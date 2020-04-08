@@ -135,6 +135,7 @@ class ClbDrv:
         self.__signal_on = False
         self.__mode = clb.Mode.SOURCE
         self.__signal_ready = False
+        self.__state = clb.State.DISCONNECTED
 
     def connect(self, a_clb_name: str):
         self.__amplitude = 0
@@ -144,6 +145,7 @@ class ClbDrv:
         self.__signal_on = False
         self.__mode = clb.Mode.SOURCE
         self.__signal_ready = False
+        self.__state = clb.State.DISCONNECTED
 
         if a_clb_name:
             self.__clb_dll.connect_usb(a_clb_name.encode("ascii"))
@@ -221,6 +223,14 @@ class ClbDrv:
 
     def is_signal_ready(self):
         return self.__clb_dll.is_signal_ready()
+
+    @property
+    def state(self):
+        return self.__state
+
+    @state.setter
+    def state(self, a_state: clb.State):
+        self.__state = a_state
 
     # def polarity_changed(self):
     #     actual_polarity = self.__clb_dll.get_polarity()

@@ -3,6 +3,7 @@ from configparser import ConfigParser
 from enum import IntEnum
 from sys import exc_info
 import math
+import time
 import re
 
 
@@ -231,3 +232,29 @@ def get_array_min_diff(a_array: list):
         diff = unique_array[i + 1] - unique_array[i]
         min_diff = diff if diff < min_diff else min_diff
     return round(min_diff, 9)
+
+
+class Timer:
+    def __init__(self, a_interval_s: float):
+        self.interval_s = a_interval_s
+        self.start_time = 0
+        self.stop_time = 0
+        self.started = False
+
+    def start(self):
+        self.started = True
+        self.start_time = time.time()
+
+    def stop(self):
+        self.started = False
+        # self.stop_time = time.time()
+
+    def check(self):
+        self.stop_time = time.time() if self.started else self.stop_time
+        return (self.stop_time - self.start_time) > self.interval_s
+
+    def reset(self):
+        self.start_time = 0
+        self.stop_time = 0
+        self.started = False
+

@@ -8,6 +8,9 @@ import calibrator_constants as clb
 import clb_dll
 import utils
 
+from test_conductor import TestsConductor
+from clb_tests import ClbTest
+
 
 class MainWindow(QtWidgets.QMainWindow):
     clb_list_changed = QtCore.pyqtSignal([list])
@@ -28,6 +31,9 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "Ошибка", 'Файл конфигурации поврежден. Пожалуйста, '
                                                            'удалите файл "settings.ini" и запустите программу заново')
         if ini_ok:
+            self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
+            self.ui.splitter.restoreGeometry(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
+
             self.clb_driver = clb_dll.set_up_driver(clb_dll.debug_dll_path)
             self.usb_driver = clb_dll.UsbDrv(self.clb_driver)
             self.usb_state = clb_dll.UsbDrv.UsbState.DISABLED
@@ -39,9 +45,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.timeout.connect(self.close)
             self.SIGNAL_OFF_TIME_MS = 200
 
-            self.usb_check_timer = QtCore.QTimer(self)
-            self.usb_check_timer.timeout.connect(self.usb_tick)
-            self.usb_check_timer.start(10)
+            self.tick_timer = QtCore.QTimer(self)
+            self.tick_timer.timeout.connect(self.tick)
+            self.tick_timer.start(10)
 
             self.ui.enter_settings_action.triggered.connect(self.open_settings)
 
@@ -51,8 +57,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)
             self.ui.source_mode_layout.addWidget(source_mode_widget)
             self.show()
+
+            self.test_conductor = TestsConductor(self.calibrator)
+            self.ui.autocheck_start_button.clicked.connect(self.test_conductor.start)
         else:
             self.close()
+
+    def tick(self):
+        self.usb_tick()
+        self.test_conductor.tick()
 
     def usb_tick(self):
         self.usb_driver.tick()
@@ -77,6 +90,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.clb_state != current_state:
             self.clb_state = current_state
+            self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
 
     def open_settings(self):
@@ -92,4 +106,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.start(self.SIGNAL_OFF_TIME_MS)
             a_event.ignore()
         else:
+            self.settings.save_geometry(self.ui.splitter.__class__.__name__, self.ui.splitter.saveGeometry())
+            self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
             a_event.accept()
