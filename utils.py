@@ -244,17 +244,16 @@ class Timer:
     def start(self):
         self.started = True
         self.start_time = time.time()
+        self.stop_time = self.start_time + self.interval_s
 
     def stop(self):
-        self.started = False
-        # self.stop_time = time.time()
-
-    def check(self):
-        self.stop_time = time.time() if self.started else self.stop_time
-        return (self.stop_time - self.start_time) > self.interval_s
-
-    def reset(self):
         self.start_time = 0
         self.stop_time = 0
         self.started = False
+
+    def check(self):
+        if not self.started:
+            return False
+        return time.time() > self.stop_time
+
 

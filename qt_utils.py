@@ -1,4 +1,5 @@
 from math import isclose
+import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
@@ -86,3 +87,14 @@ class TableHeaderContextMenu:
         # Нужно потому что лямбда соединения сами не удаляются
         for signal, connection in self.lambda_connections:
             signal.disconnect(connection)
+
+
+class QTextEditLogger(logging.Handler):
+    def __init__(self, parent, a_plain_text_edit):
+        super().__init__()
+        self.widget = a_plain_text_edit
+        # self.widget.setReadOnly(True)
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.widget.appendPlainText(msg)

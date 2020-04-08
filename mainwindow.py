@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from settings_ini_parser import Settings, BadIniException
@@ -10,6 +12,8 @@ import utils
 
 from test_conductor import TestsConductor
 from clb_tests import ClbTest
+
+from qt_utils import QTextEditLogger
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -33,6 +37,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if ini_ok:
             self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
             self.ui.splitter.restoreGeometry(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
+
+            log = QTextEditLogger(self, self.ui.log_text_edit)
+            log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
+            logging.getLogger().addHandler(log)
+            logging.getLogger().setLevel(logging.DEBUG)
 
             self.clb_driver = clb_dll.set_up_driver(clb_dll.debug_dll_path)
             self.usb_driver = clb_dll.UsbDrv(self.clb_driver)
@@ -59,7 +68,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.show()
 
             self.test_conductor = TestsConductor(self.calibrator)
-            self.ui.autocheck_start_button.clicked.connect(self.test_conductor.start)
+            self.ui.autocheck_start_button.clicked.connect(self.start_autocheck)
         else:
             self.close()
 
@@ -92,6 +101,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_state = current_state
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
+
+    def start_autocheck(self):
+        self.test_conductor.start()
 
     def open_settings(self):
         try:

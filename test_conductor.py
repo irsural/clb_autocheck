@@ -1,4 +1,5 @@
 from typing import List
+import logging
 from PyQt5.QtCore import pyqtSignal
 
 import clb_tests
@@ -41,11 +42,12 @@ class TestsConductor:
 
     def start(self):
         self.started = True
+        self.prepare_timer.start()
 
     def stop(self):
         self.started = False
         self.current_test_idx = 0
-        self.prepare_timer.reset()
+        self.prepare_timer.stop()
 
     def next(self):
         while not self.enabled_tests[self.current_test_idx]:
@@ -58,14 +60,17 @@ class TestsConductor:
     def tick(self):
         if self.started:
             current_test = self.tests[self.current_test_idx]
+            current_test.tick()
 
             if current_test.status() == clb_tests.ClbTest.Status.NOT_CHECKED:
-                if current_test.prepare():
-                    if self.prepare_timer.check():
+                if self.prepare_timer.check():
+                    if current_test.prepare():
+                        logging.debug(f"test {self.current_test_idx} success prepare")
                         current_test.start()
-                else:
-                    self.prepare_timer.start()
+                    else:
+                        self.prepare_timer.start()
             elif current_test.status() in (clb_tests.ClbTest.Status.SUCCESS, clb_tests.ClbTest.Status.FAIL):
+                logging.debug(f"test {self.current_test_idx} result {current_test.status().name}")
                 current_test.stop()
-                self.test_status_changed.emit(self.current_test_idx, current_test.status())
+                # self.test_status_changed.emit(self.current_test_idx, current_test.status())
                 self.next()
