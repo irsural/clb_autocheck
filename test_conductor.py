@@ -63,7 +63,7 @@ class TestsConductor(QtCore.QObject):
             return False
 
         while not self.enabled_tests[self.current_test_idx]:
-            logging.debug(f"TEST {self.current_test_idx} disabled, skip it")
+            logging.debug(f"ТЕСТ {self.current_test_idx} отключен, пропускаем")
             self.current_test_idx += 1
 
             if self.current_test_idx >= len(self.enabled_tests):
@@ -74,13 +74,12 @@ class TestsConductor(QtCore.QObject):
         try:
             if self.find_enabled_test():
                 logging.debug(f"----------------------------------------------------")
-                logging.debug(f"start TEST {self.current_test_idx}")
+                logging.debug(f"Старт ТЕСТ {self.current_test_idx}")
                 self.prepare_timer.start()
                 self.timeout_timer.start(self.tests[self.current_test_idx].timeout())
-                self.test_status_changed.emit(self.current_test_idx, self.tests[self.current_test_idx].status())
+                self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.IN_PROCESS)
             else:
                 self.stop()
-                logging.debug("tests are done")
                 self.tests_done.emit()
         except Exception as err:
             print(utils.exception_handler(err))
@@ -93,7 +92,7 @@ class TestsConductor(QtCore.QObject):
                 if current_test.status() == clb_tests.ClbTest.Status.NOT_CHECKED:
                     if self.prepare_timer.check():
                         if current_test.prepare():
-                            logging.debug(f"TEST {self.current_test_idx} success prepare")
+                            logging.debug(f"ТЕСТ {self.current_test_idx} успешная подготовка")
                             current_test.start()
                         else:
                             self.prepare_timer.start()
@@ -102,16 +101,16 @@ class TestsConductor(QtCore.QObject):
                     current_test.tick()
 
                 elif current_test.status() in (clb_tests.ClbTest.Status.SUCCESS, clb_tests.ClbTest.Status.FAIL):
-                    logging.info(f"TEST {self.current_test_idx} result {current_test.status().name}")
+                    logging.info(f"ТЕСТ {self.current_test_idx} результат {current_test.status().name}")
 
-                    # self.test_status_changed.emit(self.current_test_idx, current_test.status())
+                    self.test_status_changed.emit(self.current_test_idx, current_test.status())
                     current_test.stop()
                     self.current_test_idx += 1
                     self.next_test()
             else:
-                logging.info(f"TEST {self.current_test_idx} TIMEOUT")
+                logging.info(f"ТЕСТ {self.current_test_idx} таймаут")
 
-                # self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.FAIL)
+                self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.FAIL)
                 current_test.stop()
                 self.current_test_idx += 1
                 self.next_test()

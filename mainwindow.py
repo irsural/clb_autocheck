@@ -12,6 +12,7 @@ import clb_dll
 import utils
 
 from test_conductor import TestsConductor
+from clb_tests import ClbTest
 
 from qt_utils import QTextEditLogger
 
@@ -21,8 +22,10 @@ class MainWindow(QtWidgets.QMainWindow):
     usb_status_changed = QtCore.pyqtSignal(clb.State)
     signal_enable_changed = QtCore.pyqtSignal(bool)
 
-    CHECK_BOX_START_ROW = 1
+    TEST_START_ROW = 1
     CHECK_BOX_COLUMN = 0
+
+    STATUS_COLUMN = 2
 
     def __init__(self):
         super().__init__()
@@ -62,9 +65,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.test_conductor = TestsConductor(self.calibrator)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
             self.test_conductor.tests_done.connect(self.stop_autocheck)
+            self.test_conductor.test_status_changed.connect(self.set_test_status)
 
             self.test_checkboxes = [self.ui.tests_layout.itemAtPosition(row, self.CHECK_BOX_COLUMN).widget()
-                                    for row in range(self.CHECK_BOX_START_ROW, self.ui.tests_layout.rowCount())]
+                                    for row in range(self.TEST_START_ROW, self.ui.tests_layout.rowCount())]
 
             self.ui.enable_all_checkbox.toggled.connect(self.enable_all_tests)
 
@@ -77,8 +81,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_up_logger(self):
         log = QTextEditLogger(self, self.ui.log_text_edit)
-        log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-                                           datefmt='%Y-%m-%d %H:%M:%S'))
+        # log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+        #                                    datefmt='%Y-%m-%d %H:%M:%S'))
+        log.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
 
         logging.getLogger().addHandler(log)
         logging.getLogger().setLevel(logging.DEBUG)
@@ -150,6 +155,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.test_conductor.stop()
         self.lock_interface(False)
         self.ui.autocheck_start_button.setText("Старт")
+        logging.info("Проверка завершена")
+
+    def set_test_status(self, a_test_num: int, a_status: ClbTest.Status):
+        status_label = \
+            self.ui.tests_layout.itemAtPosition(a_test_num + self.TEST_START_ROW, self.STATUS_COLUMN).widget()
+
+        if a_status == ClbTest.Status.NOT_CHECKED:
+            status_label.setText("...")
+        if a_status == ClbTest.Status.IN_PROCESS:
+            status_label.setText("wait")
+        if a_status == ClbTest.Status.SUCCESS:
+            status_label.setText("ok")
+        if a_status == ClbTest.Status.FAIL:
+            status_label.setText("fail")
 
     def open_settings(self):
         try:
