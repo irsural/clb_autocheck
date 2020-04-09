@@ -66,7 +66,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_up_source_mode_widget()
             self.show()
 
-            self.tests_widget = TestsTreeWidget(self.ui.tests_tree)
+            self.tests_widget = TestsTreeWidget(self.ui.tests_tree, self.settings)
 
             self.test_conductor = TestsConductor(self.calibrator)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
@@ -171,4 +171,5 @@ class MainWindow(QtWidgets.QMainWindow):
             self.settings.save_geometry(self.ui.splitter_2.__class__.__name__ + "2", self.ui.splitter_2.saveState())
             self.settings.save_geometry(self.ui.tests_tree.__class__.__name__, self.ui.tests_tree.header().saveState())
             self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
+            self.tests_widget.save_checkboxes_state()
             a_event.accept()

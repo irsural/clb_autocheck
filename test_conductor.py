@@ -121,7 +121,7 @@ class TestsConductor(QtCore.QObject):
                     self.current_test_idx += 1
                     self.next_test()
             else:
-                logging.info(f"ТЕСТ {self.current_test_idx} таймаут")
+                logging.info(f"ТЕСТ {self.current_test_idx} TIMEOUT")
 
                 self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.FAIL)
                 current_test.stop()

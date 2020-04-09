@@ -4,15 +4,18 @@ import logging
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from clb_tests import ClbTest
+from settings_ini_parser import Settings
 import utils
 
 
 class TestsTreeWidget:
-    def __init__(self, a_tree_widget: QtWidgets.QTreeWidget):
+    def __init__(self, a_tree_widget: QtWidgets.QTreeWidget, a_settings: Settings):
         self.tree_widget = a_tree_widget
+        self.settings = a_settings
+
+        self.restore_checkboxes_state()
 
         self.tree_widget.expandAll()
-        # self.tree_widget.setColumnWidth(0, 270)
         self.tree_widget.setColumnWidth(1, 50)
 
         self.tests_map = {}
@@ -28,20 +31,24 @@ class TestsTreeWidget:
             it += 1
 
     def lock_interface(self, a_lock: bool):
-        try:
-            it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
-            while it.value():
-                item = it.value()
-                if a_lock:
-                    item.setFlags(item.flags() & ~QtCore.Qt.ItemIsUserCheckable)
-                else:
-                    item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                it += 1
-        except Exception as err:
-            print(utils.exception_handler(err))
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        while it.value():
+            item = it.value()
+            if a_lock:
+                item.setFlags(item.flags() & ~QtCore.Qt.ItemIsUserCheckable)
+            else:
+                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+            it += 1
 
     def get_enabled_tests(self) -> List[bool]:
-        return [True] * len(self.tests_map)
+        try:
+            enabled_list = []
+            for item in self.tests_map.values():
+                assert item.checkState(0) != QtCore.Qt.PartiallyChecked, "Тест не должен быть группой!!!"
+                enabled_list += [bool(item.checkState(0))]
+            return enabled_list
+        except Exception as err:
+            print(utils.exception_handler(err))
 
     def set_test_status(self, a_test_number, a_status: ClbTest.Status):
         status_label = QtWidgets.QLabel()
@@ -53,3 +60,9 @@ class TestsTreeWidget:
             status_label.setText("ok")
         if a_status == ClbTest.Status.FAIL:
             status_label.setText("fail")
+
+    def restore_checkboxes_state(self):
+        pass
+
+    def save_checkboxes_state(self):
+        pass

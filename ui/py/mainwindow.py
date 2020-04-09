@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(837, 640)
+        MainWindow.resize(870, 625)
         font = QtGui.QFont()
         font.setPointSize(10)
         MainWindow.setFont(font)
@@ -148,7 +148,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addWidget(self.splitter_2)
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 837, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 870, 21))
         self.menuBar.setObjectName("menuBar")
         self.settings_menu = QtWidgets.QMenu(self.menuBar)
         self.settings_menu.setObjectName("settings_menu")
