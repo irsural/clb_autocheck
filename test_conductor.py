@@ -18,6 +18,16 @@ class TestsConductor(QtCore.QObject):
         self.test_repeat_count = a_test_repeat_count
 
         self.tests = (
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
             clb_tests.SignalTest(a_amplitude=20*(10**-3),
                                  a_signal_type=clb.SignalType.DCV,
                                  a_calibrator=a_calibrator),
@@ -29,7 +39,10 @@ class TestsConductor(QtCore.QObject):
                                  a_calibrator=a_calibrator),
             clb_tests.SignalTest(a_amplitude=200,
                                  a_signal_type=clb.SignalType.DCV,
-                                 a_calibrator=a_calibrator)
+                                 a_calibrator=a_calibrator),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
+            clb_tests.EmptyTest(),
         )
 
         self.enabled_tests = [True] * len(self.tests)
@@ -40,7 +53,7 @@ class TestsConductor(QtCore.QObject):
         self.current_test_idx = 0
 
     def set_enabled_tests(self, a_enabled_tests: List[bool]):
-        assert len(self.enabled_tests) == len(a_enabled_tests)
+        assert len(self.enabled_tests) == len(a_enabled_tests), "Количество тестов не совпадает с заданным"
         self.enabled_tests = a_enabled_tests
 
     def start(self):

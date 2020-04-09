@@ -2,7 +2,6 @@ import abc
 from enum import IntEnum
 import utils
 import logging
-import time
 
 import calibrator_constants as clb
 from clb_dll import ClbDrv
@@ -96,3 +95,26 @@ class SignalTest(ClbTest):
 
     def timeout(self) -> float:
         return self.__timeout_s
+
+
+class EmptyTest(ClbTest):
+    def __init__(self):
+        self.__status = ClbTest.Status.NOT_CHECKED
+
+    def prepare(self) -> bool:
+        return True
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def tick(self):
+        self.__status = ClbTest.Status.SUCCESS
+
+    def status(self):
+        return self.__status
+
+    def timeout(self) -> float:
+        return 0

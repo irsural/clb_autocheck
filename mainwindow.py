@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -11,6 +10,7 @@ import calibrator_constants as clb
 import clb_dll
 import utils
 
+from tests_tree_widget import TestsTreeWidget
 from test_conductor import TestsConductor
 from clb_tests import ClbTest
 
@@ -42,7 +42,11 @@ class MainWindow(QtWidgets.QMainWindow):
                                                            'удалите файл "settings.ini" и запустите программу заново')
         if ini_ok:
             self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
-            self.ui.splitter.restoreState(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
+            self.ui.splitter.restoreState(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__ + "1"))
+            self.ui.splitter_2.restoreState(self.settings.get_last_geometry(
+                self.ui.splitter_2.__class__.__name__ + "2"))
+            self.ui.tests_tree.header().restoreState(self.settings.get_last_geometry(
+                self.ui.tests_tree.__class__.__name__))
 
             self.set_up_logger()
 
@@ -62,15 +66,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_up_source_mode_widget()
             self.show()
 
+            self.tests_widget = TestsTreeWidget(self.ui.tests_tree)
+
             self.test_conductor = TestsConductor(self.calibrator)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
             self.test_conductor.tests_done.connect(self.stop_autocheck)
             self.test_conductor.test_status_changed.connect(self.set_test_status)
-
-            self.test_checkboxes = [self.ui.tests_layout.itemAtPosition(row, self.CHECK_BOX_COLUMN).widget()
-                                    for row in range(self.TEST_START_ROW, self.ui.tests_layout.rowCount())]
-
-            self.ui.enable_all_checkbox.toggled.connect(self.enable_all_tests)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
@@ -125,29 +126,22 @@ class MainWindow(QtWidgets.QMainWindow):
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
 
-    def enable_all_tests(self, a_enable):
-        try:
-            for checkbox in self.test_checkboxes:
-                checkbox.setChecked(a_enable)
-        except Exception as err:
-            print(utils.exception_handler(err))
-
     def lock_interface(self, a_lock):
         self.ui.source_mode_widget.setDisabled(a_lock)
-        self.ui.tests_widget.setDisabled(a_lock)
-
-    def get_enabled_tests(self) -> List[bool]:
-        return [checkbox.isChecked() for checkbox in self.test_checkboxes]
+        self.tests_widget.lock_interface(a_lock)
 
     def autocheck_button_clicked(self):
-        if self.test_conductor.started():
-            self.stop_autocheck()
-        else:
-            self.start_autocheck()
+        try:
+            if self.test_conductor.started():
+                self.stop_autocheck()
+            else:
+                self.start_autocheck()
+        except AssertionError as err:
+            print(utils.exception_handler(err))
 
     def start_autocheck(self):
         self.lock_interface(True)
-        self.test_conductor.set_enabled_tests(self.get_enabled_tests())
+        self.test_conductor.set_enabled_tests(self.tests_widget.get_enabled_tests())
         self.ui.autocheck_start_button.setText("Остановить")
         self.test_conductor.start()
 
@@ -158,17 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
         logging.info("Проверка завершена")
 
     def set_test_status(self, a_test_num: int, a_status: ClbTest.Status):
-        status_label = \
-            self.ui.tests_layout.itemAtPosition(a_test_num + self.TEST_START_ROW, self.STATUS_COLUMN).widget()
-
-        if a_status == ClbTest.Status.NOT_CHECKED:
-            status_label.setText("...")
-        if a_status == ClbTest.Status.IN_PROCESS:
-            status_label.setText("wait")
-        if a_status == ClbTest.Status.SUCCESS:
-            status_label.setText("ok")
-        if a_status == ClbTest.Status.FAIL:
-            status_label.setText("fail")
+        self.tests_widget.set_test_status(a_test_num, a_status)
 
     def open_settings(self):
         try:
@@ -183,6 +167,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.start(self.SIGNAL_OFF_TIME_MS)
             a_event.ignore()
         else:
-            self.settings.save_geometry(self.ui.splitter.__class__.__name__, self.ui.splitter.saveState())
+            self.settings.save_geometry(self.ui.splitter.__class__.__name__ + "1", self.ui.splitter.saveState())
+            self.settings.save_geometry(self.ui.splitter_2.__class__.__name__ + "2", self.ui.splitter_2.saveState())
+            self.settings.save_geometry(self.ui.tests_tree.__class__.__name__, self.ui.tests_tree.header().saveState())
             self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
             a_event.accept()
