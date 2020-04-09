@@ -74,6 +74,7 @@ class SignalTest(ClbTest):
         self.hold_signal_timer.start()
 
     def stop(self):
+        # self.__status = ClbTest.Status.NOT_CHECKED
         self.calibrator.signal_enable = False
         self.timeout_timer.stop()
 

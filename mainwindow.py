@@ -21,6 +21,9 @@ class MainWindow(QtWidgets.QMainWindow):
     usb_status_changed = QtCore.pyqtSignal(clb.State)
     signal_enable_changed = QtCore.pyqtSignal(bool)
 
+    CHECK_BOX_START_ROW = 1
+    CHECK_BOX_COLUMN = 0
+
     def __init__(self):
         super().__init__()
 
@@ -38,12 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
             self.ui.splitter.restoreState(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
 
-            log = QTextEditLogger(self, self.ui.log_text_edit)
-            log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-                                               datefmt='%Y-%m-%d %H:%M:%S'))
-
-            logging.getLogger().addHandler(log)
-            logging.getLogger().setLevel(logging.DEBUG)
+            self.set_up_logger()
 
             self.clb_driver = clb_dll.set_up_driver(clb_dll.debug_dll_path)
             self.usb_driver = clb_dll.UsbDrv(self.clb_driver)
@@ -56,23 +54,41 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.timeout.connect(self.close)
             self.SIGNAL_OFF_TIME_MS = 200
 
+            self.ui.enter_settings_action.triggered.connect(self.open_settings)
+
+            self.set_up_source_mode_widget()
+            self.show()
+
+            self.test_conductor = TestsConductor(self.calibrator)
+            self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
+            self.test_conductor.tests_done.connect(self.stop_autocheck)
+
+            self.test_checkboxes = [self.ui.tests_layout.itemAtPosition(row, self.CHECK_BOX_COLUMN).widget()
+                                    for row in range(self.CHECK_BOX_START_ROW, self.ui.tests_layout.rowCount())]
+
+            self.ui.enable_all_checkbox.toggled.connect(self.enable_all_tests)
+
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
             self.tick_timer.start(10)
 
-            self.ui.enter_settings_action.triggered.connect(self.open_settings)
-
-            source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self)
-            self.clb_list_changed.connect(source_mode_widget.update_clb_list)
-            self.usb_status_changed.connect(source_mode_widget.update_clb_status)
-            self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)
-            self.ui.source_mode_layout.addWidget(source_mode_widget)
-            self.show()
-
-            self.test_conductor = TestsConductor(self.calibrator)
-            self.ui.autocheck_start_button.clicked.connect(self.start_autocheck)
         else:
             self.close()
+
+    def set_up_logger(self):
+        log = QTextEditLogger(self, self.ui.log_text_edit)
+        log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+                                           datefmt='%Y-%m-%d %H:%M:%S'))
+
+        logging.getLogger().addHandler(log)
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    def set_up_source_mode_widget(self):
+        source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self)
+        self.clb_list_changed.connect(source_mode_widget.update_clb_list)
+        self.usb_status_changed.connect(source_mode_widget.update_clb_status)
+        self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)
+        self.ui.source_mode_layout.addWidget(source_mode_widget)
 
     def tick(self):
         self.usb_tick()
@@ -104,16 +120,36 @@ class MainWindow(QtWidgets.QMainWindow):
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
 
-    def block_interface(self):
-        pass
+    def enable_all_tests(self, a_enable):
+        try:
+            for checkbox in self.test_checkboxes:
+                checkbox.setChecked(a_enable)
+        except Exception as err:
+            print(utils.exception_handler(err))
+
+    def lock_interface(self, a_lock):
+        self.ui.source_mode_widget.setDisabled(a_lock)
+        self.ui.tests_widget.setDisabled(a_lock)
 
     def get_enabled_tests(self) -> List[bool]:
-        pass
+        return [checkbox.isChecked() for checkbox in self.test_checkboxes]
+
+    def autocheck_button_clicked(self):
+        if self.test_conductor.started():
+            self.stop_autocheck()
+        else:
+            self.start_autocheck()
 
     def start_autocheck(self):
-        # self.block_interface()
-        # self.test_conductor.set_enabled_tests(self.get_enabled_tests())
+        self.lock_interface(True)
+        self.test_conductor.set_enabled_tests(self.get_enabled_tests())
+        self.ui.autocheck_start_button.setText("Остановить")
         self.test_conductor.start()
+
+    def stop_autocheck(self):
+        self.test_conductor.stop()
+        self.lock_interface(False)
+        self.ui.autocheck_start_button.setText("Старт")
 
     def open_settings(self):
         try:

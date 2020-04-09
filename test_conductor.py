@@ -36,7 +36,7 @@ class TestsConductor(QtCore.QObject):
         self.prepare_timer = utils.Timer(1.5)
         self.timeout_timer = utils.Timer(30)
 
-        self.started = False
+        self.__started = False
         self.current_test_idx = 0
 
     def set_enabled_tests(self, a_enabled_tests: List[bool]):
@@ -46,11 +46,14 @@ class TestsConductor(QtCore.QObject):
     def start(self):
         self.current_test_idx = 0
         if self.find_enabled_test():
-            self.started = True
+            self.__started = True
             self.next_test()
 
     def stop(self):
-        self.started = False
+        if self.current_test_idx < len(self.enabled_tests):
+            self.tests[self.current_test_idx].stop()
+
+        self.__started = False
         self.current_test_idx = 0
         self.prepare_timer.stop()
         self.timeout_timer.stop()
@@ -83,7 +86,7 @@ class TestsConductor(QtCore.QObject):
             print(utils.exception_handler(err))
 
     def tick(self):
-        if self.started:
+        if self.__started:
             current_test = self.tests[self.current_test_idx]
 
             if not self.timeout_timer.check():
@@ -112,3 +115,6 @@ class TestsConductor(QtCore.QObject):
                 current_test.stop()
                 self.current_test_idx += 1
                 self.next_test()
+
+    def started(self):
+        return self.__started
