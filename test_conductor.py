@@ -87,7 +87,7 @@ class TestsConductor(QtCore.QObject):
         try:
             if self.find_enabled_test():
                 logging.debug(f"----------------------------------------------------")
-                logging.debug(f"Старт ТЕСТ {self.current_test_idx}")
+                logging.debug(f"ТЕСТ {self.current_test_idx} старт")
                 self.prepare_timer.start()
                 self.timeout_timer.start(self.tests[self.current_test_idx].timeout())
                 self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.IN_PROCESS)

@@ -37,6 +37,8 @@ class Settings(QtCore.QObject):
     FIXED_STEP_KEY = "fixed_step_list"
     FIXED_STEP_DEFAULT = "0.0001,0.01,0.1,1,10,20,100"
 
+    CHECKBOX_STATES_DEFAULT = "0"
+
     FIXED_STEP_IDX_KEY = "fixed_step_idx"
     FIXED_STEP_IDX_DEFAULT = "0"
 
@@ -64,6 +66,7 @@ class Settings(QtCore.QObject):
     PROTOCOL_SECTION = "Protocol"
     TEMPLATE_FILEPATH_KEY = "template_filepath"
     SAVE_FOLDER_KEY = "save_folder"
+    CHECKBOX_STATES_KEY = "checkbox_states"
 
     # В ini файлы сохраняются QByteArray, в которых могут быть переносы строки, которые херят ini файл
     LF = '\n'
@@ -78,6 +81,8 @@ class Settings(QtCore.QObject):
 
         self.__fixed_step_list = []
         self.__fixed_step_idx = 0
+
+        self.__checkbox_states = []
 
         self.__rough_step = 0
         self.__common_step = 0
@@ -118,6 +123,9 @@ class Settings(QtCore.QObject):
 
         self.__fixed_step_list = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_KEY,
                                                       self.FIXED_STEP_DEFAULT, self.ValueType.LIST_FLOAT)
+
+        self.__checkbox_states = self.check_ini_value(self.GEOMETRY_SECTION, self.CHECKBOX_STATES_KEY,
+                                                      self.CHECKBOX_STATES_DEFAULT, self.ValueType.LIST_INT)
 
         self.__fixed_step_idx = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_IDX_KEY,
                                                      self.FIXED_STEP_IDX_DEFAULT, self.ValueType.INT)
@@ -231,6 +239,18 @@ class Settings(QtCore.QObject):
         self.__fixed_step_list = [val for val in final_list]
         self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
         self.fixed_step_changed.emit()
+
+    @property
+    def enabled_tests_list(self):
+        return self.__checkbox_states
+
+    @enabled_tests_list.setter
+    def enabled_tests_list(self, a_list: List[int]):
+        saved_string = ','.join(str(val) for val in a_list)
+        saved_string = saved_string.strip(',')
+
+        self.settings[self.GEOMETRY_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
+        self.save()
 
     @property
     def fixed_step_idx(self):
