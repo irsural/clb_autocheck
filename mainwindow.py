@@ -11,7 +11,6 @@ import clb_dll
 import utils
 
 from test_conductor import TestsConductor
-from clb_tests import ClbTest
 
 from qt_utils import QTextEditLogger
 
@@ -39,7 +38,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.splitter.restoreGeometry(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
 
             log = QTextEditLogger(self, self.ui.log_text_edit)
-            log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s'))
+            log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+                                               datefmt='%Y-%m-%d %H:%M:%S'))
+
             logging.getLogger().addHandler(log)
             logging.getLogger().setLevel(logging.DEBUG)
 

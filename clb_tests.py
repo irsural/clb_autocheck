@@ -35,6 +35,10 @@ class ClbTest(abc.ABC):
     def status(self) -> Status:
         pass
 
+    @abc.abstractmethod
+    def timeout(self) -> float:
+        pass
+
 
 class SignalTest(ClbTest):
     def __init__(self, a_amplitude: float, a_signal_type: clb.SignalType, a_calibrator: ClbDrv,
@@ -43,7 +47,7 @@ class SignalTest(ClbTest):
         self.amplitude = a_amplitude
         self.signal_type = a_signal_type
         self.calibrator = a_calibrator
-        self.timeout_s = a_timeout_s
+        self.__timeout_s = a_timeout_s
 
         self.timeout_timer = utils.Timer(a_timeout_s)
         self.hold_signal_timer = utils.Timer(a_hold_signal_timeout_s)
@@ -64,7 +68,6 @@ class SignalTest(ClbTest):
             return False
 
     def start(self):
-        logging.debug("SignalTest start")
         self.__status = ClbTest.Status.IN_PROCESS
         self.calibrator.signal_enable = True
         self.timeout_timer.start()
@@ -75,20 +78,19 @@ class SignalTest(ClbTest):
         self.timeout_timer.stop()
 
     def tick(self):
-        if not self.timeout_timer.check():
-            if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.READY):
-                if self.calibrator.state == clb.State.WAITING_SIGNAL:
-                    self.hold_signal_timer.start()
-                    logging.debug("waiting signal detected")
-                else:
-                    if self.hold_signal_timer.check():
-                        self.__status = ClbTest.Status.SUCCESS
+        if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.READY):
+            if self.calibrator.state == clb.State.WAITING_SIGNAL:
+                self.hold_signal_timer.start()
             else:
-                logging.debug("disable signal detected")
-                self.__status = ClbTest.Status.FAIL
+                if self.hold_signal_timer.check():
+                    logging.debug("success signal test")
+                    self.__status = ClbTest.Status.SUCCESS
         else:
-            logging.debug("timeout detected")
+            logging.debug("disable signal detected")
             self.__status = ClbTest.Status.FAIL
 
     def status(self) -> ClbTest.Status:
         return self.__status
+
+    def timeout(self) -> float:
+        return self.__timeout_s
