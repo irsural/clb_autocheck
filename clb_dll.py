@@ -1,6 +1,7 @@
 import ctypes
 import enum
 import os.path
+import logging
 from platform import system as cur_system
 
 import calibrator_constants as clb
@@ -168,9 +169,9 @@ class ClbDrv:
 
     @amplitude.setter
     def amplitude(self, a_amplitude: float):
-        self.__amplitude = clb.bound_amplitude(a_amplitude, self.__signal_type)
-        self.__clb_dll.set_amplitude(abs(self.__amplitude))
-        self.__set_polarity_by_amplitude_sign(self.__amplitude)
+        amplitude = clb.bound_amplitude(a_amplitude, self.__signal_type)
+        self.__clb_dll.set_amplitude(abs(amplitude))
+        self.__set_polarity_by_amplitude_sign(amplitude)
 
     def limit_amplitude(self, a_amplitude, a_lower, a_upper):
         """
@@ -201,8 +202,8 @@ class ClbDrv:
 
     @frequency.setter
     def frequency(self, a_frequency: float):
-        self.__frequency = utils.bound(a_frequency, clb.MIN_FREQUENCY, clb.MAX_FREQUENCY)
-        self.__clb_dll.set_frequency(self.__frequency)
+        frequency = utils.bound(a_frequency, clb.MIN_FREQUENCY, clb.MAX_FREQUENCY)
+        self.__clb_dll.set_frequency(frequency)
 
     def signal_type_changed(self):
         actual_signal_type = self.__clb_dll.get_signal_type()
@@ -218,7 +219,6 @@ class ClbDrv:
 
     @signal_type.setter
     def signal_type(self, a_signal_type: int):
-        self.__signal_type = a_signal_type
         self.__clb_dll.set_signal_type(a_signal_type)
 
     def is_signal_ready(self):
@@ -273,7 +273,6 @@ class ClbDrv:
 
     @signal_enable.setter
     def signal_enable(self, a_signal_enable: int):
-        self.__signal_on = a_signal_enable
         self.__clb_dll.signal_enable(a_signal_enable)
 
     def mode_changed(self):
@@ -290,7 +289,6 @@ class ClbDrv:
 
     @mode.setter
     def mode(self, a_mode: int):
-        self.__mode = a_mode
         self.__clb_dll.set_mode(a_mode)
 
     def fast_control_mode_enable(self, a_enable: int):

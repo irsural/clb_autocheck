@@ -1,3 +1,5 @@
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QTimer
 
@@ -24,6 +26,7 @@ class SourceModeWidget(QtWidgets.QWidget):
         self.ui.enable_button.setIconSize(QtCore.QSize(25, 25))
 
         self.settings = a_settings
+        # self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
 
         self.setWindowTitle("Режим источника")
 
@@ -233,4 +236,5 @@ class SourceModeWidget(QtWidgets.QWidget):
             self.mode = a_mode
 
     def closeEvent(self, a_event: QtGui.QCloseEvent) -> None:
+        # self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
         self.calibrator.signal_enable = False

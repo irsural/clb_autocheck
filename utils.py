@@ -220,9 +220,9 @@ def exception_handler(a_exception):
     filename = frame.f_code.co_filename
     checkcache(filename)
     line = getline(filename, lineno, frame.f_globals)
-    print("Exception{0} in {1}\n"
-          "Line {2}: '{3}'\n"
-          "Message: {4}".format(type(a_exception), filename, lineno, line.strip(), a_exception))
+    return "Exception{0} in {1}\n"\
+           "Line {2}: '{3}'\n"\
+           "Message: {4}".format(type(a_exception), filename, lineno, line.strip(), a_exception)
 
 
 def get_array_min_diff(a_array: list):

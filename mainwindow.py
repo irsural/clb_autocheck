@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -35,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                            'удалите файл "settings.ini" и запустите программу заново')
         if ini_ok:
             self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
-            self.ui.splitter.restoreGeometry(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
+            self.ui.splitter.restoreState(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__))
 
             log = QTextEditLogger(self, self.ui.log_text_edit)
             log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
@@ -103,7 +104,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
 
+    def block_interface(self):
+        pass
+
+    def get_enabled_tests(self) -> List[bool]:
+        pass
+
     def start_autocheck(self):
+        # self.block_interface()
+        # self.test_conductor.set_enabled_tests(self.get_enabled_tests())
         self.test_conductor.start()
 
     def open_settings(self):
@@ -111,7 +120,7 @@ class MainWindow(QtWidgets.QMainWindow):
             settings_dialog = SettingsDialog(self.settings, self)
             settings_dialog.exec()
         except Exception as err:
-            utils.exception_handler(err)
+            print(utils.exception_handler(err))
 
     def closeEvent(self, a_event: QtGui.QCloseEvent):
         if self.calibrator.signal_enable:
@@ -119,6 +128,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.start(self.SIGNAL_OFF_TIME_MS)
             a_event.ignore()
         else:
-            self.settings.save_geometry(self.ui.splitter.__class__.__name__, self.ui.splitter.saveGeometry())
+            self.settings.save_geometry(self.ui.splitter.__class__.__name__, self.ui.splitter.saveState())
             self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
             a_event.accept()

@@ -3,6 +3,7 @@ ui_to_py.convert_ui("./ui", "./ui/py")
 ui_to_py.convert_resources("./resources", ".")
 
 import sys
+import logging
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtCore
@@ -24,4 +25,4 @@ if __name__ == "__main__":
         w = MainWindow()
         sys.exit(app.exec())
     except Exception as err:
-        print("MAIN: ", exception_handler(err))
+        print("MAIN: " + exception_handler(err))

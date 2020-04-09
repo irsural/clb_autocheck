@@ -1,6 +1,6 @@
 from typing import List
 import logging
-from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtCore
 
 import clb_tests
 import calibrator_constants as clb
@@ -8,11 +8,13 @@ from clb_dll import ClbDrv
 import utils
 
 
-class TestsConductor:
-    test_status_changed = pyqtSignal(int, clb_tests.ClbTest.Status)
-    tests_done = pyqtSignal()
+class TestsConductor(QtCore.QObject):
+    test_status_changed = QtCore.pyqtSignal(int, clb_tests.ClbTest.Status)
+    tests_done = QtCore.pyqtSignal()
 
     def __init__(self, a_calibrator: ClbDrv,  a_test_repeat_count: int = 1):
+        super().__init__()
+
         self.test_repeat_count = a_test_repeat_count
 
         self.tests = (
@@ -66,16 +68,19 @@ class TestsConductor:
         return True
 
     def next_test(self):
-        if self.find_enabled_test():
-            logging.debug(f"----------------------------------------------------")
-            logging.debug(f"start TEST {self.current_test_idx}")
-            self.prepare_timer.start()
-            self.timeout_timer.start(self.tests[self.current_test_idx].timeout())
-            # emit status in process
-        else:
-            self.stop()
-            logging.debug("tests are done")
-            # self.tests_done.emit()
+        try:
+            if self.find_enabled_test():
+                logging.debug(f"----------------------------------------------------")
+                logging.debug(f"start TEST {self.current_test_idx}")
+                self.prepare_timer.start()
+                self.timeout_timer.start(self.tests[self.current_test_idx].timeout())
+                self.test_status_changed.emit(self.current_test_idx, self.tests[self.current_test_idx].status())
+            else:
+                self.stop()
+                logging.debug("tests are done")
+                self.tests_done.emit()
+        except Exception as err:
+            print(utils.exception_handler(err))
 
     def tick(self):
         if self.started:

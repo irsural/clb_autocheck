@@ -1,6 +1,7 @@
 from enum import IntEnum
 from typing import List
 import configparser
+import logging
 import base64
 import os
 
@@ -181,7 +182,7 @@ class Settings(QtCore.QObject):
 
             self.save()
         except Exception as err:
-            utils.exception_handler(err)
+            print(utils.exception_handler(err))
 
     def get_last_geometry(self, a_window_name: str):
         try:
