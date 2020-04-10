@@ -3,13 +3,11 @@ import logging
 from PyQt5 import QtCore
 
 import clb_tests
-import calibrator_constants as clb
-from clb_dll import ClbDrv
 import utils
 
 
 class TestsConductor(QtCore.QObject):
-    test_status_changed = QtCore.pyqtSignal(int, clb_tests.ClbTest.Status)
+    test_status_changed = QtCore.pyqtSignal(str, clb_tests.ClbTest.Status)
     tests_done = QtCore.pyqtSignal()
 
     def __init__(self, a_tests: List[clb_tests.ClbTest], a_test_repeat_count: int = 1):
@@ -19,15 +17,14 @@ class TestsConductor(QtCore.QObject):
 
         self.tests = a_tests
 
-        self.enabled_tests = [True] * len(self.tests)
+        self.enabled_tests = []
         self.prepare_timer = utils.Timer(1.5)
         self.timeout_timer = utils.Timer(30)
 
         self.__started = False
         self.current_test_idx = 0
 
-    def set_enabled_tests(self, a_enabled_tests: List[bool]):
-        assert len(self.enabled_tests) == len(a_enabled_tests), "Количество тестов не совпадает с заданным"
+    def set_enabled_tests(self, a_enabled_tests: List[str]):
         self.enabled_tests = a_enabled_tests
 
     def start(self):
@@ -35,9 +32,12 @@ class TestsConductor(QtCore.QObject):
         if self.find_enabled_test():
             self.__started = True
             self.next_test()
+        else:
+            self.stop()
+            self.tests_done.emit()
 
     def stop(self):
-        if self.current_test_idx < len(self.enabled_tests):
+        if self.current_test_idx < len(self.tests):
             self.tests[self.current_test_idx].stop()
 
         self.__started = False
@@ -46,16 +46,17 @@ class TestsConductor(QtCore.QObject):
         self.timeout_timer.stop()
 
     def find_enabled_test(self):
-        if self.current_test_idx >= len(self.enabled_tests):
+        if self.current_test_idx >= len(self.tests):
             return False
 
-        while not self.enabled_tests[self.current_test_idx]:
-            logging.debug(f"----------------------------------------------------")
-            logging.debug(f'ТЕСТ "{self.tests[self.current_test_idx].group()}: '
-                          f'{self.tests[self.current_test_idx].name()}" отключен, пропускаем')
+        while not ((self.tests[self.current_test_idx].group(), self.tests[self.current_test_idx].name()) in
+                   self.enabled_tests):
+            # logging.debug(f"----------------------------------------------------")
+            # logging.debug(f'ТЕСТ "{self.tests[self.current_test_idx].group()}: '
+            #               f'{self.tests[self.current_test_idx].name()}" отключен, пропускаем')
             self.current_test_idx += 1
 
-            if self.current_test_idx >= len(self.enabled_tests):
+            if self.current_test_idx >= len(self.tests):
                 return False
         return True
 
@@ -67,7 +68,7 @@ class TestsConductor(QtCore.QObject):
                 logging.debug(f'ТЕСТ "{current_test.group()}: {current_test.name()}" старт')
                 self.prepare_timer.start()
                 self.timeout_timer.start(current_test.timeout())
-                self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.IN_PROCESS)
+                self.test_status_changed.emit(current_test.name(), clb_tests.ClbTest.Status.IN_PROCESS)
             else:
                 self.stop()
                 self.tests_done.emit()
@@ -94,14 +95,14 @@ class TestsConductor(QtCore.QObject):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
 
-                    self.test_status_changed.emit(self.current_test_idx, current_test.status())
+                    self.test_status_changed.emit(current_test.name(), current_test.status())
                     current_test.stop()
                     self.current_test_idx += 1
                     self.next_test()
             else:
                 logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
 
-                self.test_status_changed.emit(self.current_test_idx, clb_tests.ClbTest.Status.FAIL)
+                self.test_status_changed.emit(current_test.name(), clb_tests.ClbTest.Status.FAIL)
                 current_test.stop()
                 self.current_test_idx += 1
                 self.next_test()

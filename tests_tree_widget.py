@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
@@ -18,18 +18,6 @@ class TestsTreeWidget:
         self.tree_widget.expandAll()
         self.tree_widget.setColumnWidth(1, 50)
 
-        self.tests_map = {}
-
-        test_number = 0
-        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
-        while it.value():
-            # Если у узла нет дочерних узлов, считаем его тестом, если есть, то считаем его группой
-            if it.value().childCount() == 0:
-                self.tests_map[test_number] = it.value()
-                test_number += 1
-            it += 1
-
-        # Вызывать после создания self.tests_map !!!
         try:
             self.restore_checkboxes_state()
         except IndexError:
@@ -45,8 +33,6 @@ class TestsTreeWidget:
             group_items = self.tree_widget.findItems(test.group(), QtCore.Qt.MatchFixedString |
                                                      QtCore.Qt.MatchCaseSensitive | QtCore.Qt.MatchRecursive)
             if group_items:
-                for i in group_items:
-                    print(i.text(0))
                 assert len(group_items) == 1, "Группы не должны повторяться !"
                 group_item = group_items[0]
             else:
@@ -70,17 +56,17 @@ class TestsTreeWidget:
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
             it += 1
 
-    def get_enabled_tests(self) -> List[bool]:
-        try:
-            enabled_list = []
-            for item in self.tests_map.values():
-                assert item.checkState(0) != QtCore.Qt.PartiallyChecked, "Тест не должен быть группой!!!"
-                enabled_list += [bool(item.checkState(0))]
-            return enabled_list
-        except Exception as err:
-            print(utils.exception_handler(err))
+    def get_enabled_tests(self) -> List[Tuple[str, str]]:
+        enabled_tests = []
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        while it.value():
+            # Если у узла нет дочерних узлов, считаем его тестом, если есть, то считаем его группой
+            if it.value().childCount() == 0 and it.value().checkState(0) == QtCore.Qt.Checked:
+                enabled_tests.append((it.value().parent().text(0), it.value().text(0)))
+            it += 1
+        return enabled_tests
 
-    def set_test_status(self, a_test_number, a_status: ClbTest.Status):
+    def set_test_status(self, a_test_name: str, a_status: ClbTest.Status):
         status_label = QtWidgets.QLabel()
         if a_status == ClbTest.Status.NOT_CHECKED:
             status_label.setText("...")
@@ -93,14 +79,20 @@ class TestsTreeWidget:
 
     def restore_checkboxes_state(self):
         enabled_list = self.settings.enabled_tests_list
-        if enabled_list:
-            for idx, item in enumerate(self.tests_map.values()):
-                item.setCheckState(0, QtCore.Qt.CheckState(enabled_list[idx]))
+        idx = 0
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        while it.value():
+            it.value().setCheckState(0, QtCore.Qt.CheckState(enabled_list[idx]))
+            idx += 1
+            it += 1
 
     def save_checkboxes_state(self):
         enabled_list = []
-        for item in self.tests_map.values():
-            assert item.checkState(0) != QtCore.Qt.PartiallyChecked, "Тест не должен быть группой!!!"
-            enabled_list += [item.checkState(0)]
+        idx = 0
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        while it.value():
+            enabled_list += [it.value().checkState(0)]
+            idx += 1
+            it += 1
 
         self.settings.enabled_tests_list = enabled_list
