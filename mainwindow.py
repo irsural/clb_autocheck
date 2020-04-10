@@ -12,7 +12,9 @@ import utils
 
 from tests_tree_widget import TestsTreeWidget
 from test_conductor import TestsConductor
+import tests_factory
 import clb_tests
+
 
 from qt_utils import QTextEditLogger
 
@@ -66,7 +68,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_up_source_mode_widget()
             self.show()
 
-            self.tests = self.create_tests()
+            self.tests = tests_factory.create_tests(self.calibrator)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
 
@@ -155,97 +157,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_test_status(self, a_test_num: int, a_status: clb_tests.ClbTest.Status):
         self.tests_widget.set_test_status(a_test_num, a_status)
-
-    def create_tests(self):
-        tests = []
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Шлейфы")
-        test.set_name("Передний")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Шлейфы")
-        test.set_name("Задний")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Кулеры")
-        test.set_name("Основная плата")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Кулеры")
-        test.set_name("Транзистор DC")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Пельтье")
-        test.set_name("№1")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Пельтье")
-        test.set_name("№2")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Пельтье")
-        test.set_name("№3")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Пельтье")
-        test.set_name("№4")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Другое")
-        test.set_name("SD карта")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("Другое")
-        test.set_name("Сетевые переменные")
-        tests.append(test)
-
-        test = clb_tests.SignalTest(a_amplitude=20*(10**-3), a_signal_type=clb.SignalType.DCV,
-                                    a_calibrator=self.calibrator)
-        test.set_group("U=")
-        test.set_name("40 мВ")
-        tests.append(test)
-
-        test = clb_tests.SignalTest(a_amplitude=4, a_signal_type=clb.SignalType.DCV, a_calibrator=self.calibrator)
-        test.set_group("U=")
-        test.set_name("4 В")
-        tests.append(test)
-
-        test = clb_tests.SignalTest(a_amplitude=43, a_signal_type=clb.SignalType.DCV, a_calibrator=self.calibrator)
-        test.set_group("U=")
-        test.set_name("43 В")
-        tests.append(test)
-
-        test = clb_tests.SignalTest(a_amplitude=200, a_signal_type=clb.SignalType.DCV, a_calibrator=self.calibrator)
-        test.set_group("U=")
-        test.set_name("200 В")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("U~")
-        test.set_name("110 мВ")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("I=")
-        test.set_name("110 мкА")
-        tests.append(test)
-
-        test = clb_tests.EmptyTest()
-        test.set_group("I~")
-        test.set_name("110 мА")
-        tests.append(test)
-
-        return tests
 
     def open_settings(self):
         try:
