@@ -155,8 +155,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.autocheck_start_button.setText("Старт")
         logging.info("Проверка завершена")
 
-    def set_test_status(self, a_test_name: str, a_status: clb_tests.ClbTest.Status):
-        self.tests_widget.set_test_status(a_test_name, a_status)
+    def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests.ClbTest.Status):
+        try:
+            self.tests_widget.set_test_status(a_group_name, a_test_name, a_status)
+        except AssertionError as err:
+            print(utils.exception_handler(err))
 
     def open_settings(self):
         try:

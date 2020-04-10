@@ -7,7 +7,7 @@ import utils
 
 
 class TestsConductor(QtCore.QObject):
-    test_status_changed = QtCore.pyqtSignal(str, clb_tests.ClbTest.Status)
+    test_status_changed = QtCore.pyqtSignal(str, str, clb_tests.ClbTest.Status)
     tests_done = QtCore.pyqtSignal()
 
     def __init__(self, a_tests: List[clb_tests.ClbTest], a_test_repeat_count: int = 1):
@@ -24,7 +24,7 @@ class TestsConductor(QtCore.QObject):
         self.__started = False
         self.current_test_idx = 0
 
-    def set_enabled_tests(self, a_enabled_tests: List[str]):
+    def set_enabled_tests(self, a_enabled_tests: List[Tuple[str, str]]):
         self.enabled_tests = a_enabled_tests
 
     def start(self):
@@ -39,7 +39,9 @@ class TestsConductor(QtCore.QObject):
     def stop(self):
         if self.current_test_idx < len(self.tests):
             self.tests[self.current_test_idx].stop()
-
+            self.test_status_changed.emit(self.tests[self.current_test_idx].group(),
+                                          self.tests[self.current_test_idx].name(),
+                                          self.tests[self.current_test_idx].status())
         self.__started = False
         self.current_test_idx = 0
         self.prepare_timer.stop()
@@ -68,7 +70,8 @@ class TestsConductor(QtCore.QObject):
                 logging.debug(f'ТЕСТ "{current_test.group()}: {current_test.name()}" старт')
                 self.prepare_timer.start()
                 self.timeout_timer.start(current_test.timeout())
-                self.test_status_changed.emit(current_test.name(), clb_tests.ClbTest.Status.IN_PROCESS)
+                self.test_status_changed.emit(current_test.group(), current_test.name(),
+                                              clb_tests.ClbTest.Status.IN_PROCESS)
             else:
                 self.stop()
                 self.tests_done.emit()
@@ -95,14 +98,14 @@ class TestsConductor(QtCore.QObject):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
 
-                    self.test_status_changed.emit(current_test.name(), current_test.status())
+                    self.test_status_changed.emit(current_test.group(), current_test.name(), current_test.status())
                     current_test.stop()
                     self.current_test_idx += 1
                     self.next_test()
             else:
                 logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
 
-                self.test_status_changed.emit(current_test.name(), clb_tests.ClbTest.Status.FAIL)
+                self.test_status_changed.emit(current_test.group(), current_test.name(), clb_tests.ClbTest.Status.FAIL)
                 current_test.stop()
                 self.current_test_idx += 1
                 self.next_test()

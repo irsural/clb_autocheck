@@ -70,7 +70,7 @@ class SignalTest(ClbTest):
         self.__status = ClbTest.Status.NOT_CHECKED
 
     def prepare(self) -> bool:
-        if clb.is_ac_signal[self.signal_type]:
+        if not clb.is_voltage_signal[self.signal_type]:
             # Замкнуть клеммы
             pass
 

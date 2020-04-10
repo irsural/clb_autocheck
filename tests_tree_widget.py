@@ -9,6 +9,9 @@ import utils
 
 
 class TestsTreeWidget:
+    TREE_COLUMN = 0
+    STATUS_COLUMN = 1
+
     def __init__(self, a_tests: List[ClbTest], a_tree_widget: QtWidgets.QTreeWidget, a_settings: Settings):
         self.tree_widget = a_tree_widget
         self.settings = a_settings
@@ -39,10 +42,12 @@ class TestsTreeWidget:
                 group_item = QtWidgets.QTreeWidgetItem(top_item, [test.group()])
                 group_item.setCheckState(0, QtCore.Qt.Checked)
                 group_item.setFlags(group_item.flags() | QtCore.Qt.ItemIsTristate)
+                self.tree_widget.setItemWidget(group_item, self.STATUS_COLUMN, QtWidgets.QLabel("..."))
                 top_item.addChild(group_item)
 
             test_item = QtWidgets.QTreeWidgetItem(group_item, [test.name()])
             test_item.setCheckState(0, QtCore.Qt.Checked)
+            self.tree_widget.setItemWidget(test_item, self.STATUS_COLUMN, QtWidgets.QLabel("..."))
             group_item.addChild(test_item)
 
     # noinspection PyTypeChecker
@@ -66,8 +71,17 @@ class TestsTreeWidget:
             it += 1
         return enabled_tests
 
-    def set_test_status(self, a_test_name: str, a_status: ClbTest.Status):
-        status_label = QtWidgets.QLabel()
+    def find_test_item(self, a_group_name: str, a_test_name: str) -> QtWidgets.QTreeWidgetItem:
+        matched_tests = self.tree_widget.findItems(a_test_name, QtCore.Qt.MatchFixedString |
+                                                   QtCore.Qt.MatchCaseSensitive | QtCore.Qt.MatchRecursive)
+        for test in matched_tests:
+            if test.parent().text(0) == a_group_name and test.childCount() == 0:
+                return test
+        assert True, f'Тест "{a_group_name}: {a_test_name}" не найден !!'
+
+    def set_test_status(self, a_group_name: str, a_test_name: str, a_status: ClbTest.Status):
+        test_item = self.find_test_item(a_group_name, a_test_name)
+        status_label = self.tree_widget.itemWidget(test_item, self.STATUS_COLUMN)
         if a_status == ClbTest.Status.NOT_CHECKED:
             status_label.setText("...")
         if a_status == ClbTest.Status.IN_PROCESS:
@@ -76,6 +90,7 @@ class TestsTreeWidget:
             status_label.setText("ok")
         if a_status == ClbTest.Status.FAIL:
             status_label.setText("fail")
+
 
     def restore_checkboxes_state(self):
         enabled_list = self.settings.enabled_tests_list
