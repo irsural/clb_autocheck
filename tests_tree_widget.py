@@ -42,13 +42,45 @@ class TestsTreeWidget:
                 group_item = QtWidgets.QTreeWidgetItem(top_item, [test.group()])
                 group_item.setCheckState(0, QtCore.Qt.Checked)
                 group_item.setFlags(group_item.flags() | QtCore.Qt.ItemIsTristate)
-                self.tree_widget.setItemWidget(group_item, self.STATUS_COLUMN, QtWidgets.QLabel("..."))
+
+                status_label = QtWidgets.QLabel()
+                self.set_status_icon(status_label, ClbTest.Status.NOT_CHECKED)
+                self.tree_widget.setItemWidget(group_item, self.STATUS_COLUMN, status_label)
+
                 top_item.addChild(group_item)
 
             test_item = QtWidgets.QTreeWidgetItem(group_item, [test.name()])
             test_item.setCheckState(0, QtCore.Qt.Checked)
-            self.tree_widget.setItemWidget(test_item, self.STATUS_COLUMN, QtWidgets.QLabel("..."))
+
+            status_label = QtWidgets.QLabel()
+            self.set_status_icon(status_label, ClbTest.Status.NOT_CHECKED)
+            self.tree_widget.setItemWidget(test_item, self.STATUS_COLUMN, status_label)
+
             group_item.addChild(test_item)
+
+    @staticmethod
+    def set_status_icon(a_label: QtWidgets.QLabel, a_status: ClbTest.Status):
+        a_label.setProperty("status", int(a_status))
+        if a_status == ClbTest.Status.NOT_CHECKED:
+            pixmap = QtGui.QPixmap(":/icons/icons/checkbox_empty.png")
+
+        elif a_status == ClbTest.Status.IN_PROCESS:
+            pixmap = None
+
+            warning_animation = QtGui.QMovie(":/icons/gif/loader.gif")
+            warning_animation.setScaledSize(QtCore.QSize(20, 20))
+            # warning_animation.setSpeed(500)
+            a_label.setMovie(warning_animation)
+            warning_animation.start()
+
+        elif a_status == ClbTest.Status.SUCCESS:
+            pixmap = QtGui.QPixmap(":/icons/icons/checkbox_ok.png")
+
+        else: # a_status == ClbTest.Status.FAIL:
+            pixmap = QtGui.QPixmap(":/icons/icons/checkbox_fail.png")
+
+        if pixmap is not None:
+            a_label.setPixmap(pixmap.scaled(20, 20))
 
     # noinspection PyTypeChecker
     def lock_interface(self, a_lock: bool):
@@ -79,18 +111,35 @@ class TestsTreeWidget:
                 return test
         assert True, f'Тест "{a_group_name}: {a_test_name}" не найден !!'
 
+    def get_group_status(self, a_group_item) -> ClbTest.Status:
+        group_status = ClbTest.Status.NOT_CHECKED
+        all_success = True
+        for child_idx in range(a_group_item.childCount()):
+            child = a_group_item.child(child_idx)
+            child_status = self.tree_widget.itemWidget(child, self.STATUS_COLUMN).property("status")
+            if child_status == ClbTest.Status.IN_PROCESS:
+                group_status = ClbTest.Status.IN_PROCESS
+                all_success = False
+                break
+            elif child_status == ClbTest.Status.FAIL:
+                group_status = ClbTest.Status.FAIL
+                all_success = False
+            elif child_status == ClbTest.Status.NOT_CHECKED:
+                all_success = False
+
+        if all_success:
+            group_status = ClbTest.Status.SUCCESS
+        return group_status
+
+    # noinspection PyTypeChecker
     def set_test_status(self, a_group_name: str, a_test_name: str, a_status: ClbTest.Status):
         test_item = self.find_test_item(a_group_name, a_test_name)
         status_label = self.tree_widget.itemWidget(test_item, self.STATUS_COLUMN)
-        if a_status == ClbTest.Status.NOT_CHECKED:
-            status_label.setText("...")
-        if a_status == ClbTest.Status.IN_PROCESS:
-            status_label.setText("wait")
-        if a_status == ClbTest.Status.SUCCESS:
-            status_label.setText("ok")
-        if a_status == ClbTest.Status.FAIL:
-            status_label.setText("fail")
+        self.set_status_icon(status_label, a_status)
 
+        group_item = test_item.parent()
+        status_label = self.tree_widget.itemWidget(group_item, self.STATUS_COLUMN)
+        self.set_status_icon(status_label, self.get_group_status(group_item))
 
     def restore_checkboxes_state(self):
         enabled_list = self.settings.enabled_tests_list
