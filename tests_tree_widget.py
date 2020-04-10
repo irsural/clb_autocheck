@@ -67,11 +67,10 @@ class TestsTreeWidget:
         elif a_status == ClbTest.Status.IN_PROCESS:
             pixmap = None
 
-            warning_animation = QtGui.QMovie(":/icons/gif/loader.gif")
-            warning_animation.setScaledSize(QtCore.QSize(20, 20))
-            # warning_animation.setSpeed(500)
-            a_label.setMovie(warning_animation)
-            warning_animation.start()
+            loader = QtGui.QMovie(":/icons/gif/loader.gif")
+            loader.setScaledSize(QtCore.QSize(20, 20))
+            a_label.setMovie(loader)
+            loader.start()
 
         elif a_status == ClbTest.Status.SUCCESS:
             pixmap = QtGui.QPixmap(":/icons/icons/checkbox_ok.png")

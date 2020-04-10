@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file>gif/loader2.gif</file>
     <file>gif/loader.gif</file>
     <file>icons/excel.png</file>
     <file>gif/warning.gif</file>

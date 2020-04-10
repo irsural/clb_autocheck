@@ -35,6 +35,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui = MainForm()
         self.ui.setupUi(self)
 
+        self.loader = QtGui.QMovie(":/icons/gif/loader2.gif")
+        self.loader.setScaledSize(QtCore.QSize(264, 198))
+        self.ui.loader_label.setMovie(self.loader)
+
         try:
             self.settings = Settings(self)
             ini_ok = True
@@ -149,11 +153,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.autocheck_start_button.setText("Остановить")
         self.test_conductor.start()
 
+        self.ui.loader_label.show()
+        self.loader.start()
+
     def stop_autocheck(self):
         self.test_conductor.stop()
         self.lock_interface(False)
         self.ui.autocheck_start_button.setText("Старт")
         logging.info("Проверка завершена")
+
+        self.ui.loader_label.hide()
+        self.loader.stop()
 
     def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests.ClbTest.Status):
         try:
