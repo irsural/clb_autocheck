@@ -15,6 +15,23 @@ class ClbTest(abc.ABC):
         SUCCESS = 3
 
     @abc.abstractmethod
+    def __init__(self):
+        self.__group = ""
+        self.__name = ""
+
+    def set_group(self, a_group: str):
+        self.__group = a_group
+
+    def group(self) -> str:
+        return self.__group
+
+    def set_name(self, a_name: str):
+        self.__name = a_name
+
+    def name(self) -> str:
+        return self.__name
+
+    @abc.abstractmethod
     def prepare(self) -> bool:
         pass
 
@@ -99,6 +116,7 @@ class SignalTest(ClbTest):
 
 class EmptyTest(ClbTest):
     def __init__(self):
+        super().__init__()
         self.__status = ClbTest.Status.NOT_CHECKED
 
     def prepare(self) -> bool:
