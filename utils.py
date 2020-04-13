@@ -257,5 +257,3 @@ class Timer:
         if not self.started:
             return False
         return time.time() > self.stop_time
-
-

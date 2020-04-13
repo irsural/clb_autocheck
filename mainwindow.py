@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from settings_ini_parser import Settings, BadIniException
 from ui.py.mainwindow import Ui_MainWindow as MainForm
 from source_mode_window import SourceModeWidget
+from tstlan_dialog import TstlanDialog
 from settings_dialog import SettingsDialog
 import calibrator_constants as clb
 import clb_dll
@@ -36,7 +37,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
 
         self.loader = QtGui.QMovie(":/icons/gif/loader2.gif")
-        self.loader.setScaledSize(QtCore.QSize(264, 198))
+        self.loader.setScaledSize(QtCore.QSize(132, 99))
         self.ui.loader_label.setMovie(self.loader)
 
         try:
@@ -69,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.ui.enter_settings_action.triggered.connect(self.open_settings)
 
-            self.set_up_source_mode_widget()
+            self.source_mode_widget = self.set_up_source_mode_widget()
             self.show()
 
             self.tests = tests_factory.create_tests(self.calibrator)
@@ -80,6 +81,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
             self.test_conductor.tests_done.connect(self.stop_autocheck)
             self.test_conductor.test_status_changed.connect(self.set_test_status)
+
+            self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
@@ -97,12 +100,13 @@ class MainWindow(QtWidgets.QMainWindow):
         logging.getLogger().addHandler(log)
         logging.getLogger().setLevel(logging.DEBUG)
 
-    def set_up_source_mode_widget(self):
+    def set_up_source_mode_widget(self) -> SourceModeWidget:
         source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self)
         self.clb_list_changed.connect(source_mode_widget.update_clb_list)
         self.usb_status_changed.connect(source_mode_widget.update_clb_status)
         self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)
         self.ui.source_mode_layout.addWidget(source_mode_widget)
+        return source_mode_widget
 
     def tick(self):
         self.usb_tick()
@@ -169,6 +173,13 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.tests_widget.set_test_status(a_group_name, a_test_name, a_status)
         except AssertionError as err:
+            print(utils.exception_handler(err))
+
+    def open_tstlan(self):
+        try:
+            tstlan_dialog = TstlanDialog(self.settings)
+            tstlan_dialog.exec()
+        except Exception as err:
             print(utils.exception_handler(err))
 
     def open_settings(self):
