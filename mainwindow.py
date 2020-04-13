@@ -7,7 +7,9 @@ from ui.py.mainwindow import Ui_MainWindow as MainForm
 from source_mode_window import SourceModeWidget
 from tstlan_dialog import TstlanDialog
 from settings_dialog import SettingsDialog
+from network_variables import NetworkVariables
 import calibrator_constants as clb
+import constants as cfg
 import clb_dll
 import utils
 
@@ -83,6 +85,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.test_conductor.test_status_changed.connect(self.set_test_status)
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
+
+            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
@@ -177,7 +181,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_tstlan(self):
         try:
-            tstlan_dialog = TstlanDialog(self.settings)
+            tstlan_dialog = TstlanDialog(self.netvars, self.settings)
             tstlan_dialog.exec()
         except Exception as err:
             print(utils.exception_handler(err))
