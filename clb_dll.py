@@ -304,8 +304,8 @@ class ClbDrv:
         self.__clb_dll.read_bytes(self.__read_buffers[a_bytes_count], a_start_index, a_bytes_count)
         return self.__read_buffers[a_bytes_count]
 
-    def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes: bytes):
-        self.__clb_dll.write_bytes(a_start_index, a_bytes_count, a_bytes)
+    def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes):
+        self.__clb_dll.write_bytes(a_bytes, a_start_index, a_bytes_count)
 
     def read_bit(self, a_byte_index: int, a_bit_index: int) -> int:
         return self.__clb_dll.read_bit(a_byte_index, a_bit_index)

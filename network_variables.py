@@ -4,6 +4,8 @@ import logging
 from typing import List
 from clb_dll import ClbDrv
 
+import utils
+
 
 class VariableInfo:
     def __init__(self, a_number=0):
@@ -80,8 +82,17 @@ class NetworkVariables:
             _bytes = self.__calibrator.read_raw_bytes(variable_info.index, variable_info.size)
             return struct.unpack(variable_info.c_type, _bytes)[0]
 
-    def write_variable(self, a_variable_number: int):
-        pass
+    def write_variable(self, a_variable_number: int, a_variable_value: float):
+        variable_info = self.__variables_info[a_variable_number]
+        if variable_info.c_type == 'o':
+            value = int(utils.bound(a_variable_value, 0, 1))
+            return self.__calibrator.write_bit(variable_info.index, variable_info.bit_index, value)
+        else:
+            if variable_info.c_type != 'd' and variable_info.c_type != 'f':
+                a_variable_value = int(a_variable_value)
+
+            _bytes = struct.pack(variable_info.c_type, a_variable_value)
+            self.__calibrator.write_raw_bytes(variable_info.index, variable_info.size, _bytes)
 
     @property
     def peltier_3_temperature(self) -> float:

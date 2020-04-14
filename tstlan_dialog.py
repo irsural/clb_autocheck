@@ -39,8 +39,7 @@ class TstlanDialog(QtWidgets.QDialog):
         self.read_variables_timer.timeout.connect(self.read_variables)
         self.read_variables_timer.start(1000)
 
-        # self.ui.variables_table.itemChanged.connect(self.write_variable)
-
+        self.ui.variables_table.itemChanged.connect(self.write_variable)
         self.ui.name_filter_edit.textChanged.connect(self.filter_variables)
         self.ui.upadte_time_spinbox.valueChanged.connect(self.update_time_changed)
 
@@ -70,20 +69,29 @@ class TstlanDialog(QtWidgets.QDialog):
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.ui.variables_table.setItem(row, self.Column.TYPE, item)
 
-                self.ui.variables_table.setItem(row, self.Column.VALUE, QtWidgets.QTableWidgetItem(""))
+                self.ui.variables_table.setItem(row, self.Column.VALUE, NumberTableWidgetItem(""))
 
     def read_variables(self):
         self.ui.variables_table.blockSignals(True)
 
-        for var_number in range(self.ui.variables_table.rowCount()):
-            value = self.netvars.read_variable(var_number)
-            self.ui.variables_table.item(var_number, self.Column.VALUE).setText(str(round(value, 7)))
+        for visual_row in range(self.ui.variables_table.rowCount()):
+            row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
+
+            value = self.netvars.read_variable(row)
+            self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
 
         self.ui.variables_table.blockSignals(False)
 
     def write_variable(self, a_item: QtWidgets.QTableWidgetItem):
-        variable_number = self.ui.variables_table.item(a_item.row(), self.Column.NUMBER).text()
-        self.netvars.write_variable(variable_number)
+        try:
+            variable_number = int(self.ui.variables_table.item(a_item.row(), self.Column.NUMBER).text())
+            try:
+                variable_value = utils.parse_input(a_item.text())
+                self.netvars.write_variable(variable_number, variable_value)
+            except ValueError:
+                pass
+        except Exception as err:
+            print(utils.exception_handler(err))
 
     def filter_variables(self):
         filter_text = self.ui.name_filter_edit.text()
