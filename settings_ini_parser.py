@@ -51,21 +51,12 @@ class Settings(QtCore.QObject):
     STEP_EXACT_KEY = "exact_step"
     STEP_EXACT_DEFAULT = "0.002"
 
-    START_DEVIATION_KEY = "start_deviation"
-    START_DEVIATION_DEFAULT = "5"
-
-    MOUSE_INVERSION_KEY = "mouse_inversion"
-    MOUSE_INVERSION_DEFAULT = "0"
-
-    DISABLE_SCROLL_ON_TABLE_KEY = "disable_scroll_on_table"
-    DISABLE_SCROLL_ON_TABLE_DEFAULT = "0"
+    TSTLAN_UPDATE_TIME_KEY = "tstlan_update_time"
+    TSTLAN_UPDATE_TIME_DEFAULT = "1"
 
     GEOMETRY_SECTION = "Geometry"
     HEADERS_SECTION = "Headers"
 
-    PROTOCOL_SECTION = "Protocol"
-    TEMPLATE_FILEPATH_KEY = "template_filepath"
-    SAVE_FOLDER_KEY = "save_folder"
     CHECKBOX_STATES_KEY = "checkbox_states"
 
     # В ini файлы сохраняются QByteArray, в которых могут быть переносы строки, которые херят ini файл
@@ -87,13 +78,8 @@ class Settings(QtCore.QObject):
         self.__rough_step = 0
         self.__common_step = 0
         self.__exact_step = 0
-        self.__start_deviation = 0
-        self.__mouse_inversion = 0
 
-        self.__disable_scroll_on_table = 0
-
-        self.__template_filepath = ""
-        self.__save_folder = ""
+        self.__tstlan_update_time = 0
 
         self.settings = configparser.ConfigParser()
         try:
@@ -109,17 +95,11 @@ class Settings(QtCore.QObject):
                                                    self.STEP_ROUGH_KEY: self.STEP_ROUGH_DEFAULT,
                                                    self.STEP_COMMON_KEY: self.STEP_COMMON_DEFAULT,
                                                    self.STEP_EXACT_KEY: self.STEP_EXACT_DEFAULT,
-                                                   self.START_DEVIATION_KEY: self.START_DEVIATION_DEFAULT,
-                                                   self.MOUSE_INVERSION_KEY: self.MOUSE_INVERSION_DEFAULT,
-                                                   self.DISABLE_SCROLL_ON_TABLE_KEY:
-                                                       self.DISABLE_SCROLL_ON_TABLE_DEFAULT}
-            self.settings[self.PROTOCOL_SECTION] = {self.TEMPLATE_FILEPATH_KEY: "",
-                                                    self.SAVE_FOLDER_KEY: ""}
+                                                   self.TSTLAN_UPDATE_TIME_KEY: self.TSTLAN_UPDATE_TIME_DEFAULT}
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
             self.settings.read(self.CONFIG_PATH)
             self.add_ini_section(self.MEASURE_SECTION)
-            self.add_ini_section(self.PROTOCOL_SECTION)
 
         self.__fixed_step_list = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_KEY,
                                                       self.FIXED_STEP_DEFAULT, self.ValueType.LIST_FLOAT)
@@ -143,28 +123,9 @@ class Settings(QtCore.QObject):
                                                  self.STEP_EXACT_DEFAULT, self.ValueType.FLOAT)
         self.__exact_step = utils.bound(self.__exact_step, 0., 100.)
 
-        self.__start_deviation = self.check_ini_value(self.MEASURE_SECTION, self.START_DEVIATION_KEY,
-                                                      self.START_DEVIATION_DEFAULT, self.ValueType.INT)
-        self.__start_deviation = utils.bound(self.__start_deviation, 0, 100)
-
-        self.__mouse_inversion = self.check_ini_value(self.MEASURE_SECTION, self.MOUSE_INVERSION_KEY,
-                                                      self.MOUSE_INVERSION_DEFAULT, self.ValueType.INT)
-        self.__mouse_inversion = utils.bound(self.__mouse_inversion, 0, 1)
-
-        self.__disable_scroll_on_table = self.check_ini_value(self.MEASURE_SECTION, self.DISABLE_SCROLL_ON_TABLE_KEY,
-                                                              self.DISABLE_SCROLL_ON_TABLE_DEFAULT, self.ValueType.INT)
-        self.__disable_scroll_on_table = utils.bound(self.__disable_scroll_on_table, 0, 1)
-
-        self.__template_filepath = self.check_ini_value(self.PROTOCOL_SECTION, self.TEMPLATE_FILEPATH_KEY,
-                                                        "", self.ValueType.STRING)
-
-        self.__save_folder = self.check_ini_value(self.PROTOCOL_SECTION, self.SAVE_FOLDER_KEY,
-                                                  "", self.ValueType.STRING)
-        # Выводит ini файл в консоль
-        # for key in settings:
-        #     print(f"[{key}]")
-        #     for subkey in settings[key]:
-        #         print(f"{subkey} = {settings[key][subkey]}")
+        self.__tstlan_update_time = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_UPDATE_TIME_KEY,
+                                                         self.TSTLAN_UPDATE_TIME_DEFAULT, self.ValueType.FLOAT)
+        self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
 
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
@@ -301,59 +262,13 @@ class Settings(QtCore.QObject):
         self.__exact_step = utils.bound(self.__exact_step, 0., 100.)
 
     @property
-    def start_deviation(self):
-        return self.__start_deviation
+    def tstlan_update_time(self):
+        return self.__tstlan_update_time
 
-    @start_deviation.setter
-    def start_deviation(self, a_step: int):
-        self.settings[self.MEASURE_SECTION][self.START_DEVIATION_KEY] = str(a_step)
+    @tstlan_update_time.setter
+    def tstlan_update_time(self, a_time: float):
+        self.settings[self.MEASURE_SECTION][self.TSTLAN_UPDATE_TIME_KEY] = str(a_time)
         self.save()
 
-        self.__start_deviation = a_step
-        self.__start_deviation = utils.bound(self.__start_deviation, 0, 100)
-
-    @property
-    def mouse_inversion(self):
-        return self.__mouse_inversion
-
-    @mouse_inversion.setter
-    def mouse_inversion(self, a_enable: int):
-        self.settings[self.MEASURE_SECTION][self.MOUSE_INVERSION_KEY] = str(a_enable)
-        self.save()
-
-        self.__mouse_inversion = a_enable
-        self.__mouse_inversion = utils.bound(self.__mouse_inversion, 0, 1)
-
-    @property
-    def disable_scroll_on_table(self):
-        return self.__disable_scroll_on_table
-
-    @disable_scroll_on_table.setter
-    def disable_scroll_on_table(self, a_enable: int):
-        self.settings[self.MEASURE_SECTION][self.DISABLE_SCROLL_ON_TABLE_KEY] = str(a_enable)
-        self.save()
-
-        self.__disable_scroll_on_table = a_enable
-        self.__disable_scroll_on_table = utils.bound(self.__disable_scroll_on_table, 0, 1)
-
-    @property
-    def template_filepath(self):
-        return self.__template_filepath
-
-    @template_filepath.setter
-    def template_filepath(self, a_filepath: str):
-        self.settings[self.PROTOCOL_SECTION][self.TEMPLATE_FILEPATH_KEY] = a_filepath
-        self.save()
-
-        self.__template_filepath = a_filepath
-
-    @property
-    def save_folder(self):
-        return self.__save_folder
-
-    @save_folder.setter
-    def save_folder(self, a_filepath: str):
-        self.settings[self.PROTOCOL_SECTION][self.SAVE_FOLDER_KEY] = a_filepath
-        self.save()
-
-        self.__save_folder = a_filepath
+        self.__tstlan_update_time = a_time
+        self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
