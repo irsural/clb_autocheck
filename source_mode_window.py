@@ -143,7 +143,6 @@ class SourceModeWidget(QtWidgets.QWidget):
     # noinspection PyTypeChecker
     def wheelEvent(self, event: QtGui.QWheelEvent):
         steps = qt_utils.get_wheel_steps(event)
-        steps = -steps if self.settings.mouse_inversion else steps
 
         keys = event.modifiers()
         if keys & QtCore.Qt.ShiftModifier:

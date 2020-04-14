@@ -28,12 +28,14 @@ class TstlanDialog(QtWidgets.QDialog):
 
         self.settings = a_settings
         self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
+
+        # Обязательно вызывать до восстановления состояния таблицы !!!
+        self.fill_variables_table()
+
         self.ui.variables_table.horizontalHeader().restoreState(self.settings.get_last_geometry(
             self.ui.variables_table.__class__.__name__))
 
         self.ui.upadte_time_spinbox.setValue(self.settings.tstlan_update_time)
-
-        self.fill_variables_table()
 
         self.read_variables_timer = QtCore.QTimer(self)
         self.read_variables_timer.timeout.connect(self.read_variables)
@@ -72,15 +74,18 @@ class TstlanDialog(QtWidgets.QDialog):
                 self.ui.variables_table.setItem(row, self.Column.VALUE, NumberTableWidgetItem(""))
 
     def read_variables(self):
-        self.ui.variables_table.blockSignals(True)
+        try:
+            self.ui.variables_table.blockSignals(True)
 
-        for visual_row in range(self.ui.variables_table.rowCount()):
-            row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
+            for visual_row in range(self.ui.variables_table.rowCount()):
+                row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
 
-            value = self.netvars.read_variable(row)
-            self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
+                value = self.netvars.read_variable(row)
+                self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
 
-        self.ui.variables_table.blockSignals(False)
+            self.ui.variables_table.blockSignals(False)
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
 
     def write_variable(self, a_item: QtWidgets.QTableWidgetItem):
         try:
@@ -91,7 +96,7 @@ class TstlanDialog(QtWidgets.QDialog):
             except ValueError:
                 pass
         except Exception as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def filter_variables(self):
         filter_text = self.ui.name_filter_edit.text()
