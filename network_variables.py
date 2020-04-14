@@ -23,33 +23,34 @@ class NetworkVariables:
     VARIABLE_RE = re.compile(r"^(?P<parameter>Name|Type)_(?P<number>\d+)=(?P<value>.*)")
 
     def __init__(self, a_variables_ini_path: str, a_calibrator: ClbDrv):
-        self.__variables_info = []
         self.__calibrator = a_calibrator
-        self.get_variables_from_ini(a_variables_ini_path)
+        self.__variables_info = self.get_variables_from_ini(a_variables_ini_path)
 
-    def get_variables_from_ini(self, a_ini_path: str):
+    @staticmethod
+    def get_variables_from_ini(a_ini_path: str):
+        variables_info = []
         with open(a_ini_path) as config:
             for line in config:
-                variable_re = self.VARIABLE_RE.match(line)
+                variable_re = NetworkVariables.VARIABLE_RE.match(line)
                 if variable_re is not None:
                     number = int(variable_re.group('number'))
                     value = variable_re.group('value')
 
-                    if number >= len(self.__variables_info):
-                        assert (number - len(self.__variables_info)) < 1, \
+                    if number >= len(variables_info):
+                        assert (number - len(variables_info)) < 1, \
                             f"Переменные в конфиге расположены не по порядку"
-                        self.__variables_info.append(VariableInfo(a_number=number))
+                        variables_info.append(VariableInfo(a_number=number))
 
                     if variable_re.group('parameter') == "Name":
-                        self.__variables_info[number].name = value
+                        variables_info[number].name = value
                     else:
-                        self.__variables_info[number].type = value
-                        self.__variables_info[number].c_type = self.__get_c_type(value)
-                        self.__variables_info[number].size = self.get_type_size(value)
+                        variables_info[number].type = value
+                        variables_info[number].c_type = NetworkVariables.__get_c_type(value)
+                        variables_info[number].size = NetworkVariables.get_type_size(value)
 
                         if number != 0:
-                            current_var = self.__variables_info[number]
-                            prev_var = self.__variables_info[number - 1]
+                            current_var = variables_info[number]
+                            prev_var = variables_info[number - 1]
 
                             if current_var.type == "bit":
                                 if prev_var.type == "bit":
@@ -63,9 +64,13 @@ class NetworkVariables:
                                     current_var.index = prev_var.index + prev_var.size
                             else:
                                 current_var.index = prev_var.index + prev_var.size
+        return variables_info
 
     def get_variables_info(self) -> List[VariableInfo]:
         return self.__variables_info
+
+    def get_data_size(self) -> int:
+        return self.__variables_info[-1].index + self.__variables_info[-1].size
 
     def read_variable(self, a_variable_number: int):
         variable_info = self.__variables_info[a_variable_number]

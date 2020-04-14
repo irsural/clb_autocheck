@@ -1,5 +1,6 @@
 import logging
 from enum import IntEnum
+import datetime
 
 from PyQt5 import QtGui, QtWidgets, QtCore
 
@@ -34,7 +35,7 @@ class TstlanDialog(QtWidgets.QDialog):
         self.fill_variables_table()
 
         self.read_variables_timer = QtCore.QTimer(self)
-        # self.read_variables_timer.timeout.connect(self.read_variables)
+        self.read_variables_timer.timeout.connect(self.read_variables)
         self.read_variables_timer.start(1000)
 
         # self.ui.variables_table.itemChanged.connect(self.write_variable)
@@ -68,13 +69,15 @@ class TstlanDialog(QtWidgets.QDialog):
                 self.ui.variables_table.setItem(row, self.Column.VALUE, QtWidgets.QTableWidgetItem(""))
 
     def read_variables(self):
+        print(1)
         self.ui.variables_table.blockSignals(True)
 
         for var_number in range(self.ui.variables_table.rowCount()):
             value = self.netvars.read_variable(var_number)
-            self.ui.variables_table.item(var_number, self.Column.VALUE).setText(value)
+            self.ui.variables_table.item(var_number, self.Column.VALUE).setText(str(round(value, 7)))
 
         self.ui.variables_table.blockSignals(False)
+        print(2)
 
     def write_variable(self, a_item: QtWidgets.QTableWidgetItem):
         variable_number = self.ui.variables_table.item(a_item.row(), self.Column.NUMBER).text()

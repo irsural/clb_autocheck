@@ -60,10 +60,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.set_up_logger()
 
             self.clb_driver = clb_dll.set_up_driver(clb_dll.debug_dll_path)
-            self.usb_driver = clb_dll.UsbDrv(self.clb_driver)
+
+            modbus_registers_count = 700
+            self.usb_driver = clb_dll.UsbDrv(self.clb_driver, modbus_registers_count * 2)
             self.usb_state = clb_dll.UsbDrv.UsbState.DISABLED
             self.calibrator = clb_dll.ClbDrv(self.clb_driver)
             self.clb_state = clb.State.DISCONNECTED
+
+            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH, self.calibrator)
 
             self.clb_signal_off_timer = QtCore.QTimer()
             # noinspection PyTypeChecker
@@ -85,8 +89,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.test_conductor.test_status_changed.connect(self.set_test_status)
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
-
-            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH, self.calibrator)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)

@@ -68,18 +68,10 @@ class UsbDrv:
         BUSY = 3
         ERROR = 4
 
-    # enum_to_usb_status = {
-    #     UsbState.DISABLED: "Отключено",
-    #     UsbState.BUSY: "Подключение...",
-    #     UsbState.CONNECTED: "Подключено",
-    #     UsbState.ERROR: "Ошибка",
-    #     UsbState.NOT_SUPPORTED: "",
-    # }
-
-    def __init__(self, a_clb_dll):
+    def __init__(self, a_clb_dll, a_data_size):
         self.clb_dll = a_clb_dll
         # Обязательно перед любыми действиями с clb_driver_dll
-        self.clb_dll.usb_init()
+        self.clb_dll.usb_init(a_data_size)
 
         self.clb_dev_list_changed = False
         self.clb_dev_list = []
@@ -294,14 +286,17 @@ class ClbDrv:
     def fast_control_mode_enable(self, a_enable: int):
         self.__clb_dll.fast_control_mode_enable(a_enable)
 
-    def read_raw_bytes(self, a_start_index: int, a_bytes_count: int) -> bytes:
-        return self.__clb_dll.read_bytes(a_start_index, a_bytes_count)
+    def read_raw_bytes(self, a_start_index: int, a_bytes_count: int):
+        a = ctypes.c_char * a_bytes_count
+        arr = a()
+        self.__clb_dll.read_bytes(arr, a_start_index, a_bytes_count)
+        return arr
 
     def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes: bytes):
         self.__clb_dll.write_bytes(a_start_index, a_bytes_count, a_bytes)
 
-    def read_bit(self, a_byte_index: int, a_bit_index: int) -> bool:
-        return bool(self.__clb_dll.read_bit(a_byte_index, a_bit_index))
+    def read_bit(self, a_byte_index: int, a_bit_index: int) -> int:
+        return self.__clb_dll.read_bit(a_byte_index, a_bit_index)
 
     def write_bit(self, a_byte_index: int, a_bit_index: int, a_value: bool):
         self.__clb_dll.write_bit(a_byte_index, a_bit_index, a_value)
