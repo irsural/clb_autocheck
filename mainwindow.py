@@ -8,18 +8,15 @@ from source_mode_window import SourceModeWidget
 from tstlan_dialog import TstlanDialog
 from settings_dialog import SettingsDialog
 from network_variables import NetworkVariables
-import calibrator_constants as clb
-import constants as cfg
-import clb_dll
-import utils
-
 from tests_tree_widget import TestsTreeWidget
 from test_conductor import TestsConductor
+from qt_utils import QTextEditLogger
+import calibrator_constants as clb
+import constants as cfg
 import tests_factory
 import clb_tests
-
-
-from qt_utils import QTextEditLogger
+import clb_dll
+import utils
 
 
 class MainWindow(QtWidgets.QMainWindow):

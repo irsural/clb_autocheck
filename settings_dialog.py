@@ -35,9 +35,6 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.exact_step_spinbox.setValue(self.settings.exact_step)
         self.ui.rough_step_spinbox.setValue(self.settings.rough_step)
         self.ui.common_step_spinbox.setValue(self.settings.common_step)
-        self.ui.start_deviation_spinbox.setValue(self.settings.start_deviation)
-        self.ui.mouse_inversion_checkbox.setChecked(self.settings.mouse_inversion)
-        self.ui.disable_scroll_on_table_checkbox.setChecked(self.settings.disable_scroll_on_table)
 
         self.open_marks_table_widget()
 
@@ -61,15 +58,6 @@ class SettingsDialog(QtWidgets.QDialog):
 
         if self.settings.exact_step != self.ui.exact_step_spinbox.value():
             self.settings.exact_step = self.ui.exact_step_spinbox.value()
-
-        if self.settings.start_deviation != self.ui.start_deviation_spinbox.value():
-            self.settings.start_deviation = self.ui.start_deviation_spinbox.value()
-
-        if self.settings.mouse_inversion != int(self.ui.mouse_inversion_checkbox.isChecked()):
-            self.settings.mouse_inversion = int(self.ui.mouse_inversion_checkbox.isChecked())
-
-        if self.settings.disable_scroll_on_table != int(self.ui.disable_scroll_on_table_checkbox.isChecked()):
-            self.settings.disable_scroll_on_table = int(self.ui.disable_scroll_on_table_checkbox.isChecked())
 
         return True
 

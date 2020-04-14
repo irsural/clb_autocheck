@@ -23,7 +23,7 @@ else:
 def set_up_driver(a_full_path):
     if os.path.exists(a_full_path):
         clb_driver_lib = ctypes.CDLL(a_full_path)
-        print("debug dll")
+        logging.debug("debug dll")
     else:
         clb_driver_lib = ctypes.CDLL("./" + dll_name)
 
