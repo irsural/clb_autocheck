@@ -15,6 +15,9 @@
     <pointsize>10</pointsize>
    </font>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::TabFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Tstlan</string>
   </property>
@@ -123,6 +126,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>variables_table</tabstop>
+  <tabstop>upadte_time_spinbox</tabstop>
+  <tabstop>name_filter_edit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

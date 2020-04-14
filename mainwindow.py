@@ -145,7 +145,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.usb_status_changed.emit(self.clb_state)
 
     def lock_interface(self, a_lock):
-        self.ui.source_mode_widget.setDisabled(a_lock)
+        self.source_mode_widget.ui.control_box.setDisabled(a_lock)
         self.tests_widget.lock_interface(a_lock)
 
     def autocheck_button_clicked(self):
@@ -155,7 +155,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self.start_autocheck()
         except AssertionError as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def start_autocheck(self):
         self.lock_interface(True)
@@ -179,21 +179,21 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.tests_widget.set_test_status(a_group_name, a_test_name, a_status)
         except AssertionError as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def open_tstlan(self):
         try:
             tstlan_dialog = TstlanDialog(self.netvars, self.settings)
             tstlan_dialog.exec()
         except Exception as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def open_settings(self):
         try:
             settings_dialog = SettingsDialog(self.settings, self)
             settings_dialog.exec()
         except Exception as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def closeEvent(self, a_event: QtGui.QCloseEvent):
         if self.calibrator.signal_enable:

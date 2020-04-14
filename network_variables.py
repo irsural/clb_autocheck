@@ -4,6 +4,7 @@ import logging
 from typing import List
 from clb_dll import ClbDrv
 
+import calibrator_constants as clb
 import utils
 
 
@@ -73,6 +74,9 @@ class NetworkVariables:
 
     def get_data_size(self) -> int:
         return self.__variables_info[-1].index + self.__variables_info[-1].size
+
+    def connected(self):
+        return self.__calibrator.state != clb.State.DISCONNECTED
 
     def read_variable(self, a_variable_number: int):
         variable_info = self.__variables_info[a_variable_number]

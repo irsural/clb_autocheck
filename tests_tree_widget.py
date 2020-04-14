@@ -44,6 +44,7 @@ class TestsTreeWidget:
                 group_item.setFlags(group_item.flags() | QtCore.Qt.ItemIsTristate)
 
                 status_label = QtWidgets.QLabel()
+                status_label.setAlignment(QtCore.Qt.AlignCenter)
                 self.set_status_icon(status_label, ClbTest.Status.NOT_CHECKED)
                 self.tree_widget.setItemWidget(group_item, self.STATUS_COLUMN, status_label)
 
@@ -53,6 +54,7 @@ class TestsTreeWidget:
             test_item.setCheckState(0, QtCore.Qt.Checked)
 
             status_label = QtWidgets.QLabel()
+            status_label.setAlignment(QtCore.Qt.AlignCenter)
             self.set_status_icon(status_label, ClbTest.Status.NOT_CHECKED)
             self.tree_widget.setItemWidget(test_item, self.STATUS_COLUMN, status_label)
 

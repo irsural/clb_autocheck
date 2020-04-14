@@ -74,27 +74,30 @@ class TstlanDialog(QtWidgets.QDialog):
                 self.ui.variables_table.setItem(row, self.Column.VALUE, NumberTableWidgetItem(""))
 
     def read_variables(self):
+        self.ui.variables_table.blockSignals(True)
+
         try:
-            self.ui.variables_table.blockSignals(True)
+            if self.netvars.connected():
+                for visual_row in range(self.ui.variables_table.rowCount()):
+                    row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
 
-            for visual_row in range(self.ui.variables_table.rowCount()):
-                row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
+                    value = self.netvars.read_variable(row)
+                    self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
 
-                value = self.netvars.read_variable(row)
-                self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
-
-            self.ui.variables_table.blockSignals(False)
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
+        self.ui.variables_table.blockSignals(False)
+
     def write_variable(self, a_item: QtWidgets.QTableWidgetItem):
         try:
-            variable_number = int(self.ui.variables_table.item(a_item.row(), self.Column.NUMBER).text())
-            try:
-                variable_value = utils.parse_input(a_item.text())
-                self.netvars.write_variable(variable_number, variable_value)
-            except ValueError:
-                pass
+            if self.netvars.connected():
+                variable_number = int(self.ui.variables_table.item(a_item.row(), self.Column.NUMBER).text())
+                try:
+                    variable_value = utils.parse_input(a_item.text())
+                    self.netvars.write_variable(variable_number, variable_value)
+                except ValueError:
+                    pass
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 

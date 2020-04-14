@@ -17,6 +17,7 @@ class Ui_Dialog(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         Dialog.setFont(font)
+        Dialog.setFocusPolicy(QtCore.Qt.TabFocus)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout = QtWidgets.QGridLayout()
@@ -66,6 +67,8 @@ class Ui_Dialog(object):
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+        Dialog.setTabOrder(self.variables_table, self.upadte_time_spinbox)
+        Dialog.setTabOrder(self.upadte_time_spinbox, self.name_filter_edit)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
