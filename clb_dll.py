@@ -57,6 +57,8 @@ def set_up_driver(a_full_path):
 
     clb_driver_lib.fast_control_mode_enable.argtypes = [ctypes.c_int]
 
+    clb_driver_lib.read_bit.restype = ctypes.c_uint8
+
     return clb_driver_lib
 
 
