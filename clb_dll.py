@@ -57,8 +57,6 @@ def set_up_driver(a_full_path):
 
     clb_driver_lib.fast_control_mode_enable.argtypes = [ctypes.c_int]
 
-    clb_driver_lib.read_bit.restype = ctypes.c_uint8
-
     return clb_driver_lib
 
 
@@ -131,6 +129,20 @@ class ClbDrv:
         self.__mode = clb.Mode.SOURCE
         self.__signal_ready = False
         self.__state = clb.State.DISCONNECTED
+
+        buf1_t = ctypes.c_char * 1
+        buf2_t = ctypes.c_char * 2
+        buf4_t = ctypes.c_char * 4
+        buf8_t = ctypes.c_char * 8
+        buf10_t = ctypes.c_char * 10
+
+        self.__read_buffers = {
+            1: buf1_t(),
+            2: buf2_t(),
+            4: buf4_t(),
+            8: buf8_t(),
+            10: buf10_t(),
+        }
 
     def connect(self, a_clb_name: str):
         self.__amplitude = 0
@@ -289,10 +301,8 @@ class ClbDrv:
         self.__clb_dll.fast_control_mode_enable(a_enable)
 
     def read_raw_bytes(self, a_start_index: int, a_bytes_count: int):
-        a = ctypes.c_char * a_bytes_count
-        arr = a()
-        self.__clb_dll.read_bytes(arr, a_start_index, a_bytes_count)
-        return arr
+        self.__clb_dll.read_bytes(self.__read_buffers[a_bytes_count], a_start_index, a_bytes_count)
+        return self.__read_buffers[a_bytes_count]
 
     def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes: bytes):
         self.__clb_dll.write_bytes(a_start_index, a_bytes_count, a_bytes)
@@ -300,5 +310,5 @@ class ClbDrv:
     def read_bit(self, a_byte_index: int, a_bit_index: int) -> int:
         return self.__clb_dll.read_bit(a_byte_index, a_bit_index)
 
-    def write_bit(self, a_byte_index: int, a_bit_index: int, a_value: bool):
+    def write_bit(self, a_byte_index: int, a_bit_index: int, a_value: int):
         self.__clb_dll.write_bit(a_byte_index, a_bit_index, a_value)
