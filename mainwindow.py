@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
-            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH)
+            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH, self.calibrator)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)

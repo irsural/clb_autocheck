@@ -34,10 +34,10 @@ class TstlanDialog(QtWidgets.QDialog):
         self.fill_variables_table()
 
         self.read_variables_timer = QtCore.QTimer(self)
-        self.read_variables_timer.timeout.connect(self.read_variables)
+        # self.read_variables_timer.timeout.connect(self.read_variables)
         self.read_variables_timer.start(1000)
 
-        self.ui.variables_table.itemChanged.connect(self.write_variable)
+        # self.ui.variables_table.itemChanged.connect(self.write_variable)
 
     def __del__(self):
         print("tstlan deleted")

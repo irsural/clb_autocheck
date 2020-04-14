@@ -293,3 +293,15 @@ class ClbDrv:
 
     def fast_control_mode_enable(self, a_enable: int):
         self.__clb_dll.fast_control_mode_enable(a_enable)
+
+    def read_raw_bytes(self, a_start_index: int, a_bytes_count: int) -> bytes:
+        return self.__clb_dll.read_bytes(a_start_index, a_bytes_count)
+
+    def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes: bytes):
+        self.__clb_dll.write_bytes(a_start_index, a_bytes_count, a_bytes)
+
+    def read_bit(self, a_byte_index: int, a_bit_index: int) -> bool:
+        return bool(self.__clb_dll.read_bit(a_byte_index, a_bit_index))
+
+    def write_bit(self, a_byte_index: int, a_bit_index: int, a_value: bool):
+        self.__clb_dll.write_bit(a_byte_index, a_bit_index, a_value)
