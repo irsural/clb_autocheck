@@ -76,7 +76,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.source_mode_widget = self.set_up_source_mode_widget()
             self.show()
 
-            self.tests = tests_factory.create_tests(self.calibrator)
+            self.tests = tests_factory.create_tests(self.calibrator, self.netvars)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
 

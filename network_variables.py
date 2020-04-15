@@ -15,8 +15,10 @@ class NetworkVariables:
         self.__calibrator = a_calibrator
         self.__variables_info = self.get_variables_from_ini(a_variables_ini_path)
 
-        self.fast_adc_slow = BufferedVariable(VariableInfo(a_index=229, a_type="double"),
-                                              a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+        # Обязательно объявлять через класс, а не через self, иначе не будут вызываться __get__ и __set__
+        NetworkVariables.fast_adc_slow = BufferedVariable(VariableInfo(a_index=229, a_type="double"),
+                                                          a_mode=BufferedVariable.Mode.R,
+                                                          a_calibrator=self.__calibrator)
 
     @staticmethod
     def get_variables_from_ini(a_ini_path: str):
@@ -184,7 +186,7 @@ class BufferedVariable:
         self.__buffer = 0
         self.__delay_timer = utils.Timer(a_buffer_delay_s)
 
-    def get(self):
+    def __get(self):
         if self.__delay_timer.check() or not self.__delay_timer.started():
             if self.__is_bit:
                 return self.__calibrator.read_bit(self.__variable_info.index, self.__variable_info.bit_index)
@@ -194,7 +196,7 @@ class BufferedVariable:
         else:
             return self.__buffer
 
-    def set(self, a_value):
+    def __set(self, a_value):
         assert self.__mode == BufferedVariable.Mode.RW, "Режим переменной должен быть RW !!"
 
         if self.__is_bit:
@@ -209,3 +211,9 @@ class BufferedVariable:
 
         self.__buffer = a_value
         self.__delay_timer.start()
+
+    def __get__(self, instance, owner):
+        return self.__get()
+
+    def __set__(self, instance, value):
+        return self.__set(value)

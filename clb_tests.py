@@ -3,6 +3,7 @@ from enum import IntEnum
 import utils
 import logging
 
+from network_variables import NetworkVariables
 import calibrator_constants as clb
 from clb_dll import ClbDrv
 
@@ -58,11 +59,12 @@ class ClbTest(abc.ABC):
 
 class SignalTest(ClbTest):
     def __init__(self, a_amplitude: float, a_signal_type: clb.SignalType, a_calibrator: ClbDrv,
-                 a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 30):
+                 a_netvars: NetworkVariables, a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 30):
         super().__init__()
         self.amplitude = a_amplitude
         self.signal_type = a_signal_type
         self.calibrator = a_calibrator
+        self.netvars = a_netvars
         self.__timeout_s = a_timeout_s
 
         self.timeout_timer = utils.Timer(a_timeout_s)

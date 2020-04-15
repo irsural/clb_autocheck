@@ -119,7 +119,7 @@ class SourceModeWidget(QtWidgets.QWidget):
             self.mode_to_radio[self.mode].setChecked(True)
 
     def update_netvars(self):
-        self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
+        self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow)})")
 
     def enable_signal(self, a_signal_enable):
         self.calibrator.signal_enable = a_signal_enable
