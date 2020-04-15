@@ -97,6 +97,8 @@ class TestsConductor(QtCore.QObject):
                 elif current_test.status() in (clb_tests.ClbTest.Status.SUCCESS, clb_tests.ClbTest.Status.FAIL):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
+                    if current_test.has_error():
+                        logging.info(f"Описание ошибки: {current_test.get_last_error()}")
 
                     self.test_status_changed.emit(current_test.group(), current_test.name(), current_test.status())
                     current_test.stop()
@@ -104,6 +106,8 @@ class TestsConductor(QtCore.QObject):
                     self.next_test()
             else:
                 logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
+                if current_test.has_error():
+                    logging.info(f"Описание ошибки: {current_test.get_last_error()}")
 
                 self.test_status_changed.emit(current_test.group(), current_test.name(), clb_tests.ClbTest.Status.FAIL)
                 current_test.stop()
