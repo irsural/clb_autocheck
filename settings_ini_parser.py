@@ -54,6 +54,12 @@ class Settings(QtCore.QObject):
     TSTLAN_UPDATE_TIME_KEY = "tstlan_update_time"
     TSTLAN_UPDATE_TIME_DEFAULT = "1"
 
+    TSTLAN_SHOW_MARKS_KEY = "tstlan_show_marks"
+    TSTLAN_SHOW_MARKS_DEFAULT = "0"
+
+    TSTLAN_MARKS_KEY = "tstlan_marks"
+    TSTLAN_MARKS_DEFAULT = "0"
+
     GEOMETRY_SECTION = "Geometry"
     HEADERS_SECTION = "Headers"
 
@@ -80,6 +86,8 @@ class Settings(QtCore.QObject):
         self.__exact_step = 0
 
         self.__tstlan_update_time = 0
+        self.__tstlan_show_marks = 0
+        self.__tstlan_makrs = []
 
         self.settings = configparser.ConfigParser()
         try:
@@ -90,12 +98,16 @@ class Settings(QtCore.QObject):
     # noinspection DuplicatedCode
     def restore_settings(self):
         if not os.path.exists(self.CONFIG_PATH):
-            self.settings[self.MEASURE_SECTION] = {self.FIXED_STEP_KEY: self.FIXED_STEP_DEFAULT,
-                                                   self.FIXED_STEP_IDX_KEY: self.FIXED_STEP_IDX_DEFAULT,
-                                                   self.STEP_ROUGH_KEY: self.STEP_ROUGH_DEFAULT,
-                                                   self.STEP_COMMON_KEY: self.STEP_COMMON_DEFAULT,
-                                                   self.STEP_EXACT_KEY: self.STEP_EXACT_DEFAULT,
-                                                   self.TSTLAN_UPDATE_TIME_KEY: self.TSTLAN_UPDATE_TIME_DEFAULT}
+            self.settings[self.MEASURE_SECTION] = {
+                self.FIXED_STEP_KEY: self.FIXED_STEP_DEFAULT,
+                self.FIXED_STEP_IDX_KEY: self.FIXED_STEP_IDX_DEFAULT,
+                self.STEP_ROUGH_KEY: self.STEP_ROUGH_DEFAULT,
+                self.STEP_COMMON_KEY: self.STEP_COMMON_DEFAULT,
+                self.STEP_EXACT_KEY: self.STEP_EXACT_DEFAULT,
+                self.TSTLAN_UPDATE_TIME_KEY: self.TSTLAN_UPDATE_TIME_DEFAULT,
+                self.TSTLAN_SHOW_MARKS_KEY: self.TSTLAN_SHOW_MARKS_DEFAULT,
+                self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT
+            }
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
             self.settings.read(self.CONFIG_PATH)
@@ -127,6 +139,13 @@ class Settings(QtCore.QObject):
                                                          self.TSTLAN_UPDATE_TIME_DEFAULT, self.ValueType.FLOAT)
         self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
 
+        self.__tstlan_show_marks = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_SHOW_MARKS_KEY,
+                                                        self.TSTLAN_SHOW_MARKS_DEFAULT, self.ValueType.INT)
+        self.__tstlan_show_marks = utils.bound(self.__tstlan_show_marks, 0, 1)
+
+        self.__tstlan_makrs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_MARKS_KEY,
+                                                   self.TSTLAN_MARKS_DEFAULT, self.ValueType.LIST_INT)
+
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
             self.settings.add_section(a_name)
@@ -134,7 +153,7 @@ class Settings(QtCore.QObject):
     def check_ini_value(self, a_section, a_key, a_default, a_value_type: ValueType):
         try:
             value = self.ValueTypeConvertFoo[a_value_type](self.settings[a_section][a_key])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as err:
             self.settings[a_section][a_key] = a_default
             utils.save_settings(self.CONFIG_PATH, self.settings)
             value = self.ValueTypeConvertFoo[a_value_type](a_default)
@@ -213,6 +232,8 @@ class Settings(QtCore.QObject):
         self.settings[self.GEOMETRY_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
         self.save()
 
+        self.__checkbox_states = a_list
+
     @property
     def fixed_step_idx(self):
         return self.__fixed_step_idx
@@ -272,3 +293,29 @@ class Settings(QtCore.QObject):
 
         self.__tstlan_update_time = a_time
         self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
+
+    @property
+    def tstlan_show_marks(self):
+        return self.__tstlan_show_marks
+
+    @tstlan_show_marks.setter
+    def tstlan_show_marks(self, a_enable: int):
+        self.settings[self.MEASURE_SECTION][self.TSTLAN_SHOW_MARKS_KEY] = str(a_enable)
+        self.save()
+
+        self.__tstlan_show_marks = a_enable
+        self.__tstlan_show_marks = utils.bound(self.__tstlan_show_marks, 0, 1)
+
+    @property
+    def tstlan_marks(self):
+        return self.__tstlan_makrs
+
+    @tstlan_marks.setter
+    def tstlan_marks(self, a_list: List[int]):
+        saved_string = ','.join(str(val) for val in a_list)
+        saved_string = saved_string.strip(',')
+
+        self.settings[self.MEASURE_SECTION][self.TSTLAN_MARKS_KEY] = saved_string
+        self.save()
+
+        self.__tstlan_makrs = a_list

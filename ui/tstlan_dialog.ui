@@ -24,19 +24,17 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QDoubleSpinBox" name="upadte_time_spinbox">
-       <property name="decimals">
-        <number>1</number>
+     <item row="1" column="4">
+      <widget class="QLineEdit" name="name_filter_edit">
+       <property name="placeholderText">
+        <string>Поиск...</string>
        </property>
-       <property name="minimum">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.500000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.500000000000000</double>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Время обновления, с</string>
        </property>
       </widget>
      </item>
@@ -53,22 +51,41 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Время обновления, с</string>
+     <item row="1" column="0">
+      <widget class="QDoubleSpinBox" name="upadte_time_spinbox">
+       <property name="decimals">
+        <number>1</number>
        </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Фильтр по имени</string>
+       <property name="minimum">
+        <double>0.100000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.500000000000000</double>
        </property>
       </widget>
      </item>
      <item row="1" column="2">
-      <widget class="QLineEdit" name="name_filter_edit"/>
+      <widget class="QCheckBox" name="show_marked_checkbox">
+       <property name="text">
+        <string>Оставить отмеченные</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -105,6 +122,11 @@
      <column>
       <property name="text">
        <string>Индекс</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string/>
       </property>
      </column>
      <column>
