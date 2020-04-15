@@ -239,10 +239,10 @@ class Timer:
         self.interval_s = a_interval_s
         self.start_time = 0
         self.stop_time = 0
-        self.started = False
+        self.__started = False
 
     def start(self, a_interval_s=None):
-        self.started = True
+        self.__started = True
         self.start_time = time.time()
         if a_interval_s is not None:
             self.interval_s = a_interval_s
@@ -251,9 +251,12 @@ class Timer:
     def stop(self):
         self.start_time = 0
         self.stop_time = 0
-        self.started = False
+        self.__started = False
 
     def check(self):
-        if not self.started:
+        if not self.__started:
             return False
         return time.time() > self.stop_time
+
+    def started(self):
+        return self.__started

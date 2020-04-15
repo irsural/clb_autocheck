@@ -90,7 +90,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
             self.tick_timer.start(10)
-
         else:
             self.close()
 
@@ -104,7 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         logging.getLogger().setLevel(logging.DEBUG)
 
     def set_up_source_mode_widget(self) -> SourceModeWidget:
-        source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self)
+        source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self.netvars, self)
         self.clb_list_changed.connect(source_mode_widget.update_clb_list)
         self.usb_status_changed.connect(source_mode_widget.update_clb_status)
         self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)

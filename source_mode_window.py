@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSignal, QTimer
 
 
 from ui.py.source_mode_form import Ui_Form as SourceModeForm
+from network_variables import NetworkVariables
 import calibrator_constants as clb
 from settings_ini_parser import Settings
 import qt_utils
@@ -15,7 +16,8 @@ import utils
 class SourceModeWidget(QtWidgets.QWidget):
     close_confirmed = pyqtSignal()
 
-    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv, a_parent=None):
+    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv, a_network_variables: NetworkVariables,
+                 a_parent=None):
         super().__init__(a_parent)
 
         self.ui = SourceModeForm()
@@ -33,6 +35,8 @@ class SourceModeWidget(QtWidgets.QWidget):
         self.clb_state = clb.State.DISCONNECTED
         self.signal_type = clb.SignalType.ACI
         self.mode = clb.Mode.SOURCE
+
+        self.netvars = a_network_variables
 
         self.units = clb.signal_type_to_units[self.signal_type]
         self.value_to_user = utils.value_to_user_with_units(self.units)
@@ -56,6 +60,10 @@ class SourceModeWidget(QtWidgets.QWidget):
         self.clb_check_timer = QTimer()
         self.clb_check_timer.timeout.connect(self.sync_clb_parameters)
         self.clb_check_timer.start(10)
+
+        self.update_netvars_timer = QTimer()
+        self.update_netvars_timer.timeout.connect(self.update_netvars)
+        self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
 
     def __del__(self):
         print("source mode deleted")
@@ -109,6 +117,9 @@ class SourceModeWidget(QtWidgets.QWidget):
         if self.calibrator.mode_changed():
             self.mode = self.calibrator.mode
             self.mode_to_radio[self.mode].setChecked(True)
+
+    def update_netvars(self):
+        self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
 
     def enable_signal(self, a_signal_enable):
         self.calibrator.signal_enable = a_signal_enable
