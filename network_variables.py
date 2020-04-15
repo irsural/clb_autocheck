@@ -1,25 +1,130 @@
-import re
-import struct
-import logging
+from enum import IntEnum
 from typing import List
-from clb_dll import ClbDrv
+import logging
+import struct
+import re
 
 import calibrator_constants as clb
+from clb_dll import ClbDrv
 import utils
 
 
 class VariableInfo:
-    def __init__(self, a_number=0):
+    def __init__(self, a_number=0, a_type="u32"):
         self.number = a_number
         self.index = 0
         self.name = ""
-        self.type = ""
         self.size = 0
         self.c_type = ""
         self.bit_index = 0
 
+        self.__type = a_type
+        self.type = self.__type
+
+    @property
+    def type(self):
+        return self.__type
+
+    @type.setter
+    def type(self, a_type: str):
+        self.__type = a_type
+        self.c_type = VariableInfo.__get_c_type(self.__type)
+        self.size = VariableInfo.__get_type_size(self.__type)
+
+    @staticmethod
+    def __get_type_size(a_type_name: str):
+        if a_type_name == "double":
+            return 8
+        elif a_type_name == "float":
+            return 4
+        elif "32" in a_type_name:
+            return 4
+        elif "16" in a_type_name:
+            return 2
+        elif "8" in a_type_name:
+            return 1
+        elif a_type_name == "bit":
+            return 1
+        elif a_type_name == "bool":
+            return 1
+        elif "64" in a_type_name:
+            return 8
+        elif "long" in a_type_name:
+            return 10
+        else:
+            assert False, f"Незарегистрированый тип '{a_type_name}'"
+
+    @staticmethod
+    def __get_c_type(a_type_name: str):
+        if a_type_name == "double":
+            return 'd'
+        elif a_type_name == "float":
+            return 'f'
+        elif a_type_name == "bit":
+            # Используется как флаг
+            return 'o'
+        elif a_type_name == "u32":
+            return 'I'
+        elif a_type_name == "i32":
+            return 'i'
+        elif a_type_name == "u8":
+            return 'B'
+        elif a_type_name == "i8":
+            return 'b'
+        elif a_type_name == "u16":
+            return 'H'
+        elif a_type_name == "i16":
+            return 'h'
+        elif a_type_name == "bool":
+            return 'B'
+        elif a_type_name == "u64":
+            return 'Q'
+        elif a_type_name == "i64":
+            return 'q'
+        else:
+            logging.debug(f"WARNING! Незарегистрированый тип '{a_type_name}'")
+            return ''
+
     def __str__(self):
-        return f"{self.number}, {self.index}, {self.bit_index}, {self.name}, {self.type}"
+        return f"{self.number}, {self.index}, {self.bit_index}, {self.name}, {self.__type}"
+
+
+class BufferedVariable:
+    class Mode(IntEnum):
+        R = 0
+        RW = 1
+
+    def __init__(self, a_variable_info: VariableInfo, a_mode: Mode, a_calibrator: ClbDrv, a_buffer_delay_s=1):
+        assert a_variable_info.name != "", "variable must have a name"
+        assert a_variable_info.c_type != "", "variable must have a c_type"
+        assert a_variable_info.type != "", "variable must have a type"
+        assert a_variable_info.size != 0, "variable must have a non-zero size"
+
+        self.__variable_info = a_variable_info
+        self.__is_bit = True if a_variable_info.c_type == 'o' else False
+        self.__mode = a_mode
+        self.__calibrator = a_calibrator
+
+        self.__buffer = 0
+        self.__delay_timer = utils.Timer(a_buffer_delay_s)
+
+    def get(self):
+        if self.__is_bit:
+            return self.__calibrator.read_bit(self.__variable_info.index, self.__variable_info.bit_index)
+        else:
+            _bytes = self.__calibrator.read_raw_bytes(self.__variable_info.index, self.__variable_info.size)
+            return struct.unpack(self.__variable_info.c_type, _bytes)[0]
+
+    def set(self, a_value):
+        if self.__is_bit:
+            value = int(utils.bound(a_value, 0, 1))
+            return self.__calibrator.write_bit(self.__variable_info.index, self.__variable_info.bit_index, value)
+        else:
+            if self.__variable_info.c_type != 'd' and self.__variable_info.c_type != 'f':
+                a_value = int(a_value)
+
+            _bytes = struct.pack(self.__variable_info.c_type, a_value)
+            self.__calibrator.write_raw_bytes(self.__variable_info.index, self.__variable_info.size, _bytes)
 
 
 class NetworkVariables:
@@ -48,8 +153,8 @@ class NetworkVariables:
                         variables_info[number].name = value
                     else:
                         variables_info[number].type = value
-                        variables_info[number].c_type = NetworkVariables.__get_c_type(value)
-                        variables_info[number].size = NetworkVariables.get_type_size(value)
+                        # variables_info[number].c_type = NetworkVariables.__get_c_type(value)
+                        # variables_info[number].size = NetworkVariables.get_type_size(value)
 
                         if number != 0:
                             current_var = variables_info[number]
@@ -107,57 +212,3 @@ class NetworkVariables:
     def peltier_3_temperature(self, a_value: float):
         _bytes = struct.pack('d', a_value)
         self.__calibrator.write_raw_bytes(938, 8, _bytes)
-
-    @staticmethod
-    def get_type_size(a_type_name: str):
-        if a_type_name == "double":
-            return 8
-        elif a_type_name == "float":
-            return 4
-        elif "32" in a_type_name:
-            return 4
-        elif "16" in a_type_name:
-            return 2
-        elif "8" in a_type_name:
-            return 1
-        elif a_type_name == "bit":
-            return 1
-        elif a_type_name == "bool":
-            return 1
-        elif "64" in a_type_name:
-            return 8
-        elif "long" in a_type_name:
-            return 10
-        else:
-            assert False, "Незарегистрированый тип"
-
-    @staticmethod
-    def __get_c_type(a_type_name: str):
-        if a_type_name == "double":
-            return 'd'
-        elif a_type_name == "float":
-            return 'f'
-        elif a_type_name == "bit":
-            # Используется как флаг
-            return 'o'
-        elif a_type_name == "u32":
-            return 'I'
-        elif a_type_name == "i32":
-            return 'i'
-        elif a_type_name == "u8":
-            return 'B'
-        elif a_type_name == "i8":
-            return 'b'
-        elif a_type_name == "u16":
-            return 'H'
-        elif a_type_name == "i16":
-            return 'h'
-        elif a_type_name == "bool":
-            return 'B'
-        elif a_type_name == "u64":
-            return 'Q'
-        elif a_type_name == "i64":
-            return 'q'
-        else:
-            logging.debug(f"WARNING! Незарегистрированый тип '{a_type_name}'")
-            return ''

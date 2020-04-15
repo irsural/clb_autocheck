@@ -101,7 +101,8 @@ class TstlanDialog(QtWidgets.QDialog):
                     row = int(self.ui.variables_table.item(visual_row, self.Column.NUMBER).text())
 
                     value = self.netvars.read_variable(row)
-                    self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(str(round(value, 7)))
+                    self.ui.variables_table.item(visual_row, self.Column.VALUE).setText(
+                        utils.float_to_string(round(value, 7)))
 
         except Exception as err:
             logging.debug(utils.exception_handler(err))
