@@ -14,7 +14,7 @@ from qt_utils import QTextEditLogger
 import calibrator_constants as clb
 import constants as cfg
 import tests_factory
-import clb_tests
+import clb_tests_base
 import clb_dll
 import utils
 
@@ -171,7 +171,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.hide()
         self.loader.stop()
 
-    def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests.ClbTest.Status):
+    def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests_base.ClbTest.Status):
         try:
             self.tests_widget.set_test_status(a_group_name, a_test_name, a_status)
         except AssertionError as err:

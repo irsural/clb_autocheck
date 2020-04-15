@@ -2,15 +2,15 @@ from typing import List, Tuple
 import logging
 from PyQt5 import QtCore
 
-import clb_tests
+import clb_tests_base
 import utils
 
 
 class TestsConductor(QtCore.QObject):
-    test_status_changed = QtCore.pyqtSignal(str, str, clb_tests.ClbTest.Status)
+    test_status_changed = QtCore.pyqtSignal(str, str, clb_tests_base.ClbTest.Status)
     tests_done = QtCore.pyqtSignal()
 
-    def __init__(self, a_tests: List[clb_tests.ClbTest], a_test_repeat_count: int = 1):
+    def __init__(self, a_tests: List[clb_tests_base.ClbTest], a_test_repeat_count: int = 1):
         super().__init__()
 
         self.test_repeat_count = a_test_repeat_count
@@ -71,7 +71,7 @@ class TestsConductor(QtCore.QObject):
                 self.prepare_timer.start()
                 self.timeout_timer.start(current_test.timeout())
                 self.test_status_changed.emit(current_test.group(), current_test.name(),
-                                              clb_tests.ClbTest.Status.IN_PROCESS)
+                                              clb_tests_base.ClbTest.Status.IN_PROCESS)
             else:
                 self.stop()
                 self.tests_done.emit()
@@ -83,7 +83,7 @@ class TestsConductor(QtCore.QObject):
             current_test = self.tests[self.current_test_idx]
 
             if not self.timeout_timer.check():
-                if current_test.status() == clb_tests.ClbTest.Status.NOT_CHECKED:
+                if current_test.status() == clb_tests_base.ClbTest.Status.NOT_CHECKED:
                     if self.prepare_timer.check():
                         if current_test.prepare():
                             logging.debug(f"Успешная подготовка")
@@ -91,14 +91,15 @@ class TestsConductor(QtCore.QObject):
                         else:
                             self.prepare_timer.start()
 
-                elif current_test.status() == clb_tests.ClbTest.Status.IN_PROCESS:
+                elif current_test.status() == clb_tests_base.ClbTest.Status.IN_PROCESS:
                     current_test.tick()
 
-                elif current_test.status() in (clb_tests.ClbTest.Status.SUCCESS, clb_tests.ClbTest.Status.FAIL):
+                elif current_test.status() in (clb_tests_base.ClbTest.Status.SUCCESS,
+                                               clb_tests_base.ClbTest.Status.FAIL):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
                     if current_test.has_error():
-                        logging.info(f"Описание ошибки: {current_test.get_last_error()}")
+                        logging.info(f"Ошибка: {current_test.get_last_error()}")
 
                     self.test_status_changed.emit(current_test.group(), current_test.name(), current_test.status())
                     current_test.stop()
@@ -107,9 +108,10 @@ class TestsConductor(QtCore.QObject):
             else:
                 logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
-                    logging.info(f"Описание ошибки: {current_test.get_last_error()}")
+                    logging.info(f"Ошибка: {current_test.get_last_error()}")
 
-                self.test_status_changed.emit(current_test.group(), current_test.name(), clb_tests.ClbTest.Status.FAIL)
+                self.test_status_changed.emit(current_test.group(), current_test.name(),
+                                              clb_tests_base.ClbTest.Status.FAIL)
                 current_test.stop()
                 self.current_test_idx += 1
                 self.next_test()
