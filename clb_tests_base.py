@@ -1,7 +1,8 @@
 import abc
 from enum import IntEnum
+from typing import List, Dict
 
-from network_variables import NetworkVariables
+from network_variables import NetworkVariables, BufferedVariable
 
 
 class ClbTest(abc.ABC):
@@ -13,13 +14,13 @@ class ClbTest(abc.ABC):
 
     @staticmethod
     def does_calibrator_has_error(a_netvars: NetworkVariables) -> bool:
-        return a_netvars.error_occurred
+        return a_netvars.error_occurred.get()
 
     @staticmethod
     def get_calibrator_last_error(a_netvars: NetworkVariables) -> str:
-        error_code = a_netvars.error_code
-        error_count = a_netvars.error_count
-        error_index = a_netvars.error_index
+        error_code = a_netvars.error_code.get()
+        error_count = a_netvars.error_count.get()
+        error_index = a_netvars.error_index.get()
         error_msg = f"({error_index + 1} из {error_count}). "
 
         if error_code == 257:
@@ -83,13 +84,14 @@ class ClbTest(abc.ABC):
 
         error_msg += f". Код {error_code}"
 
-        a_netvars.clear_error_occurred_status = 1
+        a_netvars.clear_error_occurred_status.set(1)
         return error_msg
 
     @abc.abstractmethod
     def __init__(self):
         self.__group = ""
         self.__name = ""
+        self.__variables_to_graph = {}
 
     def set_group(self, a_group: str):
         self.__group = a_group
@@ -102,6 +104,12 @@ class ClbTest(abc.ABC):
 
     def name(self) -> str:
         return self.__name
+
+    def set_variables_to_graph(self, a_names: Dict[str, BufferedVariable]):
+        self.__variables_to_graph = a_names
+
+    def get_variables_to_graph(self) -> Dict[str, BufferedVariable]:
+        return self.__variables_to_graph
 
     @abc.abstractmethod
     def prepare(self) -> bool:

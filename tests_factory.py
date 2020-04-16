@@ -1,6 +1,6 @@
 import clb_tests
 import calibrator_constants as clb
-from network_variables import NetworkVariables
+from network_variables import NetworkVariables, BufferedVariable
 from clb_dll import ClbDrv
 
 
@@ -61,6 +61,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
                                 a_calibrator=a_calibrator)
     test.set_group("U=")
     test.set_name("40 мВ")
+    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow})
     tests.append(test)
 
     test = clb_tests.SignalTest(a_amplitude=0.21, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
@@ -109,6 +110,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
                                 a_calibrator=a_calibrator)
     test.set_group("U~")
     test.set_name("11 В")
+    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow})
     tests.append(test)
 
     test = clb_tests.SignalTest(a_amplitude=100, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars,

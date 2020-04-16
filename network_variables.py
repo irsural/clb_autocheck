@@ -212,7 +212,7 @@ class BufferedVariable:
         self.__buffer = 0
         self.__delay_timer = utils.Timer(a_buffer_delay_s)
 
-    def __get(self):
+    def get(self):
         if self.__delay_timer.check() or not self.__delay_timer.started():
             if self.__is_bit:
                 return self.__calibrator.read_bit(self.__variable_info.index, self.__variable_info.bit_index)
@@ -222,7 +222,7 @@ class BufferedVariable:
         else:
             return self.__buffer
 
-    def __set(self, a_value):
+    def set(self, a_value):
         assert self.__mode == BufferedVariable.Mode.RW, "Режим переменной должен быть RW !!"
 
         if self.__is_bit:
@@ -237,9 +237,3 @@ class BufferedVariable:
 
         self.__buffer = a_value
         self.__delay_timer.start()
-
-    def __get__(self, instance, owner):
-        return self.__get()
-
-    def __set__(self, instance, value):
-        return self.__set(value)
