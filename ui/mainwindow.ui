@@ -48,6 +48,16 @@
           </column>
           <column>
            <property name="text">
+            <string>Кол-во</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Успешно</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
             <string>Статус</string>
            </property>
           </column>

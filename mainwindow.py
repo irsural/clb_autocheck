@@ -156,7 +156,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def start_autocheck(self):
         self.lock_interface(True)
-        self.test_conductor.set_enabled_tests(self.tests_widget.get_enabled_tests())
+        self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
         self.ui.autocheck_start_button.setText("Остановить")
         self.test_conductor.start()
 
@@ -202,5 +202,5 @@ class MainWindow(QtWidgets.QMainWindow):
             self.settings.save_geometry(self.ui.splitter_2.__class__.__name__ + "2", self.ui.splitter_2.saveState())
             self.settings.save_geometry(self.ui.tests_tree.__class__.__name__, self.ui.tests_tree.header().saveState())
             self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
-            self.tests_widget.save_checkboxes_state()
+            self.tests_widget.save()
             a_event.accept()

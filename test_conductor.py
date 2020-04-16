@@ -49,12 +49,12 @@ class TestsConductor(QtCore.QObject):
         if self.current_test_idx >= len(self.tests):
             return False
 
-        while not ((self.tests[self.current_test_idx].group(), self.tests[self.current_test_idx].name()) in
-                   self.enabled_tests):
+        while not (self.tests[self.current_test_idx].group() in self.enabled_tests and self.tests[self.current_test_idx].name() in self.enabled_tests):
             self.current_test_idx += 1
 
             if self.current_test_idx >= len(self.tests):
                 return False
+        print(self.tests[self.current_test_idx].group(), self.tests[self.current_test_idx].name())
         return True
 
     def next_test(self):

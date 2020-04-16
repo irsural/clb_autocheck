@@ -122,7 +122,9 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.tests_tree.headerItem().setText(0, _translate("MainWindow", "Тест"))
-        self.tests_tree.headerItem().setText(1, _translate("MainWindow", "Статус"))
+        self.tests_tree.headerItem().setText(1, _translate("MainWindow", "Кол-во"))
+        self.tests_tree.headerItem().setText(2, _translate("MainWindow", "Успешно"))
+        self.tests_tree.headerItem().setText(3, _translate("MainWindow", "Статус"))
         self.autocheck_start_button.setText(_translate("MainWindow", "Старт"))
         self.settings_menu.setTitle(_translate("MainWindow", "Настройки"))
         self.menu.setTitle(_translate("MainWindow", "Справка"))

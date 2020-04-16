@@ -60,6 +60,9 @@ class Settings(QtCore.QObject):
     TSTLAN_MARKS_KEY = "tstlan_marks"
     TSTLAN_MARKS_DEFAULT = "0"
 
+    TESTS_REPEAT_COUNT_KEY = "tests_repeat_count"
+    TESTS_REPEAT_COUNT_DEFAULT = "0"
+
     GEOMETRY_SECTION = "Geometry"
     HEADERS_SECTION = "Headers"
 
@@ -89,6 +92,8 @@ class Settings(QtCore.QObject):
         self.__tstlan_show_marks = 0
         self.__tstlan_makrs = []
 
+        self.__tests_repeat_count = []
+
         self.settings = configparser.ConfigParser()
         try:
             self.restore_settings()
@@ -106,7 +111,8 @@ class Settings(QtCore.QObject):
                 self.STEP_EXACT_KEY: self.STEP_EXACT_DEFAULT,
                 self.TSTLAN_UPDATE_TIME_KEY: self.TSTLAN_UPDATE_TIME_DEFAULT,
                 self.TSTLAN_SHOW_MARKS_KEY: self.TSTLAN_SHOW_MARKS_DEFAULT,
-                self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT
+                self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT,
+                self.TESTS_REPEAT_COUNT_KEY: self.TESTS_REPEAT_COUNT_DEFAULT,
             }
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
@@ -145,6 +151,9 @@ class Settings(QtCore.QObject):
 
         self.__tstlan_makrs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_MARKS_KEY,
                                                    self.TSTLAN_MARKS_DEFAULT, self.ValueType.LIST_INT)
+
+        self.__tests_repeat_count = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_REPEAT_COUNT_KEY,
+                                                         self.TESTS_REPEAT_COUNT_DEFAULT, self.ValueType.LIST_INT)
 
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
@@ -319,3 +328,17 @@ class Settings(QtCore.QObject):
         self.save()
 
         self.__tstlan_makrs = a_list
+
+    @property
+    def tests_repeat_count(self):
+        return self.__tests_repeat_count
+
+    @tests_repeat_count.setter
+    def tests_repeat_count(self, a_list: List[int]):
+        saved_string = ','.join(str(val) for val in a_list)
+        saved_string = saved_string.strip(',')
+
+        self.settings[self.MEASURE_SECTION][self.TESTS_REPEAT_COUNT_KEY] = saved_string
+        self.save()
+
+        self.__tests_repeat_count = a_list
