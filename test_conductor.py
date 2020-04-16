@@ -22,14 +22,14 @@ class TestsConductor(QtCore.QObject):
         self.__started = False
         self.current_test_idx = 0
 
-    def set_enabled_tests(self, a_enabled_tests: List[Tuple[str, str]]):
+    def set_enabled_tests(self, a_enabled_tests: List[int]):
         self.enabled_tests = a_enabled_tests
 
     def start(self):
         self.current_test_idx = 0
         if self.find_enabled_test():
             self.__started = True
-            self.next_test()
+            self.next_test(a_first_test=True)
         else:
             self.stop()
             self.tests_done.emit()
@@ -49,17 +49,22 @@ class TestsConductor(QtCore.QObject):
         if self.current_test_idx >= len(self.tests):
             return False
 
-        while not (self.tests[self.current_test_idx].group() in self.enabled_tests and self.tests[self.current_test_idx].name() in self.enabled_tests):
+        while not (self.enabled_tests[self.current_test_idx] > 0):
             self.current_test_idx += 1
 
             if self.current_test_idx >= len(self.tests):
                 return False
-        print(self.tests[self.current_test_idx].group(), self.tests[self.current_test_idx].name())
+
         return True
 
-    def next_test(self):
+    def next_test(self, a_first_test):
         try:
+            if not a_first_test:
+                if self.enabled_tests[self.current_test_idx] <= 0:
+                    self.current_test_idx += 1
+
             if self.find_enabled_test():
+                self.enabled_tests[self.current_test_idx] -= 1
                 current_test = self.tests[self.current_test_idx]
                 logging.debug(f"----------------------------------------------------")
                 logging.debug(f'ТЕСТ "{current_test.group()}: {current_test.name()}" старт')
@@ -71,7 +76,7 @@ class TestsConductor(QtCore.QObject):
                 self.stop()
                 self.tests_done.emit()
         except Exception as err:
-            print(utils.exception_handler(err))
+            logging.debug(utils.exception_handler(err))
 
     def tick(self):
         if self.__started:
@@ -99,8 +104,7 @@ class TestsConductor(QtCore.QObject):
 
                     self.test_status_changed.emit(current_test.group(), current_test.name(), current_test.status())
                     current_test.stop()
-                    self.current_test_idx += 1
-                    self.next_test()
+                    self.next_test(a_first_test=False)
             else:
                 logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
@@ -110,8 +114,7 @@ class TestsConductor(QtCore.QObject):
                 self.test_status_changed.emit(current_test.group(), current_test.name(),
                                               clb_tests_base.ClbTest.Status.FAIL)
                 current_test.stop()
-                self.current_test_idx += 1
-                self.next_test()
+                self.next_test(a_first_test=False)
 
     def started(self):
         return self.__started

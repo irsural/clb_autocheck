@@ -115,17 +115,20 @@ class TestsTreeWidget:
 
             it += 1
 
-    def get_tests_repeat_count(self) -> List[Tuple[str, str, int]]:
+    def get_tests_repeat_count(self) -> List[int]:
         enabled_tests = []
         it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
         while it.value():
             item = it.value()
             # Если у узла нет дочерних узлов, считаем его тестом, если есть, то считаем его группой
-            if item.childCount() == 0 and item.checkState(TestsTreeWidget.Column.TESTS_TREE) == QtCore.Qt.Checked:
-                test_group = item.parent().text(TestsTreeWidget.Column.TESTS_TREE)
-                test_name = item.text(TestsTreeWidget.Column.TESTS_TREE)
-                test_repeat_count = self.tree_widget.itemWidget(item, self.Column.REPEAT_COUNT).value()
-                enabled_tests.append((test_group, test_name, test_repeat_count))
+            if item.childCount() == 0:
+                # test_group = item.parent().text(TestsTreeWidget.Column.TESTS_TREE)
+                # test_name = item.text(TestsTreeWidget.Column.TESTS_TREE)
+                test_repeat_count = self.tree_widget.itemWidget(item, self.Column.REPEAT_COUNT).value() if \
+                    item.checkState(TestsTreeWidget.Column.TESTS_TREE) == QtCore.Qt.Checked else 0
+
+                # enabled_tests.append([test_group, test_name, test_repeat_count])
+                enabled_tests.append(test_repeat_count)
             it += 1
         return enabled_tests
 
