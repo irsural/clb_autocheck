@@ -101,6 +101,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         logging.getLogger().addHandler(log)
         logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger().setLevel(logging.WARN)
 
     def set_up_source_mode_widget(self) -> SourceModeWidget:
         source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self.netvars, self)

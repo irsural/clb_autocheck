@@ -10,10 +10,8 @@ class TestsConductor(QtCore.QObject):
     test_status_changed = QtCore.pyqtSignal(str, str, clb_tests_base.ClbTest.Status)
     tests_done = QtCore.pyqtSignal()
 
-    def __init__(self, a_tests: List[clb_tests_base.ClbTest], a_test_repeat_count: int = 1):
+    def __init__(self, a_tests: List[clb_tests_base.ClbTest]):
         super().__init__()
-
-        self.test_repeat_count = a_test_repeat_count
 
         self.tests = a_tests
 
@@ -53,9 +51,6 @@ class TestsConductor(QtCore.QObject):
 
         while not ((self.tests[self.current_test_idx].group(), self.tests[self.current_test_idx].name()) in
                    self.enabled_tests):
-            # logging.debug(f"----------------------------------------------------")
-            # logging.debug(f'ТЕСТ "{self.tests[self.current_test_idx].group()}: '
-            #               f'{self.tests[self.current_test_idx].name()}" отключен, пропускаем')
             self.current_test_idx += 1
 
             if self.current_test_idx >= len(self.tests):
@@ -99,16 +94,18 @@ class TestsConductor(QtCore.QObject):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
                     if current_test.has_error():
-                        logging.info(f"Ошибка: {current_test.get_last_error()}")
+                        logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
+                                        f'Ошибка: {current_test.get_last_error()}')
 
                     self.test_status_changed.emit(current_test.group(), current_test.name(), current_test.status())
                     current_test.stop()
                     self.current_test_idx += 1
                     self.next_test()
             else:
-                logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
+                logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
-                    logging.info(f"Ошибка: {current_test.get_last_error()}")
+                    logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
+                                    f'Ошибка: {current_test.get_last_error()}')
 
                 self.test_status_changed.emit(current_test.group(), current_test.name(),
                                               clb_tests_base.ClbTest.Status.FAIL)
