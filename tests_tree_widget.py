@@ -161,9 +161,11 @@ class TestsTreeWidget:
         return group_status
 
     # noinspection PyTypeChecker
-    def set_test_status(self, a_group_name: str, a_test_name: str, a_status: ClbTest.Status):
+    def set_test_status(self, a_group_name: str, a_test_name: str, a_status: ClbTest.Status, a_success_count: int):
         test_item = self.find_test_item(a_group_name, a_test_name)
         status_label = self.tree_widget.itemWidget(test_item, TestsTreeWidget.Column.STATUS)
+        success_count_label = self.tree_widget.itemWidget(test_item, TestsTreeWidget.Column.SUCCESS_COUNT)
+        success_count_label.setText(str(a_success_count))
         self.set_status_icon(status_label, a_status)
 
         group_item = test_item.parent()

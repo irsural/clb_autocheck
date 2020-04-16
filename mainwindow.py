@@ -148,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def autocheck_button_clicked(self):
         try:
             if self.test_conductor.started():
+                self.test_conductor.stop()
                 self.stop_autocheck()
             else:
                 self.start_autocheck()
@@ -164,7 +165,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loader.start()
 
     def stop_autocheck(self):
-        self.test_conductor.stop()
         self.lock_interface(False)
         self.ui.autocheck_start_button.setText("Старт")
         logging.info("Проверка завершена")
@@ -172,9 +172,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.hide()
         self.loader.stop()
 
-    def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests_base.ClbTest.Status):
+    def set_test_status(self, a_group_name, a_test_name: str, a_status: clb_tests_base.ClbTest.Status,
+                        a_success_count: int):
         try:
-            self.tests_widget.set_test_status(a_group_name, a_test_name, a_status)
+            self.tests_widget.set_test_status(a_group_name, a_test_name, a_status, a_success_count)
         except AssertionError as err:
             logging.debug(utils.exception_handler(err))
 
