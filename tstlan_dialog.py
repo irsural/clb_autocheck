@@ -122,9 +122,12 @@ class TstlanDialog(QtWidgets.QDialog):
             logging.debug(utils.exception_handler(err))
 
     def filter_variables(self):
-        filter_text = self.ui.name_filter_edit.text()
+        regexp = QtCore.QRegExp(self.ui.name_filter_edit.text())
+        regexp.setPatternSyntax(QtCore.QRegExp.Wildcard)
+        regexp.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
         for i in range(self.ui.variables_table.rowCount()):
-            match = filter_text.lower() in self.ui.variables_table.item(i, self.Column.NAME).text()
+            # match = regexp.exactMatch(self.ui.variables_table.item(i, self.Column.NAME).text())
+            match = False if regexp.indexIn(self.ui.variables_table.item(i, self.Column.NAME).text()) == -1 else True
             if self.ui.show_marked_checkbox.isChecked():
                 marked_cb = self.ui.variables_table.cellWidget(i, self.Column.MARK).layout().itemAt(0).widget()
                 match = match & marked_cb.isChecked()
