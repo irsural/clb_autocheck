@@ -192,7 +192,8 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             graph_data = self.test_conductor.get_test_graph(a_group, a_name)
             if graph_data:
-                graphs_dialog = TestGraphDialog(graph_data, self.settings)
+                graphs_dialog = TestGraphDialog(graph_data, self.settings, self)
+                self.test_conductor.graphs_have_been_updated.connect(graphs_dialog.update_graphs)
                 graphs_dialog.exec()
             else:
                 logging.warning("График для выбранного измерения не создан")

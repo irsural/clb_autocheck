@@ -21,7 +21,7 @@ class TestResults:
     def new_result(self):
         self.statuses.append(clb_tests_base.ClbTest.Status.NOT_CHECKED)
         if self.variables_to_graph:
-            self.__graph_data.append({name: [] for name in self.variables_to_graph.keys()})
+            self.__graph_data.append({name: ([], []) for name in self.variables_to_graph.keys()})
 
     def delete_results(self):
         self.statuses = []
@@ -46,7 +46,7 @@ class TestResults:
     def get_success_results_count(self) -> int:
         return self.statuses.count(clb_tests_base.ClbTest.Status.SUCCESS)
 
-    def get_graph_data(self) -> List[Dict[str, List[Tuple[float, float]]]]:
+    def get_graph_data(self) -> List[Dict[str, Tuple[List[float], List[float]]]]:
         return self.__graph_data
 
     def set_variables_to_graph(self, a_variables_to_graph: Dict[str, BufferedVariable]):
@@ -59,10 +59,12 @@ class TestResults:
             value = self.variables_to_graph[variable].get()
             current_graph = self.__graph_data[-1][variable]
 
-            if not current_graph:
+            if not current_graph[0]:
                 self.graph_normalize_time_value = timestamp
-
-            current_graph.append((value, round(timestamp - self.graph_normalize_time_value, 3)))
+            # Список X-ов
+            current_graph[0].append(round(timestamp - self.graph_normalize_time_value, 3))
+            # Список Y-ов
+            current_graph[1].append(value)
 
     def __str__(self):
         return f"{self.statuses}\n{self.__graph_data}"
@@ -70,6 +72,7 @@ class TestResults:
 
 class TestsConductor(QtCore.QObject):
     test_status_changed = QtCore.pyqtSignal(str, str, clb_tests_base.ClbTest.Status, int)
+    graphs_have_been_updated = QtCore.pyqtSignal()
     tests_done = QtCore.pyqtSignal()
 
     def __init__(self, a_tests: List[clb_tests_base.ClbTest]):
@@ -185,6 +188,7 @@ class TestsConductor(QtCore.QObject):
                     if self.read_graphs_time.check():
                         self.read_graphs_time.start()
                         current_results.read_variables_to_graph()
+                        self.graphs_have_been_updated.emit()
 
                 elif current_test.status() in (clb_tests_base.ClbTest.Status.SUCCESS,
                                                clb_tests_base.ClbTest.Status.FAIL):
@@ -210,7 +214,7 @@ class TestsConductor(QtCore.QObject):
     def started(self):
         return self.__started
 
-    def get_test_graph(self, a_group: str, a_name: str) -> List[Dict[str, List[Tuple[float, float]]]]:
+    def get_test_graph(self, a_group: str, a_name: str) -> List[Dict[str, Tuple[List[float], List[float]]]]:
         for idx, test in enumerate(self.tests):
             if test.group() == a_group and test.name() == a_name:
                 return self.test_results[idx].get_graph_data()

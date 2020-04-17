@@ -176,7 +176,7 @@ class TestsTreeWidget(QtCore.QObject):
 
     def send_request_for_graph(self, a_item: QtWidgets.QTreeWidgetItem, a_column: int):
         # Если итем - тест, а не группа
-        if a_column == self.Column.TESTS_TREE and a_item.childCount() == 0:
+        if a_column != self.Column.REPEAT_COUNT and a_item.childCount() == 0:
             test_group = a_item.parent().text(self.Column.TESTS_TREE)
             test_name = a_item.text(self.Column.TESTS_TREE)
             self.show_graph_requested.emit(test_group, test_name)
