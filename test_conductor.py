@@ -213,6 +213,5 @@ class TestsConductor(QtCore.QObject):
     def get_test_graph(self, a_group: str, a_name: str) -> List[Dict[str, List[Tuple[float, float]]]]:
         for idx, test in enumerate(self.tests):
             if test.group() == a_group and test.name() == a_name:
-                logging.debug(idx)
                 return self.test_results[idx].get_graph_data()
         assert False, f'Тест "{a_group}: {a_name}" не найден'

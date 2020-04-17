@@ -5,11 +5,12 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from settings_ini_parser import Settings, BadIniException
 from ui.py.mainwindow import Ui_MainWindow as MainForm
 from source_mode_window import SourceModeWidget
-from tstlan_dialog import TstlanDialog
-from settings_dialog import SettingsDialog
 from network_variables import NetworkVariables
 from tests_tree_widget import TestsTreeWidget
+from test_graph_dialog import TestGraphDialog
+from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
+from tstlan_dialog import TstlanDialog
 from qt_utils import QTextEditLogger
 import calibrator_constants as clb
 import constants as cfg
@@ -190,7 +191,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_test_graph(self, a_group: str, a_name: str):
         try:
             graph_data = self.test_conductor.get_test_graph(a_group, a_name)
-            logging.debug(graph_data)
+            if graph_data:
+                graphs_dialog = TestGraphDialog(graph_data, self.settings)
+                graphs_dialog.exec()
+            else:
+                logging.warning("График для выбранного измерения не создан")
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
