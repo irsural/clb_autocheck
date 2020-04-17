@@ -132,10 +132,6 @@ class CoolerTest(ClbTest):
         return ClbTest.get_calibrator_last_error(self.netvars)
 
 
-
-
-
-
 class EmptyTest(ClbTest):
     def __init__(self):
         super().__init__()

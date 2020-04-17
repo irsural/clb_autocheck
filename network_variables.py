@@ -15,15 +15,65 @@ class NetworkVariables:
         self.__calibrator = a_calibrator
         self.__variables_info = self.get_variables_from_ini(a_variables_ini_path)
 
-        self.fast_adc_slow = BufferedVariable(
-            VariableInfo(a_index=229, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+        self.core_t_calibration = BufferedVariable(
+            VariableInfo(a_index=36, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_voltage_k = BufferedVariable(
+            VariableInfo(a_index=71, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_voltage_ki = BufferedVariable(
+            VariableInfo(a_index=79, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_voltage_kd = BufferedVariable(
+            VariableInfo(a_index=87, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.iso_ac_voltage_k = BufferedVariable(
+            VariableInfo(a_index=95, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.iso_ac_voltage_t = BufferedVariable(
+            VariableInfo(a_index=103, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.acv_rate_slope = BufferedVariable(
+            VariableInfo(a_index=111, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_current_k = BufferedVariable(
+            VariableInfo(a_index=119, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_current_ki = BufferedVariable(
+            VariableInfo(a_index=127, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.pid_ac_current_kd = BufferedVariable(
+            VariableInfo(a_index=135, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.iso_ac_current_k = BufferedVariable(
+            VariableInfo(a_index=143, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.iso_ac_current_t = BufferedVariable(
+            VariableInfo(a_index=151, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.aci_rate_slope = BufferedVariable(
+            VariableInfo(a_index=159, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.aci_preset_voltage_rate_slope = BufferedVariable(
+            VariableInfo(a_index=167, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.dead_band = BufferedVariable(
+            VariableInfo(a_index=183, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.f_correct_off = BufferedVariable(VariableInfo(a_index=199, a_bit_index=0, a_type="bit"),
+                                              a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.ui_correct_off = BufferedVariable(VariableInfo(a_index=199, a_bit_index=1, a_type="bit"),
+                                               a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.use_eeprom_instead_of_sd_for_correct = BufferedVariable(VariableInfo(
+            a_index=199, a_bit_index=2, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.error_occurred = BufferedVariable(VariableInfo(a_index=199, a_bit_index=3, a_type="bit"),
                                                a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        self.clear_error_occurred_status = BufferedVariable(VariableInfo(a_index=199, a_bit_index=4, a_type="bit"),
-                                                            a_mode=BufferedVariable.Mode.RW,
-                                                            a_calibrator=self.__calibrator)
+        self.clear_error_occurred_status = BufferedVariable(VariableInfo(
+            a_index=199, a_bit_index=4, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.error_code = BufferedVariable(
             VariableInfo(a_index=200, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
@@ -34,6 +84,9 @@ class NetworkVariables:
         self.error_count = BufferedVariable(
             VariableInfo(a_index=208, a_type="u32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.fast_adc_slow = BufferedVariable(
+            VariableInfo(a_index=229, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.aux_stabilizer_adc_dc_600v_voltage = BufferedVariable(
             VariableInfo(a_index=428, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
@@ -43,11 +96,35 @@ class NetworkVariables:
         self.aux_stabilizer_adc_dc_4v_voltage = BufferedVariable(
             VariableInfo(a_index=468, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.analog_board_temperature_max = BufferedVariable(
+            VariableInfo(a_index=560, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_temperature_max = BufferedVariable(
+            VariableInfo(a_index=576, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.main_board_fun_temperature_setpoint = BufferedVariable(
             VariableInfo(a_index=584, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.main_board_temperature = BufferedVariable(
             VariableInfo(a_index=592, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_pid_k = BufferedVariable(
+            VariableInfo(a_index=600, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_pid_ki = BufferedVariable(
+            VariableInfo(a_index=608, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_pid_kd = BufferedVariable(
+            VariableInfo(a_index=616, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_iso_k = BufferedVariable(
+            VariableInfo(a_index=624, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_iso_t = BufferedVariable(
+            VariableInfo(a_index=632, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_rate_slope = BufferedVariable(
+            VariableInfo(a_index=640, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.main_board_fun_pid_out = BufferedVariable(
             VariableInfo(a_index=648, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
@@ -55,17 +132,152 @@ class NetworkVariables:
         self.main_board_fun_speed = BufferedVariable(
             VariableInfo(a_index=656, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.transistor_dc_10a_temperature_max = BufferedVariable(
+            VariableInfo(a_index=660, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.transistor_dc_10a_fun_temperature_setpoint = BufferedVariable(
             VariableInfo(a_index=668, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.transistor_dc_10a_temperature = BufferedVariable(
             VariableInfo(a_index=676, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.transistor_dc_10a_fun_pid_k = BufferedVariable(
+            VariableInfo(a_index=684, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_pid_ki = BufferedVariable(
+            VariableInfo(a_index=692, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_pid_kd = BufferedVariable(
+            VariableInfo(a_index=700, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_iso_k = BufferedVariable(
+            VariableInfo(a_index=708, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_iso_t = BufferedVariable(
+            VariableInfo(a_index=716, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_rate_slope = BufferedVariable(
+            VariableInfo(a_index=724, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.transistor_dc_10a_fun_pid_out = BufferedVariable(
             VariableInfo(a_index=732, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
         self.transistor_dc_10a_fun_speed = BufferedVariable(
             VariableInfo(a_index=740, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.peltier_1_temperature_max = BufferedVariable(
+            VariableInfo(a_index=744, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_temperature_setpoint = BufferedVariable(
+            VariableInfo(a_index=752, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_pid_k = BufferedVariable(
+            VariableInfo(a_index=768, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_pid_ki = BufferedVariable(
+            VariableInfo(a_index=776, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_pid_kd = BufferedVariable(
+            VariableInfo(a_index=784, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_iso_k = BufferedVariable(
+            VariableInfo(a_index=792, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_iso_t = BufferedVariable(
+            VariableInfo(a_index=800, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_rate_slope = BufferedVariable(
+            VariableInfo(a_index=808, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_temperature_max = BufferedVariable(
+            VariableInfo(a_index=833, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_temperature_setpoint = BufferedVariable(
+            VariableInfo(a_index=841, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_pid_k = BufferedVariable(
+            VariableInfo(a_index=857, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_pid_ki = BufferedVariable(
+            VariableInfo(a_index=865, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_pid_kd = BufferedVariable(
+            VariableInfo(a_index=873, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_iso_k = BufferedVariable(
+            VariableInfo(a_index=881, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_iso_t = BufferedVariable(
+            VariableInfo(a_index=889, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_rate_slope = BufferedVariable(
+            VariableInfo(a_index=897, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_temperature_max = BufferedVariable(
+            VariableInfo(a_index=922, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_temperature_setpoint = BufferedVariable(
+            VariableInfo(a_index=930, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_pid_k = BufferedVariable(
+            VariableInfo(a_index=946, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_pid_ki = BufferedVariable(
+            VariableInfo(a_index=954, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_pid_kd = BufferedVariable(
+            VariableInfo(a_index=962, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_iso_k = BufferedVariable(
+            VariableInfo(a_index=970, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_iso_t = BufferedVariable(
+            VariableInfo(a_index=978, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_rate_slope = BufferedVariable(
+            VariableInfo(a_index=986, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_temperature_max = BufferedVariable(VariableInfo(
+            a_index=1011, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.volume = BufferedVariable(VariableInfo(
+            a_index=1036, a_type="float"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.result_id = BufferedVariable(VariableInfo(
+            a_index=1040, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.f_calibr_coeff = BufferedVariable(VariableInfo(
+            a_index=1064, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.time_calibr_coeff = BufferedVariable(VariableInfo(
+            a_index=1088, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.id = BufferedVariable(VariableInfo(
+            a_index=1098, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_temperature_setpoint = BufferedVariable(VariableInfo(
+            a_index=1130, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_pid_k = BufferedVariable(VariableInfo(
+            a_index=1138, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_pid_ki = BufferedVariable(VariableInfo(
+            a_index=1146, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_pid_kd = BufferedVariable(VariableInfo(
+            a_index=1154, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_iso_k = BufferedVariable(VariableInfo(
+            a_index=1154, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_iso_t = BufferedVariable(VariableInfo(
+            a_index=1170, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_rate_slope = BufferedVariable(VariableInfo(
+            a_index=1178, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        # self.fun_max_level_for_low_dcv = BufferedVariable(VariableInfo(
+        #     a_index=1178, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
     @staticmethod
     def get_variables_from_ini(a_ini_path: str):
@@ -243,17 +455,20 @@ class BufferedVariable:
             return self.__buffer
 
     def set(self, a_value):
-        assert self.__mode == BufferedVariable.Mode.RW, "Режим переменной должен быть RW !!"
+        try:
+            assert self.__mode == BufferedVariable.Mode.RW, "Режим переменной должен быть RW !!"
 
-        if self.__is_bit:
-            a_value = int(utils.bound(a_value, 0, 1))
-            self.__calibrator.write_bit(self.__variable_info.index, self.__variable_info.bit_index, a_value)
-        else:
-            if self.__variable_info.c_type != 'd' and self.__variable_info.c_type != 'f':
-                a_value = int(a_value)
+            if self.__is_bit:
+                a_value = int(utils.bound(a_value, 0, 1))
+                self.__calibrator.write_bit(self.__variable_info.index, self.__variable_info.bit_index, a_value)
+            else:
+                if self.__variable_info.c_type != 'd' and self.__variable_info.c_type != 'f':
+                    a_value = int(a_value)
 
-            _bytes = struct.pack(self.__variable_info.c_type, a_value)
-            self.__calibrator.write_raw_bytes(self.__variable_info.index, self.__variable_info.size, _bytes)
+                _bytes = struct.pack(self.__variable_info.c_type, a_value)
+                self.__calibrator.write_raw_bytes(self.__variable_info.index, self.__variable_info.size, _bytes)
 
-        self.__buffer = a_value
-        self.__delay_timer.start()
+            self.__buffer = a_value
+            self.__delay_timer.start()
+        except AssertionError as err:
+            logging.debug(utils.exception_handler(err))
