@@ -24,12 +24,16 @@ class TestsTreeWidget(QtCore.QObject):
         self.settings = a_settings
 
         self.create_tree(a_tests)
-        self.tree_widget.expandAll()
 
         self.tree_widget.itemDoubleClicked.connect(self.send_request_for_graph)
 
         try:
             self.restore_checkboxes_state()
+        except IndexError:
+            pass
+
+        try:
+            self.restore_collapsed_state()
         except IndexError:
             pass
 
@@ -215,9 +219,29 @@ class TestsTreeWidget(QtCore.QObject):
 
         self.settings.tests_repeat_count = repeat_count
 
+    def restore_collapsed_state(self):
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        idx = 0
+        while it.value():
+            it.value().setExpanded(self.settings.tests_collapsed_states[idx])
+            idx += 1
+            it += 1
+
+    def save_collapsed_state(self):
+        collapsed_states = []
+
+        it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
+        while it.value():
+            item = it.value()
+            collapsed_states.append(int(item.isExpanded()))
+            it += 1
+
+        self.settings.tests_collapsed_states = collapsed_states
+
     def save(self):
         self.save_checkboxes_state()
         self.save_repeat_count()
+        self.save_collapsed_state()
 
 
 class SpinBoxIgnoreWheel(QtWidgets.QSpinBox):

@@ -1,8 +1,7 @@
-import logging
 from typing import List, Dict, Tuple
-from enum import IntEnum
+import logging
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5 import QtGui, QtWidgets
 import pyqtgraph
 
 from ui.py.test_graphs_dialog import Ui_Dialog as GraphForm

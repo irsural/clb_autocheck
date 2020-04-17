@@ -63,6 +63,9 @@ class Settings(QtCore.QObject):
     TESTS_REPEAT_COUNT_KEY = "tests_repeat_count"
     TESTS_REPEAT_COUNT_DEFAULT = "0"
 
+    TESTS_COLLAPSED_STATES_KEY = "tests_collapsed_states"
+    TESTS_COLLAPSED_STATES_DEFAULT = "0"
+
     GEOMETRY_SECTION = "Geometry"
     HEADERS_SECTION = "Headers"
 
@@ -93,6 +96,7 @@ class Settings(QtCore.QObject):
         self.__tstlan_makrs = []
 
         self.__tests_repeat_count = []
+        self.__tests_collapsed_states = []
 
         self.settings = configparser.ConfigParser()
         try:
@@ -113,6 +117,7 @@ class Settings(QtCore.QObject):
                 self.TSTLAN_SHOW_MARKS_KEY: self.TSTLAN_SHOW_MARKS_DEFAULT,
                 self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT,
                 self.TESTS_REPEAT_COUNT_KEY: self.TESTS_REPEAT_COUNT_DEFAULT,
+                self.TESTS_COLLAPSED_STATES_KEY: self.TESTS_COLLAPSED_STATES_DEFAULT
             }
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
@@ -154,6 +159,10 @@ class Settings(QtCore.QObject):
 
         self.__tests_repeat_count = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_REPEAT_COUNT_KEY,
                                                          self.TESTS_REPEAT_COUNT_DEFAULT, self.ValueType.LIST_INT)
+
+        self.__tests_collapsed_states = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_COLLAPSED_STATES_KEY,
+                                                             self.TESTS_COLLAPSED_STATES_DEFAULT,
+                                                             self.ValueType.LIST_INT)
 
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
@@ -342,3 +351,17 @@ class Settings(QtCore.QObject):
         self.save()
 
         self.__tests_repeat_count = a_list
+
+    @property
+    def tests_collapsed_states(self):
+        return self.__tests_collapsed_states
+
+    @tests_collapsed_states.setter
+    def tests_collapsed_states(self, a_list: List[int]):
+        saved_string = ','.join(str(val) for val in a_list)
+        saved_string = saved_string.strip(',')
+
+        self.settings[self.MEASURE_SECTION][self.TESTS_COLLAPSED_STATES_KEY] = saved_string
+        self.save()
+
+        self.__tests_collapsed_states = a_list
