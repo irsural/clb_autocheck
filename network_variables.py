@@ -11,49 +11,36 @@ import utils
 class NetworkVariables:
     VARIABLE_RE = re.compile(r"^(?P<parameter>Name|Type)_(?P<number>\d+)=(?P<value>.*)")
 
-    # Чтобы IDE подсказывала эти переменные и не выдавала варнинги
-    fast_adc_slow = None
-    error_occurred = None
-    clear_error_occurred_status = None
-    error_code = None
-    error_index = None
-    error_count = None
-    aux_stabilizer_adc_dc_600v_voltage = None
-    aux_stabilizer_adc_dc_40v_voltage = None
-    aux_stabilizer_adc_dc_4v_voltage = None
-
     def __init__(self, a_variables_ini_path: str, a_calibrator: ClbDrv):
         self.__calibrator = a_calibrator
         self.__variables_info = self.get_variables_from_ini(a_variables_ini_path)
 
-        # Обязательно объявлять через класс, а не через self, иначе не будут вызываться __get__ и __set__
-        NetworkVariables.fast_adc_slow = BufferedVariable(
+        self.fast_adc_slow = BufferedVariable(
             VariableInfo(a_index=229, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.error_occurred = BufferedVariable(VariableInfo(a_index=199, a_bit_index=3, a_type="bit"),
-                                                           a_mode=BufferedVariable.Mode.R,
-                                                           a_calibrator=self.__calibrator)
+        self.error_occurred = BufferedVariable(VariableInfo(a_index=199, a_bit_index=3, a_type="bit"),
+                                               a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.clear_error_occurred_status = BufferedVariable(VariableInfo(a_index=199, a_bit_index=4,
-                                                                        a_type="bit"), a_mode=BufferedVariable.Mode.RW,
-                                                                        a_calibrator=self.__calibrator)
+        self.clear_error_occurred_status = BufferedVariable(VariableInfo(a_index=199, a_bit_index=4, a_type="bit"),
+                                                            a_mode=BufferedVariable.Mode.RW,
+                                                            a_calibrator=self.__calibrator)
 
-        NetworkVariables.error_code = BufferedVariable(
+        self.error_code = BufferedVariable(
             VariableInfo(a_index=200, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.error_index = BufferedVariable(
+        self.error_index = BufferedVariable(
             VariableInfo(a_index=204, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
-        NetworkVariables.error_count = BufferedVariable(
+        self.error_count = BufferedVariable(
             VariableInfo(a_index=208, a_type="u32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.aux_stabilizer_adc_dc_600v_voltage = BufferedVariable(
+        self.aux_stabilizer_adc_dc_600v_voltage = BufferedVariable(
             VariableInfo(a_index=428, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.aux_stabilizer_adc_dc_40v_voltage = BufferedVariable(
+        self.aux_stabilizer_adc_dc_40v_voltage = BufferedVariable(
             VariableInfo(a_index=448, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
-        NetworkVariables.aux_stabilizer_adc_dc_4v_voltage = BufferedVariable(
+        self.aux_stabilizer_adc_dc_4v_voltage = BufferedVariable(
             VariableInfo(a_index=468, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
     @staticmethod
@@ -67,8 +54,7 @@ class NetworkVariables:
                     value = variable_re.group('value')
 
                     if number >= len(variables_info):
-                        assert (number - len(variables_info)) < 1, \
-                            f"Переменные в конфиге расположены не по порядку"
+                        assert (number - len(variables_info)) < 1, f"Переменные в конфиге расположены не по порядку"
                         variables_info.append(VariableInfo(a_number=number))
 
                     if variable_re.group('parameter') == "Name":

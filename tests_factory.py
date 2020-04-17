@@ -1,6 +1,6 @@
 import clb_tests
 import calibrator_constants as clb
-from network_variables import NetworkVariables, BufferedVariable
+from network_variables import NetworkVariables
 from clb_dll import ClbDrv
 
 

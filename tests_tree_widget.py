@@ -9,19 +9,24 @@ from settings_ini_parser import Settings
 import utils
 
 
-class TestsTreeWidget:
+class TestsTreeWidget(QtCore.QObject):
     class Column(IntEnum):
         TESTS_TREE = 0
         REPEAT_COUNT = 1
         SUCCESS_COUNT = 2
         STATUS = 3
 
+    show_graph_requested = QtCore.pyqtSignal(str, str)
+
     def __init__(self, a_tests: List[ClbTest], a_tree_widget: QtWidgets.QTreeWidget, a_settings: Settings):
+        super().__init__()
         self.tree_widget = a_tree_widget
         self.settings = a_settings
 
         self.create_tree(a_tests)
         self.tree_widget.expandAll()
+
+        self.tree_widget.itemDoubleClicked.connect(self.send_request_for_graph)
 
         try:
             self.restore_checkboxes_state()
@@ -122,12 +127,9 @@ class TestsTreeWidget:
             item = it.value()
             # Если у узла нет дочерних узлов, считаем его тестом, если есть, то считаем его группой
             if item.childCount() == 0:
-                # test_group = item.parent().text(TestsTreeWidget.Column.TESTS_TREE)
-                # test_name = item.text(TestsTreeWidget.Column.TESTS_TREE)
                 test_repeat_count = self.tree_widget.itemWidget(item, self.Column.REPEAT_COUNT).value() if \
                     item.checkState(TestsTreeWidget.Column.TESTS_TREE) == QtCore.Qt.Checked else 0
 
-                # enabled_tests.append([test_group, test_name, test_repeat_count])
                 enabled_tests.append(test_repeat_count)
             it += 1
         return enabled_tests
@@ -171,6 +173,13 @@ class TestsTreeWidget:
         group_item = test_item.parent()
         status_label = self.tree_widget.itemWidget(group_item, TestsTreeWidget.Column.STATUS)
         self.set_status_icon(status_label, self.get_group_status(group_item))
+
+    def send_request_for_graph(self, a_item: QtWidgets.QTreeWidgetItem, a_column: int):
+        # Если итем - тест, а не группа
+        if a_column == self.Column.TESTS_TREE and a_item.childCount() == 0:
+            test_group = a_item.parent().text(self.Column.TESTS_TREE)
+            test_name = a_item.text(self.Column.TESTS_TREE)
+            self.show_graph_requested.emit(test_group, test_name)
 
     def restore_checkboxes_state(self):
         enabled_list = self.settings.enabled_tests_list

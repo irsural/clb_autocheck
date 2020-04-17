@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import logging
 import time
 from PyQt5 import QtCore
@@ -12,7 +12,7 @@ class TestResults:
     def __init__(self):
         self.statuses = []
         self.variables_to_graph = {}
-        self.graph_data = []
+        self.__graph_data = []
         self.graph_normalize_time_value = 0
 
     def set_current_result_status(self, a_status: clb_tests_base.ClbTest.Status):
@@ -20,12 +20,12 @@ class TestResults:
 
     def new_result(self):
         self.statuses.append(clb_tests_base.ClbTest.Status.NOT_CHECKED)
-        self.graph_data.append({name: [] for name in self.variables_to_graph.keys()})
+        self.__graph_data.append({name: [] for name in self.variables_to_graph.keys()})
 
     def delete_results(self):
         self.statuses = []
         self.variables_to_graph = {}
-        self.graph_data = []
+        self.__graph_data = []
 
     def get_final_status(self) -> clb_tests_base.ClbTest.Status:
         assert self.statuses, "Ни одного результата не создано!!"
@@ -45,19 +45,26 @@ class TestResults:
     def get_success_results_count(self) -> int:
         return self.statuses.count(clb_tests_base.ClbTest.Status.SUCCESS)
 
+    def get_graph_data(self) -> List[Dict[str, List[Tuple[float, float]]]]:
+        return self.__graph_data
+
     def set_variables_to_graph(self, a_variables_to_graph: Dict[str, BufferedVariable]):
         self.variables_to_graph = a_variables_to_graph
 
     def read_variables_to_graph(self):
+        timestamp = time.time()
+
         for variable in self.variables_to_graph.keys():
             value = self.variables_to_graph[variable].get()
-            timestamp = time.time()
-            current_graph = self.graph_data[-1][variable]
+            current_graph = self.__graph_data[-1][variable]
 
             if not current_graph:
                 self.graph_normalize_time_value = timestamp
 
             current_graph.append((value, round(timestamp - self.graph_normalize_time_value, 3)))
+
+    def __str__(self):
+        return f"{self.statuses}\n{self.__graph_data}"
 
 
 class TestsConductor(QtCore.QObject):
@@ -68,7 +75,7 @@ class TestsConductor(QtCore.QObject):
         super().__init__()
 
         self.tests = a_tests
-        self.test_results = [TestResults()] * len(self.tests)
+        self.test_results = [TestResults() for i in range(len(self.tests))]
 
         self.enabled_tests = []
         self.prepare_timer = utils.Timer(1.5)
@@ -201,3 +208,10 @@ class TestsConductor(QtCore.QObject):
 
     def started(self):
         return self.__started
+
+    def get_test_graph(self, a_group: str, a_name: str) -> List[Dict[str, List[Tuple[float, float]]]]:
+        for idx, test in enumerate(self.tests):
+            if test.group() == a_group and test.name() == a_name:
+                logging.debug(idx)
+                return self.test_results[idx].get_graph_data()
+        assert False, f'Тест "{a_group}: {a_name}" не найден'

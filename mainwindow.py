@@ -79,6 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tests = tests_factory.create_tests(self.calibrator, self.netvars)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
+            self.tests_widget.show_graph_requested.connect(self.show_test_graph)
 
             self.test_conductor = TestsConductor(self.tests)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
@@ -183,6 +184,12 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             tstlan_dialog = TstlanDialog(self.netvars, self.settings)
             tstlan_dialog.exec()
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
+
+    def show_test_graph(self, a_group: str, a_name: str):
+        try:
+            graph_data = self.test_conductor.get_test_graph(a_group, a_name)
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
