@@ -4,7 +4,7 @@ import time
 from PyQt5 import QtCore
 
 from network_variables import BufferedVariable
-import clb_tests_base
+from clb_tests import tests_base
 import utils
 
 
@@ -15,11 +15,11 @@ class TestResults:
         self.__graph_data = []
         self.graph_normalize_time_value = 0
 
-    def set_current_result_status(self, a_status: clb_tests_base.ClbTest.Status):
+    def set_current_result_status(self, a_status: tests_base.ClbTest.Status):
         self.statuses[-1] = a_status
 
     def new_result(self):
-        self.statuses.append(clb_tests_base.ClbTest.Status.NOT_CHECKED)
+        self.statuses.append(tests_base.ClbTest.Status.NOT_CHECKED)
         if self.variables_to_graph:
             self.__graph_data.append({name: ([], []) for name in self.variables_to_graph.keys()})
 
@@ -28,23 +28,23 @@ class TestResults:
         self.variables_to_graph = {}
         self.__graph_data = []
 
-    def get_final_status(self) -> clb_tests_base.ClbTest.Status:
+    def get_final_status(self) -> tests_base.ClbTest.Status:
         assert self.statuses, "Ни одного результата не создано!!"
 
-        if self.statuses[0] == clb_tests_base.ClbTest.Status.NOT_CHECKED:
-            return clb_tests_base.ClbTest.Status.NOT_CHECKED
+        if self.statuses[0] == tests_base.ClbTest.Status.NOT_CHECKED:
+            return tests_base.ClbTest.Status.NOT_CHECKED
 
         for status in self.statuses:
-            assert status != (clb_tests_base.ClbTest.Status.IN_PROCESS, clb_tests_base.ClbTest.Status.NOT_CHECKED)
-            if status == clb_tests_base.ClbTest.Status.FAIL:
-                return clb_tests_base.ClbTest.Status.FAIL
-        return clb_tests_base.ClbTest.Status.SUCCESS
+            assert status != (tests_base.ClbTest.Status.IN_PROCESS, tests_base.ClbTest.Status.NOT_CHECKED)
+            if status == tests_base.ClbTest.Status.FAIL:
+                return tests_base.ClbTest.Status.FAIL
+        return tests_base.ClbTest.Status.SUCCESS
 
     def get_results_count(self) -> int:
         return len(self.statuses)
 
     def get_success_results_count(self) -> int:
-        return self.statuses.count(clb_tests_base.ClbTest.Status.SUCCESS)
+        return self.statuses.count(tests_base.ClbTest.Status.SUCCESS)
 
     def get_graph_data(self) -> List[Dict[str, Tuple[List[float], List[float]]]]:
         return self.__graph_data
@@ -71,11 +71,11 @@ class TestResults:
 
 
 class TestsConductor(QtCore.QObject):
-    test_status_changed = QtCore.pyqtSignal(str, str, clb_tests_base.ClbTest.Status, int)
+    test_status_changed = QtCore.pyqtSignal(str, str, tests_base.ClbTest.Status, int)
     graphs_have_been_updated = QtCore.pyqtSignal()
     tests_done = QtCore.pyqtSignal()
 
-    def __init__(self, a_tests: List[clb_tests_base.ClbTest]):
+    def __init__(self, a_tests: List[tests_base.ClbTest]):
         super().__init__()
 
         self.tests = a_tests
@@ -160,7 +160,7 @@ class TestsConductor(QtCore.QObject):
                 current_results.new_result()
 
                 self.test_status_changed.emit(current_test.group(), current_test.name(),
-                                              clb_tests_base.ClbTest.Status.IN_PROCESS,
+                                              tests_base.ClbTest.Status.IN_PROCESS,
                                               current_results.get_success_results_count())
             else:
                 self.stop()
@@ -174,7 +174,7 @@ class TestsConductor(QtCore.QObject):
             current_results = self.test_results[self.current_test_idx]
 
             if not self.timeout_timer.check():
-                if current_test.status() == clb_tests_base.ClbTest.Status.NOT_CHECKED:
+                if current_test.status() == tests_base.ClbTest.Status.NOT_CHECKED:
                     if self.prepare_timer.check():
                         if current_test.prepare():
                             logging.info(f"Успешная подготовка")
@@ -182,7 +182,7 @@ class TestsConductor(QtCore.QObject):
                         else:
                             self.prepare_timer.start()
 
-                elif current_test.status() == clb_tests_base.ClbTest.Status.IN_PROCESS:
+                elif current_test.status() == tests_base.ClbTest.Status.IN_PROCESS:
                     current_test.tick()
 
                     if self.read_graphs_time.check():
@@ -190,13 +190,13 @@ class TestsConductor(QtCore.QObject):
                         current_results.read_variables_to_graph()
                         self.graphs_have_been_updated.emit()
 
-                elif current_test.status() in (clb_tests_base.ClbTest.Status.SUCCESS,
-                                               clb_tests_base.ClbTest.Status.FAIL):
+                elif current_test.status() in (tests_base.ClbTest.Status.SUCCESS,
+                                               tests_base.ClbTest.Status.FAIL):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
                     if current_test.has_error():
                         logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                        f'Ошибка: {current_test.get_last_error()}')
+                                        f'\nОшибка: {current_test.get_last_error()}')
 
                     current_results.set_current_result_status(current_test.status())
                     current_test.stop()
@@ -205,9 +205,9 @@ class TestsConductor(QtCore.QObject):
                 logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
                     logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                    f'Ошибка: {current_test.get_last_error()}')
+                                    f'\nОшибка: {current_test.get_last_error()}')
 
-                current_results.set_current_result_status(clb_tests_base.ClbTest.Status.FAIL)
+                current_results.set_current_result_status(tests_base.ClbTest.Status.FAIL)
                 current_test.stop()
                 self.next_test(a_first_test=False)
 

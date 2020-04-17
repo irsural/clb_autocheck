@@ -268,7 +268,7 @@ class NetworkVariables:
             a_index=1154, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.peltier_4_iso_k = BufferedVariable(VariableInfo(
-            a_index=1154, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+            a_index=1162, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.peltier_4_iso_t = BufferedVariable(VariableInfo(
             a_index=1170, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)

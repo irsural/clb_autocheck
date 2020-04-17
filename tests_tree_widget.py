@@ -1,12 +1,10 @@
 from typing import List
 from enum import IntEnum
-import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from clb_tests_base import ClbTest
+from clb_tests.tests_base import ClbTest
 from settings_ini_parser import Settings
-import utils
 
 
 class TestsTreeWidget(QtCore.QObject):

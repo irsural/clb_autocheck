@@ -1,6 +1,6 @@
 import abc
 from enum import IntEnum
-from typing import List, Dict
+from typing import Dict
 
 from network_variables import NetworkVariables, BufferedVariable
 
@@ -142,3 +142,33 @@ class ClbTest(abc.ABC):
     @abc.abstractmethod
     def get_last_error(self) -> str:
         pass
+
+
+class EmptyTest(ClbTest):
+    def __init__(self):
+        super().__init__()
+        self.__status = ClbTest.Status.NOT_CHECKED
+
+    def prepare(self) -> bool:
+        return True
+
+    def start(self):
+        pass
+
+    def stop(self):
+        pass
+
+    def tick(self):
+        self.__status = ClbTest.Status.SUCCESS
+
+    def status(self):
+        return self.__status
+
+    def timeout(self) -> float:
+        return 0
+
+    def has_error(self) -> bool:
+        return True
+
+    def get_last_error(self) -> str:
+        return "Пустой тест"
