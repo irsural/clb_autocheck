@@ -190,6 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_test_graph(self, a_group: str, a_name: str):
         try:
             graph_data = self.test_conductor.get_test_graph(a_group, a_name)
+            logging.debug(graph_data)
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 

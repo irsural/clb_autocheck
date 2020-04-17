@@ -20,7 +20,8 @@ class TestResults:
 
     def new_result(self):
         self.statuses.append(clb_tests_base.ClbTest.Status.NOT_CHECKED)
-        self.__graph_data.append({name: [] for name in self.variables_to_graph.keys()})
+        if self.variables_to_graph:
+            self.__graph_data.append({name: [] for name in self.variables_to_graph.keys()})
 
     def delete_results(self):
         self.statuses = []
