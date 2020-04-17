@@ -62,13 +62,19 @@ class TestGraphDialog(QtWidgets.QDialog):
         self.redraw_graph()
 
     def redraw_graph(self):
-        plot_data = self.graph_data[self.current_test_number][self.current_graph_name]
-        self.graph_widget.clear()
-        self.current_graph = self.graph_widget.plot(plot_data[0], plot_data[1], pen=self.pen)
+        try:
+            plot_data = self.graph_data[self.current_test_number][self.current_graph_name]
+            self.graph_widget.clear()
+            self.current_graph = self.graph_widget.plot(plot_data[0], plot_data[1], pen=self.pen)
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
 
     def update_graphs(self):
-        plot_data = self.graph_data[self.current_test_number][self.current_graph_name]
-        self.current_graph.setData(plot_data[0], plot_data[1])
+        try:
+            plot_data = self.graph_data[self.current_test_number][self.current_graph_name]
+            self.current_graph.setData(plot_data[0], plot_data[1])
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
 
     def __del__(self):
         print("graphs deleted")

@@ -43,6 +43,30 @@ class NetworkVariables:
         self.aux_stabilizer_adc_dc_4v_voltage = BufferedVariable(
             VariableInfo(a_index=468, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.main_board_fun_temperature_setpoint = BufferedVariable(
+            VariableInfo(a_index=584, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.main_board_temperature = BufferedVariable(
+            VariableInfo(a_index=592, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_pid_out = BufferedVariable(
+            VariableInfo(a_index=648, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.main_board_fun_speed = BufferedVariable(
+            VariableInfo(a_index=656, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_temperature_setpoint = BufferedVariable(
+            VariableInfo(a_index=668, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_temperature = BufferedVariable(
+            VariableInfo(a_index=676, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_pid_out = BufferedVariable(
+            VariableInfo(a_index=732, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.transistor_dc_10a_fun_speed = BufferedVariable(
+            VariableInfo(a_index=740, a_type="i32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
     @staticmethod
     def get_variables_from_ini(a_ini_path: str):
         variables_info = []

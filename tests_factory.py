@@ -17,14 +17,19 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     test.set_name("Задний")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    test = clb_tests.EmptyTest()
+    test = clb_tests.CoolerTest(a_cooler_location=clb_tests.CoolerTest.CoolerLocation.MAIN_BOARD, a_netvars=a_netvars)
     test.set_group("Кулеры")
     test.set_name("Основная плата")
+    test.set_variables_to_graph({"Выход pid-регулятора": a_netvars.main_board_fun_pid_out,
+                                 "Скорость (об/мин)": a_netvars.main_board_fun_speed})
     tests.append(test)
 
-    test = clb_tests.EmptyTest()
+    test = clb_tests.CoolerTest(a_cooler_location=clb_tests.CoolerTest.CoolerLocation.TRANSISTOR_DC,
+                                a_netvars=a_netvars)
     test.set_group("Кулеры")
     test.set_name("Транзистор DC")
+    test.set_variables_to_graph({"Выход pid-регулятора": a_netvars.transistor_dc_10a_fun_pid_out,
+                                 "Скорость (об/мин)": a_netvars.transistor_dc_10a_fun_speed})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = clb_tests.EmptyTest()

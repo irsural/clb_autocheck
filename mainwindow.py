@@ -158,13 +158,16 @@ class MainWindow(QtWidgets.QMainWindow):
             logging.debug(utils.exception_handler(err))
 
     def start_autocheck(self):
-        self.lock_interface(True)
-        self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
-        self.ui.autocheck_start_button.setText("Остановить")
-        self.test_conductor.start()
+        if self.calibrator.state != clb.State.DISCONNECTED:
+            self.lock_interface(True)
+            self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
+            self.ui.autocheck_start_button.setText("Остановить")
+            self.test_conductor.start()
 
-        self.ui.loader_label.show()
-        self.loader.start()
+            self.ui.loader_label.show()
+            self.loader.start()
+        else:
+            logging.warning("Калибратор не подключен, невозможно провести проверку")
 
     def stop_autocheck(self):
         self.lock_interface(False)
