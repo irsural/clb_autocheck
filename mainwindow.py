@@ -154,7 +154,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.stop_autocheck()
             else:
                 self.start_autocheck()
-        except AssertionError as err:
+        except Exception as err:
             logging.debug(utils.exception_handler(err))
 
     def start_autocheck(self):

@@ -4,22 +4,28 @@ from clb_dll import ClbDrv
 
 from clb_tests.test_eeprom_variables import EepromVariablesTest
 from clb_tests.test_release_check import ReleaseCheckTest
-from clb_tests.tests_base import EmptyTest
 from clb_tests.test_coolers import CoolerTest
 from clb_tests.test_signals import SignalTest
+from clb_tests.test_cables import CablesTest
+from clb_tests.tests_base import EmptyTest
 
 
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     tests = []
     # -----------------------------------------------------------------------------------------------------
-    test = EmptyTest()
-    test.set_group("Шлейфы")
-    test.set_name("Передний")
+    test = CablesTest(a_netvars=a_netvars)
+    test.set_group("Тесты")
+    test.set_name("Шлейфы")
     tests.append(test)
 
-    test = EmptyTest()
-    test.set_group("Шлейфы")
-    test.set_name("Задний")
+    test = EepromVariablesTest(a_netvars=a_netvars)
+    test.set_group("Тесты")
+    test.set_name("Сетевые переменные")
+    tests.append(test)
+
+    test = ReleaseCheckTest(a_netvars=a_netvars)
+    test.set_group("Тесты")
+    test.set_name("Проверка перед отправкой")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = CoolerTest(a_cooler_location=CoolerTest.CoolerLocation.MAIN_BOARD, a_netvars=a_netvars)
@@ -55,21 +61,6 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     test = EmptyTest()
     test.set_group("Пельтье")
     test.set_name("№4")
-    tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
-    test = EmptyTest()
-    test.set_group("Другое")
-    test.set_name("SD карта")
-    tests.append(test)
-
-    test = EepromVariablesTest(a_netvars)
-    test.set_group("Другое")
-    test.set_name("Сетевые переменные")
-    tests.append(test)
-
-    test = ReleaseCheckTest(a_netvars)
-    test.set_group("Другое")
-    test.set_name("Проверка перед отправкой")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,

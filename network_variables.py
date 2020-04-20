@@ -177,6 +177,9 @@ class NetworkVariables:
         self.peltier_1_temperature_setpoint = BufferedVariable(
             VariableInfo(a_index=752, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.peltier_1_temperature = BufferedVariable(
+            VariableInfo(a_index=760, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.peltier_1_pid_k = BufferedVariable(
             VariableInfo(a_index=768, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
@@ -200,6 +203,9 @@ class NetworkVariables:
 
         self.peltier_2_temperature_setpoint = BufferedVariable(
             VariableInfo(a_index=841, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_temperature = BufferedVariable(
+            VariableInfo(a_index=849, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
         self.peltier_2_pid_k = BufferedVariable(
             VariableInfo(a_index=857, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
@@ -225,6 +231,9 @@ class NetworkVariables:
         self.peltier_3_temperature_setpoint = BufferedVariable(
             VariableInfo(a_index=930, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.peltier_3_temperature = BufferedVariable(
+            VariableInfo(a_index=938, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.peltier_3_pid_k = BufferedVariable(
             VariableInfo(a_index=946, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
@@ -245,6 +254,9 @@ class NetworkVariables:
 
         self.peltier_4_temperature_max = BufferedVariable(VariableInfo(
             a_index=1011, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_temperature = BufferedVariable(VariableInfo(
+            a_index=1019, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
         self.volume = BufferedVariable(VariableInfo(
             a_index=1036, a_type="float"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)

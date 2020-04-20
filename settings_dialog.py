@@ -1,4 +1,6 @@
-from PyQt5 import QtGui, QtWidgets
+import logging
+
+from PyQt5 import QtGui, QtWidgets, QtSql, QtCore
 from PyQt5.QtCore import pyqtSignal
 
 from custom_widgets.EditListDialog import EditedListWithUnits
@@ -36,12 +38,12 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.rough_step_spinbox.setValue(self.settings.rough_step)
         self.ui.common_step_spinbox.setValue(self.settings.common_step)
 
-        self.open_marks_table_widget()
+        self.open_first_tab()
 
     def __del__(self):
         print("settings deleted")
 
-    def open_marks_table_widget(self):
+    def open_first_tab(self):
         self.ui.settings_menu_list.setCurrentRow(0)
         self.ui.settings_stackedwidget.setCurrentIndex(0)
 

@@ -174,7 +174,9 @@ class TestsTreeWidget(QtCore.QObject):
 
         group_item = test_item.parent()
         status_label = self.tree_widget.itemWidget(group_item, TestsTreeWidget.Column.STATUS)
-        self.set_status_icon(status_label, self.get_group_status(group_item))
+        if status_label is not None:
+            # У греппы "Тесты" нет статуса
+            self.set_status_icon(status_label, self.get_group_status(group_item))
 
     def send_request_for_graph(self, a_item: QtWidgets.QTreeWidgetItem, a_column: int):
         # Если итем - тест, а не группа
