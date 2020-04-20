@@ -53,7 +53,7 @@
           </column>
           <column>
            <property name="text">
-            <string>Успешно</string>
+            <string>Успех</string>
            </property>
           </column>
           <column>

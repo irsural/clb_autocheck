@@ -66,6 +66,26 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     test.set_name("Сетевые переменные")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
+    test = EmptyTest()
+    test.set_group("Проверка перед отправкой")
+    test.set_name("Release прошивка")
+    tests.append(test)
+
+    test = EepromVariablesTest(a_netvars)
+    test.set_group("Проверка перед отправкой")
+    test.set_name("Коррекция зашита")
+    tests.append(test)
+
+    test = EepromVariablesTest(a_netvars)
+    test.set_group("Проверка перед отправкой")
+    test.set_name("Коррекция включена")
+    tests.append(test)
+
+    test = EepromVariablesTest(a_netvars)
+    test.set_group("Проверка перед отправкой")
+    test.set_name("Коррекция в EEPROM")
+    tests.append(test)
+    # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
                       a_calibrator=a_calibrator)
     test.set_group("U=")

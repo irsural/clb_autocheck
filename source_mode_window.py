@@ -120,6 +120,8 @@ class SourceModeWidget(QtWidgets.QWidget):
 
     def update_netvars(self):
         self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
+        firmware_type = "RELEASE" if self.netvars.release_firmware.get() else "DEBUG"
+        self.ui.firmware_info_label.setText(f"{self.netvars.software_revision.get()} {firmware_type}")
 
     def enable_signal(self, a_signal_enable):
         self.calibrator.signal_enable = a_signal_enable

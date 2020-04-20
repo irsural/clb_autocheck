@@ -18,6 +18,9 @@ class NetworkVariables:
         self.core_t_calibration = BufferedVariable(
             VariableInfo(a_index=36, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.release_firmware = BufferedVariable(VariableInfo(a_index=69, a_bit_index=5, a_type="bit"),
+                                                 a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.pid_ac_voltage_k = BufferedVariable(
             VariableInfo(a_index=71, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
@@ -66,11 +69,11 @@ class NetworkVariables:
         self.ui_correct_off = BufferedVariable(VariableInfo(a_index=199, a_bit_index=1, a_type="bit"),
                                                a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
-        self.use_eeprom_instead_of_sd_for_correct = BufferedVariable(VariableInfo(
-            a_index=199, a_bit_index=2, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
-
         self.error_occurred = BufferedVariable(VariableInfo(a_index=199, a_bit_index=3, a_type="bit"),
                                                a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.use_eeprom_instead_of_sd_for_correct = BufferedVariable(VariableInfo(
+            a_index=199, a_bit_index=6, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.clear_error_occurred_status = BufferedVariable(VariableInfo(
             a_index=199, a_bit_index=4, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
@@ -254,6 +257,9 @@ class NetworkVariables:
 
         self.id = BufferedVariable(VariableInfo(
             a_index=1098, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.software_revision = BufferedVariable(VariableInfo(
+            a_index=1108, a_type="u32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
         self.peltier_4_temperature_setpoint = BufferedVariable(VariableInfo(
             a_index=1130, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
