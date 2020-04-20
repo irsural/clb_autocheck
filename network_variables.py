@@ -276,8 +276,8 @@ class NetworkVariables:
         self.peltier_4_rate_slope = BufferedVariable(VariableInfo(
             a_index=1178, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
-        # self.fun_max_level_for_low_dcv = BufferedVariable(VariableInfo(
-        #     a_index=1178, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+        self.fun_max_level_for_low_dcv = BufferedVariable(VariableInfo(
+            a_index=1237, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
     @staticmethod
     def get_variables_from_ini(a_ini_path: str):

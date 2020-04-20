@@ -241,9 +241,9 @@ class EepromVariablesTest(ClbTest):
         if self.netvars.peltier_4_rate_slope.get() != 0.4:
             self.error_message += f"Переменная peltier_4_rate_slope = {self.netvars.peltier_4_rate_slope.get()} " \
                                   f"не соответствует значению по умолчанию '0.4'\n"
-        # if self.netvars.fun_max_level_reset_mark.get() != 0:
-        #     self.error_message += f"Переменная fun_max_level_reset_mark = {self.netvars.fun_max_level_reset_mark.get()} " \
-        #                           f"не соответствует значению по умолчанию '0'\n"
+        if self.netvars.fun_max_level_for_low_dcv.get() != 1:
+            self.error_message += f"Переменная fun_max_level_reset_mark = {self.netvars.fun_max_level_for_low_dcv.get()} " \
+                                  f"не соответствует значению по умолчанию '0'\n"
 
         if not self.error_message:
             self.__status = ClbTest.Status.SUCCESS
