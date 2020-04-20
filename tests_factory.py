@@ -2,10 +2,11 @@ from network_variables import NetworkVariables
 import calibrator_constants as clb
 from clb_dll import ClbDrv
 
+from clb_tests.test_eeprom_variables import EepromVariablesTest
+from clb_tests.test_release_check import ReleaseCheckTest
 from clb_tests.tests_base import EmptyTest
 from clb_tests.test_coolers import CoolerTest
 from clb_tests.test_signals import SignalTest
-from clb_tests.test_eeprom_variables import EepromVariablesTest
 
 
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
@@ -65,25 +66,10 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     test.set_group("Другое")
     test.set_name("Сетевые переменные")
     tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
-    test = EmptyTest()
-    test.set_group("Проверка перед отправкой")
-    test.set_name("Release прошивка")
-    tests.append(test)
 
-    test = EepromVariablesTest(a_netvars)
-    test.set_group("Проверка перед отправкой")
-    test.set_name("Коррекция зашита")
-    tests.append(test)
-
-    test = EepromVariablesTest(a_netvars)
-    test.set_group("Проверка перед отправкой")
-    test.set_name("Коррекция включена")
-    tests.append(test)
-
-    test = EepromVariablesTest(a_netvars)
-    test.set_group("Проверка перед отправкой")
-    test.set_name("Коррекция в EEPROM")
+    test = ReleaseCheckTest(a_netvars)
+    test.set_group("Другое")
+    test.set_name("Проверка перед отправкой")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,

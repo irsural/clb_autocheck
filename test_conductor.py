@@ -196,7 +196,7 @@ class TestsConductor(QtCore.QObject):
                                  f'результат {current_test.status().name}')
                     if current_test.has_error():
                         logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                        f'\nОшибка: {current_test.get_last_error()}')
+                                        f'\nОшибки:\n{current_test.get_last_error()}')
 
                     current_results.set_current_result_status(current_test.status())
                     current_test.stop()
@@ -205,7 +205,7 @@ class TestsConductor(QtCore.QObject):
                 logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
                     logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                    f'\nОшибка: {current_test.get_last_error()}')
+                                    f'\nОшибки:\n{current_test.get_last_error()}')
 
                 current_results.set_current_result_status(tests_base.ClbTest.Status.FAIL)
                 current_test.stop()
