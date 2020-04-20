@@ -29,8 +29,6 @@ class SourceModeWidget(QtWidgets.QWidget):
 
         self.settings = a_settings
 
-        self.setWindowTitle("Режим источника")
-
         self.calibrator = a_calibrator
         self.clb_state = clb.State.DISCONNECTED
         self.signal_type = clb.SignalType.ACI
@@ -64,6 +62,11 @@ class SourceModeWidget(QtWidgets.QWidget):
         self.update_netvars_timer = QTimer()
         self.update_netvars_timer.timeout.connect(self.update_netvars)
         self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
+
+        self.next_error_timer = QTimer()
+        self.next_error_timer.timeout.connect(self.show_next_error)
+
+        self.ui.errors_out_button.clicked.connect(self.start_errors_output)
 
     def __del__(self):
         print("source mode deleted")
@@ -120,8 +123,15 @@ class SourceModeWidget(QtWidgets.QWidget):
 
     def update_netvars(self):
         self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
+
         firmware_type = "RELEASE" if self.netvars.release_firmware.get() else "DEBUG"
         self.ui.firmware_info_label.setText(f"{self.netvars.software_revision.get()} {firmware_type}")
+
+        self.ui.errors_count_label.setText(str(self.netvars.error_count.get()))
+        if self.netvars.error_count.get() > 0:
+            self.ui.errors_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.ui.errors_label.setStyleSheet("QLabel { color : black; }")
 
     def enable_signal(self, a_signal_enable):
         self.calibrator.signal_enable = a_signal_enable
@@ -208,6 +218,13 @@ class SourceModeWidget(QtWidgets.QWidget):
         except ValueError:
             # Отлавливает некорректный ввод
             pass
+
+    def start_errors_output(self):
+        if self.netvars.error_count.get() > 0:
+            self.next_error_timer.start(1200)
+
+    def show_next_error(self):
+        logging.warning(f"Ошибка №{self.netvars.error_index.get()}")
 
     def aci_radio_checked(self):
         self.update_signal_type(clb.SignalType.ACI)

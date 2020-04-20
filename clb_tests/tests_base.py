@@ -3,6 +3,7 @@ from enum import IntEnum
 from typing import Dict
 
 from network_variables import NetworkVariables, BufferedVariable
+import calibrator_constants as clb
 
 
 class ClbTest(abc.ABC):
@@ -23,64 +24,10 @@ class ClbTest(abc.ABC):
         error_index = a_netvars.error_index.get()
         error_msg = f"({error_index + 1} из {error_count}). "
 
-        if error_code == 257:
-            error_msg += "Перегрев аналоговой платы"
-        elif error_code == 258:
-            error_msg += "Перегрев платы питания"
-        elif error_code == 259:
-            error_msg += "Перегрев транзистора постоянного тока 10 А"
-        elif error_code == 260:
-            error_msg += "Перегрев элемента Пельтье №1"
-        elif error_code == 261:
-            error_msg += "Перегрев элемента Пельтье №2"
-        elif error_code == 262:
-            error_msg += "Перегрев элемента Пельтье №3"
-        elif error_code == 263:
-            error_msg += "Перегрев элемента Пельтье №4"
-        elif error_code == 4104:
-            error_msg += "Нестабильное напряжение на стабилизаторе 12 В"
-        elif error_code == 4105:
-            error_msg += "Нестабильное напряжение на стабилизаторе 9 В"
-        elif error_code == 4106:
-            error_msg += "Нестабильное напряжение на стабилизаторе 5 В"
-        elif error_code == 4107:
-            error_msg += "Нестабильное напряжение на стабилизаторе +2,5 В"
-        elif error_code == 4108:
-            error_msg += "Нестабильное напряжение на стабилизаторе -2,5 В"
-        elif error_code == 4109:
-            error_msg += "Нестабильное напряжение на источнике питания вентиляторов"
-        elif error_code == 4110:
-            error_msg += "Стабилизатор 4 В не вышел на режим"
-        elif error_code == 4111:
-            error_msg += "Стабилизатор 45 В не вышел на режим"
-        elif error_code == 4112:
-            error_msg += "Стабилизатор 650 В не вышел на режим"
-        elif error_code == 4113:
-            error_msg += "Не удалось выйти на режим"
-        elif error_code == 4114:
-            error_msg += "Не удалось выйти на режим, слишком большое сопротивление"
-        elif error_code == 4115:
-            error_msg += "Превышение тока"
-        elif error_code == 4116:
-            error_msg += "Не удалось выделить память"
-        elif error_code == 4117:
-            error_msg += "Сторожевой таймер перезагрузил установку"
-        elif error_code == 4118:
-            error_msg += "Ошибка при чтении основных настроек"
-        elif error_code == 4119:
-            error_msg += "Слишком много ошибок"
-        elif error_code == 4120:
-            error_msg += "Сброс EEPROM Пельтье 4"
-        elif error_code == 4121:
-            error_msg += "Слишком низкое сопротивление нагрузки. Прибор не может выйти на режим"
-        elif error_code == 4122:
-            error_msg += "Обнаружено короткое замыкание"
-        elif error_code == 129:
-            error_msg += "SD карта не обнаружена. Калибровка прибора нарушена"
-        elif error_code == 140:
-            error_msg += "Не удалось смонтировать файловую систему. Калибровка прибора нарушена"
-        else:
-            error_msg += f"Незарегистрированная ошибка"
+        try:
+            error_msg += clb.error_code_to_message[error_code]
+        except KeyError:
+            error_msg += "Незарегистрированная ошибка"
 
         error_msg += f". Код {error_code}"
 
