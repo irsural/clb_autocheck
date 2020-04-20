@@ -65,6 +65,7 @@ class SourceModeWidget(QtWidgets.QWidget):
 
         self.next_error_timer = QTimer()
         self.next_error_timer.timeout.connect(self.show_next_error)
+        self.next_error_index = 0
 
         self.ui.errors_out_button.clicked.connect(self.start_errors_output)
 
@@ -221,10 +222,27 @@ class SourceModeWidget(QtWidgets.QWidget):
 
     def start_errors_output(self):
         if self.netvars.error_count.get() > 0:
+            self.next_error_index = 0
             self.next_error_timer.start(1200)
 
     def show_next_error(self):
-        logging.warning(f"Ошибка №{self.netvars.error_index.get()}")
+        error_index = self.netvars.error_index.get()
+        error_count = self.netvars.error_count.get()
+        if error_index >= error_count:
+            # На случай если во время вывода ошибок их состояние было изменено извне
+            self.next_error_timer.stop()
+        else:
+            if self.next_error_index == error_index:
+                error_code = self.netvars.error_code.get()
+                logging.warning(f"Ошибка №{error_index + 1}: Код {error_code}. {clb.error_code_to_message[error_code]}.")
+
+                next_error_index = error_index + 1
+                if next_error_index >= error_count:
+                    self.netvars.clear_error_occurred_status.set(1)
+                    self.next_error_timer.stop()
+                else:
+                    self.next_error_index = next_error_index
+                    self.netvars.error_index.set(next_error_index)
 
     def aci_radio_checked(self):
         self.update_signal_type(clb.SignalType.ACI)
