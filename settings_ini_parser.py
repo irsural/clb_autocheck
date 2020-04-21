@@ -127,7 +127,7 @@ class Settings(QtCore.QObject):
         self.__fixed_step_list = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_KEY,
                                                       self.FIXED_STEP_DEFAULT, self.ValueType.LIST_FLOAT)
 
-        self.__checkbox_states = self.check_ini_value(self.GEOMETRY_SECTION, self.CHECKBOX_STATES_KEY,
+        self.__checkbox_states = self.check_ini_value(self.MEASURE_SECTION, self.CHECKBOX_STATES_KEY,
                                                       self.CHECKBOX_STATES_DEFAULT, self.ValueType.LIST_INT)
 
         self.__fixed_step_idx = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_IDX_KEY,

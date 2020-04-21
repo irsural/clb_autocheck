@@ -50,7 +50,7 @@ class CoolerTest(ClbTest):
         self.setpoint_variable.set(self.prev_setpoint)
 
     def tick(self):
-        if self.speed_variable == 0:
+        if self.speed_variable.get() == 0:
             self.wait_cooler_timer.start()
         else:
             if self.wait_cooler_timer.check():
