@@ -368,10 +368,10 @@ class NetworkVariables:
 
 
 class VariableInfo:
-    def __init__(self, a_number=0, a_index=0, a_bit_index=0, a_type="u32"):
+    def __init__(self, a_number=0, a_index=0, a_bit_index=0, a_type="u32", a_name=""):
         self.number = a_number
         self.index = a_index
-        self.name = ""
+        self.name = a_name
         self.size = 0
         self.c_type = ""
         self.bit_index = a_bit_index

@@ -62,4 +62,3 @@ class ComboboxCellDelegate(QtWidgets.QItemDelegate):
 
     def setEditorData(self, editor: QWidget, index: QtCore.QModelIndex) -> None:
         editor.setCurrentText(index.data())
-

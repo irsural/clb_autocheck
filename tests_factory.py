@@ -1,3 +1,4 @@
+from network_variables_database import NetvarsDatabase
 from network_variables import NetworkVariables
 import calibrator_constants as clb
 from clb_dll import ClbDrv
@@ -10,7 +11,7 @@ from clb_tests.test_cables import CablesTest
 from clb_tests.tests_base import EmptyTest
 
 
-def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
+def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db: NetvarsDatabase):
     tests = []
     # -----------------------------------------------------------------------------------------------------
     test = CablesTest(a_netvars=a_netvars)
@@ -18,7 +19,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables):
     test.set_name("Шлейфы")
     tests.append(test)
 
-    test = EepromVariablesTest(a_netvars=a_netvars)
+    test = EepromVariablesTest(a_netvars_db=a_netvars_db, a_calibrator=a_calibrator)
     test.set_group("Тесты")
     test.set_name("Сетевые переменные")
     tests.append(test)

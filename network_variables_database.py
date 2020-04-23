@@ -1,11 +1,15 @@
-import logging
+from typing import Tuple, Generator
 from enum import IntEnum
+from math import floor
+import logging
 
 from PyQt5 import QtGui, QtCore, QtWidgets, QtSql
 
+from network_variables import VariableInfo
+
 
 class NetvarsDatabase(QtCore.QObject):
-    class Column:
+    class Column(IntEnum):
         ID = 0
         NAME = 1
         INDEX = 2
@@ -60,7 +64,8 @@ class NetvarsDatabase(QtCore.QObject):
             self.model_updated.emit()
 
     def add_netvar(self):
-        self.__query.exec("INSERT INTO netvars DEFAULT VALUES")
+        self.__query.exec("INSERT INTO netvars (name, _index, type, min, max, _default) "
+                          "VALUES (NULL, NULL, 'double', NULL, NULL, NULL)")
         self.__model.select()
         self.model_updated.emit()
 
@@ -68,6 +73,22 @@ class NetvarsDatabase(QtCore.QObject):
         self.__model.removeRow(a_row)
         self.__model.select()
         self.model_updated.emit()
+
+    def get_variables(self) -> Generator[Tuple[VariableInfo, float, float, float], None, None]:
+        for row in range(self.__model.rowCount()):
+            float_index = float(self.__model.index(row, NetvarsDatabase.Column.INDEX).data())
+            _type = self.__model.index(row, NetvarsDatabase.Column.TYPE).data()
+            name = self.__model.index(row, NetvarsDatabase.Column.NAME).data()
+            if _type == "bit":
+                index = floor(float_index)
+                bit_index = int(round((float_index - index) * 10, 2))
+            else:
+                index = int(float_index)
+                bit_index = 0
+            _min = self.__model.index(row, NetvarsDatabase.Column.MIN).data()
+            _max = self.__model.index(row, NetvarsDatabase.Column.MAX).data()
+            _default = self.__model.index(row, NetvarsDatabase.Column.DEFAULT).data()
+            yield VariableInfo(a_index=index, a_bit_index=bit_index, a_type=_type, a_name=name), _min, _max, _default
 
     def model(self):
         return self.__model

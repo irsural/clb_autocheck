@@ -35,6 +35,7 @@ class TstlanDialog(QtWidgets.QDialog):
 
         self.ui.variables_table.horizontalHeader().restoreState(self.settings.get_last_geometry(
             self.ui.variables_table.__class__.__name__))
+        self.ui.variables_table.resizeRowsToContents()
 
         self.ui.show_marked_checkbox.setChecked(self.settings.tstlan_show_marks)
 

@@ -247,7 +247,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.GEOMETRY_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
+        self.settings[self.MEASURE_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
         self.save()
 
         self.__checkbox_states = a_list

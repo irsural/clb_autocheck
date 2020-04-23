@@ -67,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_state = clb.State.DISCONNECTED
 
             self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH, self.calibrator)
+            self.netvars_db = NetvarsDatabase("./netvars.db", self)
 
             self.clb_signal_off_timer = QtCore.QTimer()
             # noinspection PyTypeChecker
@@ -78,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.source_mode_widget = self.set_up_source_mode_widget()
             self.show()
 
-            self.tests = tests_factory.create_tests(self.calibrator, self.netvars)
+            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
             self.tests_widget.show_graph_requested.connect(self.show_test_graph)
@@ -87,8 +88,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
             self.test_conductor.tests_done.connect(self.stop_autocheck)
             self.test_conductor.test_status_changed.connect(self.set_test_status)
-
-            self.netvars_db = NetvarsDatabase("./netvars.db", self)
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 

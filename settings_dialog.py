@@ -29,6 +29,8 @@ class SettingsDialog(QtWidgets.QDialog):
         self.netvars_db = a_netvars_db
         self.settings = a_settings
         self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
+        self.ui.netvars_table.horizontalHeader().restoreState(
+            self.settings.get_last_header_state(self.ui.netvars_table.__class__.__name__))
 
         self.ui.save_and_exit_button.clicked.connect(self.save_and_exit)
         self.ui.save_button.clicked.connect(self.save)
@@ -106,4 +108,6 @@ class SettingsDialog(QtWidgets.QDialog):
 
     def closeEvent(self, a_event: QtGui.QCloseEvent) -> None:
         self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
+        self.settings.save_header_state(self.ui.netvars_table.__class__.__name__,
+                                        self.ui.netvars_table.horizontalHeader().saveState())
         a_event.accept()
