@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5 import QtGui, QtWidgets, QtSql, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 
 from custom_widgets.EditListDialog import EditedListWithUnits

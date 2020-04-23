@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>689</width>
+    <width>592</width>
     <height>511</height>
    </rect>
   </property>
@@ -158,7 +158,7 @@ QListWidget::item {
         <item>
          <widget class="QStackedWidget" name="settings_stackedwidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="network_variables_page">
            <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -215,7 +215,26 @@ QListWidget::item {
           <widget class="QWidget" name="step_parameters_page">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QGroupBox" name="fixed_range_groupbox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="title">
                <string>Фиксированный шаг</string>
               </property>
@@ -300,26 +319,6 @@ QListWidget::item {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="disable_scroll_on_table_checkbox">
-                   <property name="text">
-                    <string>Отключить прокрутку шага,
-если курсор мыши находится
-на таблице измерения</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="mouse_inversion_checkbox">
-                   <property name="text">
-                    <string>Инвертировать
-колесо мыши</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <spacer name="verticalSpacer">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
@@ -334,42 +333,6 @@ QListWidget::item {
                  </item>
                 </layout>
                </widget>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
-                <property name="leftMargin">
-                 <number>9</number>
-                </property>
-                <property name="topMargin">
-                 <number>6</number>
-                </property>
-                <property name="rightMargin">
-                 <number>9</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>6</number>
-                </property>
-                <item>
-                 <widget class="QLabel" name="label_4">
-                  <property name="whatsThis">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Во время измерения, при нажатии кнопки &amp;quot;Перейти к точке&amp;quot;, на калибраторе будет установлено значение: &lt;/p&gt;&lt;p&gt;&amp;quot;выбранная точка +(-) начальное отклонение&amp;quot;. &lt;/p&gt;&lt;p&gt;Начальное отклонение задается в процентах от максимума шкалы поверяемого прибора.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Начальное отклонение, %</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="start_deviation_spinbox">
-                  <property name="maximum">
-                   <number>100</number>
-                  </property>
-                  <property name="value">
-                   <number>5</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
              </layout>
             </item>
