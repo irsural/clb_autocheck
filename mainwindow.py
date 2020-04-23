@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 from settings_ini_parser import Settings, BadIniException
 from ui.py.mainwindow import Ui_MainWindow as MainForm
+from network_variables_database import NetvarsDatabase
 from source_mode_window import SourceModeWidget
 from network_variables import NetworkVariables
 from tests_tree_widget import TestsTreeWidget
@@ -86,6 +87,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
             self.test_conductor.tests_done.connect(self.stop_autocheck)
             self.test_conductor.test_status_changed.connect(self.set_test_status)
+
+            self.netvars_db = NetvarsDatabase("./netvars.db", self)
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
@@ -205,7 +208,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_settings(self):
         try:
-            settings_dialog = SettingsDialog(self.settings, self)
+            settings_dialog = SettingsDialog(self.settings, self.netvars_db, self)
             settings_dialog.exec()
         except Exception as err:
             logging.debug(utils.exception_handler(err))

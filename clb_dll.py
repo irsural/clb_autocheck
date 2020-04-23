@@ -9,8 +9,9 @@ import utils
 
 if cur_system() == "Windows":
     dll_name = "clb_driver_dll.dll"
-    debug_dll_path = "C:\\Users\\503.IRS\\Desktop\\Qt Projects\\clb_driver_dll\\" \
-                     "build-clb_driver_dll-Desktop_Qt_5_14_1_MSVC2017_32bit-Release\\release\\clb_driver_dll.dll"
+    debug_dll_path = ""
+    # debug_dll_path = "C:\\Users\\503.IRS\\Desktop\\Qt Projects\\clb_driver_dll\\" \
+    #                  "build-clb_driver_dll-Desktop_Qt_5_14_1_MSVC2017_32bit-Release\\release\\clb_driver_dll.dll"
 elif cur_system() == "Linux":
     dll_name = "libclb_driver_dll.so"
     debug_dll_path = "/home/astra/Загрузки/clb_driver_dll/build-clb_driver_dll-Desktop-Release/libclb_driver_dll.so"
