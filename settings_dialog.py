@@ -39,8 +39,6 @@ class SettingsDialog(QtWidgets.QDialog):
                                                            a_optional_widget=QtWidgets.QLabel("Шаг", self))
         self.ui.fixed_range_groupbox.layout().addWidget(self.edit_fixed_range_widget)
 
-        self.ui.add_row_button.clicked.connect(self.add_netvar_button_clicked)
-
         self.ui.exact_step_spinbox.setValue(self.settings.exact_step)
         self.ui.rough_step_spinbox.setValue(self.settings.rough_step)
         self.ui.common_step_spinbox.setValue(self.settings.common_step)
@@ -57,6 +55,9 @@ class SettingsDialog(QtWidgets.QDialog):
 
         self.netvars_db.model_updated.connect(self.show_table_comboboxes)
         self.show_table_comboboxes()
+
+        self.ui.add_row_button.clicked.connect(self.add_netvar_button_clicked)
+        self.ui.delete_row_button.clicked.connect(self.delete_netvar_button_clicked)
 
         self.open_first_tab()
 
@@ -76,6 +77,12 @@ class SettingsDialog(QtWidgets.QDialog):
             self.netvars_db.add_netvar()
         except AssertionError as err:
             logging.debug(utils.exception_handler(err))
+
+    def delete_netvar_button_clicked(self):
+        indexes = self.ui.netvars_table.selectedIndexes()
+        if indexes and len(indexes) == 1:
+            row = indexes[0].row()
+            self.netvars_db.delete_netvar(row)
 
     def save(self):
         fixed_step_list = self.edit_fixed_range_widget.sort_list()

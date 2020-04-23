@@ -64,6 +64,11 @@ class NetvarsDatabase(QtCore.QObject):
         self.__model.select()
         self.model_updated.emit()
 
+    def delete_netvar(self, a_row):
+        self.__model.removeRow(a_row)
+        self.__model.select()
+        self.model_updated.emit()
+
     def model(self):
         return self.__model
 
