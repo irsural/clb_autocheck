@@ -4,6 +4,7 @@ import calibrator_constants as clb
 from clb_dll import ClbDrv
 
 from clb_tests.test_eeprom_variables import EepromVariablesTest
+from clb_tests.test_supply_voltage import SupplyVoltageTest
 from clb_tests.test_release_check import ReleaseCheckTest
 from clb_tests.test_coolers import CoolerTest
 from clb_tests.test_signals import SignalTest
@@ -17,6 +18,17 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test = CablesTest(a_netvars=a_netvars)
     test.set_group("Тесты")
     test.set_name("Шлейфы")
+    tests.append(test)
+
+    test = SupplyVoltageTest(a_netvars=a_netvars, a_success_timeout_s=30, a_timeout_s=60)
+    test.set_group("Тесты")
+    test.set_name("Напряжения питания")
+    test.set_variables_to_graph({"Внутр. стабилизатор 12 В": a_netvars.inner_stabilizer_12v_voltage,
+                                 "Внутр. стабилизатор 9 В": a_netvars.inner_stabilizer_9v_voltage,
+                                 "Внутр. стабилизатор 5 В": a_netvars.inner_stabilizer_5v_voltage,
+                                 "Внутр. стабилизатор +2.5 В": a_netvars.inner_stabilizer_2_5v_pos_voltage,
+                                 "Внутр. стабилизатор -2.5 В": a_netvars.inner_stabilizer_2_5v_neg_voltage,
+                                 "Питание кулеров": a_netvars.cooling_power_supply_voltage})
     tests.append(test)
 
     test = EepromVariablesTest(a_netvars_db=a_netvars_db, a_calibrator=a_calibrator)

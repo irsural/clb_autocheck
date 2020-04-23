@@ -102,6 +102,24 @@ class NetworkVariables:
         self.aux_stabilizer_adc_dc_4v_voltage = BufferedVariable(
             VariableInfo(a_index=468, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.inner_stabilizer_12v_voltage = BufferedVariable(
+            VariableInfo(a_index=512, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.inner_stabilizer_9v_voltage = BufferedVariable(
+            VariableInfo(a_index=520, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.inner_stabilizer_5v_voltage = BufferedVariable(
+            VariableInfo(a_index=528, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.inner_stabilizer_2_5v_pos_voltage = BufferedVariable(
+            VariableInfo(a_index=536, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.inner_stabilizer_2_5v_neg_voltage = BufferedVariable(
+            VariableInfo(a_index=544, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.cooling_power_supply_voltage = BufferedVariable(
+            VariableInfo(a_index=552, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.analog_board_temperature_max = BufferedVariable(
             VariableInfo(a_index=560, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
