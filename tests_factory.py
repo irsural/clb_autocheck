@@ -6,6 +6,7 @@ from clb_dll import ClbDrv
 from clb_tests.test_eeprom_variables import EepromVariablesTest
 from clb_tests.test_supply_voltage import SupplyVoltageTest
 from clb_tests.test_release_check import ReleaseCheckTest
+from clb_tests.test_peltier import PeltierTest
 from clb_tests.test_coolers import CoolerTest
 from clb_tests.test_signals import SignalTest
 from clb_tests.test_cables import CablesTest
@@ -56,24 +57,40 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Скорость (об/мин)": a_netvars.transistor_dc_10a_fun_speed})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    test = EmptyTest()
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FIRST, a_netvars=a_netvars,
+                       a_wait_peltier_timeout_s=30, a_timeout_s=120)
     test.set_group("Пельтье")
     test.set_name("№1")
+    test.set_variables_to_graph({"Уставка": a_netvars.peltier_1_temperature_setpoint,
+                                 "Температура": a_netvars.peltier_1_temperature,
+                                 "Выход pid-регулятора": a_netvars.peltier_1_pid_out})
     tests.append(test)
 
-    test = EmptyTest()
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.SECOND, a_netvars=a_netvars ,
+                       a_wait_peltier_timeout_s=30, a_timeout_s=120)
     test.set_group("Пельтье")
     test.set_name("№2")
+    test.set_variables_to_graph({"Уставка": a_netvars.peltier_2_temperature_setpoint,
+                                 "Температура": a_netvars.peltier_2_temperature,
+                                 "Выход pid-регулятора": a_netvars.peltier_2_pid_out})
     tests.append(test)
 
-    test = EmptyTest()
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.THIRD, a_netvars=a_netvars,
+                       a_wait_peltier_timeout_s=30, a_timeout_s=120)
     test.set_group("Пельтье")
     test.set_name("№3")
+    test.set_variables_to_graph({"Уставка": a_netvars.peltier_3_temperature_setpoint,
+                                 "Температура": a_netvars.peltier_3_temperature,
+                                 "Выход pid-регулятора": a_netvars.peltier_3_pid_out})
     tests.append(test)
 
-    test = EmptyTest()
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FOURTH, a_netvars=a_netvars,
+                       a_wait_peltier_timeout_s=100, a_timeout_s=240)
     test.set_group("Пельтье")
     test.set_name("№4")
+    test.set_variables_to_graph({"Уставка": a_netvars.peltier_4_temperature_setpoint,
+                                 "Температура": a_netvars.peltier_4_temperature,
+                                 "Выход pid-регулятора": a_netvars.peltier_4_pid_out})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,

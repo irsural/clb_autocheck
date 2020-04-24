@@ -216,6 +216,15 @@ class NetworkVariables:
         self.peltier_1_rate_slope = BufferedVariable(
             VariableInfo(a_index=808, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.peltier_1_polarity_pin = BufferedVariable(VariableInfo(a_index=832, a_bit_index=2, a_type="bit"),
+                                                       a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_ready = BufferedVariable(VariableInfo(a_index=832, a_bit_index=3, a_type="bit"),
+                                                a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_1_pid_out = BufferedVariable(
+            VariableInfo(a_index=816, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.peltier_2_temperature_max = BufferedVariable(
             VariableInfo(a_index=833, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
@@ -243,6 +252,15 @@ class NetworkVariables:
         self.peltier_2_rate_slope = BufferedVariable(
             VariableInfo(a_index=897, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.peltier_2_polarity_pin = BufferedVariable(VariableInfo(a_index=921, a_bit_index=2, a_type="bit"),
+                                                       a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_ready = BufferedVariable(VariableInfo(a_index=921, a_bit_index=3, a_type="bit"),
+                                                a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_2_pid_out = BufferedVariable(
+            VariableInfo(a_index=905, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.peltier_3_temperature_max = BufferedVariable(
             VariableInfo(a_index=922, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
@@ -269,6 +287,15 @@ class NetworkVariables:
 
         self.peltier_3_rate_slope = BufferedVariable(
             VariableInfo(a_index=986, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_pid_out = BufferedVariable(
+            VariableInfo(a_index=994, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.peltier_3_polarity_pin = BufferedVariable(VariableInfo(a_index=1010, a_bit_index=2, a_type="bit"),
+                                                       a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_3_ready = BufferedVariable(VariableInfo(a_index=1010, a_bit_index=3, a_type="bit"),
+                                                a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.peltier_4_temperature_max = BufferedVariable(VariableInfo(
             a_index=1011, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
@@ -314,6 +341,15 @@ class NetworkVariables:
 
         self.peltier_4_rate_slope = BufferedVariable(VariableInfo(
             a_index=1178, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_pid_out = BufferedVariable(
+            VariableInfo(a_index=1186, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.peltier_4_polarity_pin = BufferedVariable(VariableInfo(a_index=1202, a_bit_index=2, a_type="bit"),
+                                                       a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.peltier_4_ready = BufferedVariable(VariableInfo(a_index=1202, a_bit_index=3, a_type="bit"),
+                                                a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.fun_max_level_for_low_dcv = BufferedVariable(VariableInfo(
             a_index=1237, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
