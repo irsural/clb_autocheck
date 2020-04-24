@@ -57,16 +57,17 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Скорость (об/мин)": a_netvars.transistor_dc_10a_fun_speed})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FIRST, a_netvars=a_netvars,
-                       a_wait_peltier_timeout_s=30, a_timeout_s=120)
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FIRST, a_netvars=a_netvars, a_ready_hold_timer=30,
+                       a_wait_peltier_timeout_s=80, a_timeout_s=200)
     test.set_group("Пельтье")
     test.set_name("№1")
     test.set_variables_to_graph({"Уставка": a_netvars.peltier_1_temperature_setpoint,
                                  "Температура": a_netvars.peltier_1_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_1_pid_out})
+                                 "Выход pid-регулятора": a_netvars.peltier_1_pid_out,
+                                 "amplitude_code_float": a_netvars.peltier_1_amplitude_code_float})
     tests.append(test)
 
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.SECOND, a_netvars=a_netvars ,
+    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.SECOND, a_netvars=a_netvars,
                        a_wait_peltier_timeout_s=30, a_timeout_s=120)
     test.set_group("Пельтье")
     test.set_name("№2")

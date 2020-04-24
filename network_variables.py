@@ -225,6 +225,9 @@ class NetworkVariables:
         self.peltier_1_pid_out = BufferedVariable(
             VariableInfo(a_index=816, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.peltier_1_amplitude_code_float = BufferedVariable(
+            VariableInfo(a_index=824, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.peltier_2_temperature_max = BufferedVariable(
             VariableInfo(a_index=833, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 

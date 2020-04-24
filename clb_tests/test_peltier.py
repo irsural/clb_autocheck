@@ -20,7 +20,7 @@ class PeltierTest(ClbTest):
         WAIT_TEMP_DOWN = 3
         DONE = 4
 
-    def __init__(self, a_peltier_number: PeltierNumber, a_netvars: NetworkVariables,
+    def __init__(self, a_peltier_number: PeltierNumber, a_netvars: NetworkVariables, a_ready_hold_timer: int = 10,
                  a_wait_peltier_timeout_s: int = 10, a_timeout_s: int = 30):
         super().__init__()
 
@@ -62,6 +62,7 @@ class PeltierTest(ClbTest):
         self.__timeout_s = a_timeout_s
 
         self.wait_peltier_timer = utils.Timer(a_wait_peltier_timeout_s)
+        self.ready_hold_timer = utils.Timer(a_ready_hold_timer)
         self.__status = ClbTest.Status.NOT_CHECKED
         self.__stage = PeltierTest.Stage.TEMP_UP
 
@@ -75,6 +76,7 @@ class PeltierTest(ClbTest):
     def stop(self):
         self.__status = ClbTest.Status.NOT_CHECKED
         self.wait_peltier_timer.stop()
+        self.ready_hold_timer.stop()
         self.error_message = ""
 
         self.__stage = PeltierTest.Stage.TEMP_UP
@@ -93,15 +95,20 @@ class PeltierTest(ClbTest):
             self.is_peltier_ready.set(0)
 
             self.wait_peltier_timer.start()
+            self.ready_hold_timer.start()
             self.__stage = PeltierTest.Stage.WAIT_TEMP_UP if self.__stage == PeltierTest.Stage.TEMP_UP \
                 else PeltierTest.Stage.WAIT_TEMP_DOWN
 
         elif self.__stage in (PeltierTest.Stage.WAIT_TEMP_UP, PeltierTest.Stage.WAIT_TEMP_DOWN):
-            if self.is_peltier_ready.get() != 0:
-                logging.debug(f"Stage {self.__stage.name}. Success.")
-                self.__stage = PeltierTest.Stage.TEMP_DOWN if self.__stage == PeltierTest.Stage.WAIT_TEMP_UP \
-                    else PeltierTest.Stage.DONE
-            elif self.wait_peltier_timer.check():
+            if self.is_peltier_ready.get() == 0:
+                self.ready_hold_timer.start()
+            else:
+                if self.ready_hold_timer.check():
+                    logging.debug(f"Stage {self.__stage.name}. Success.")
+                    self.__stage = PeltierTest.Stage.TEMP_DOWN if self.__stage == PeltierTest.Stage.WAIT_TEMP_UP \
+                        else PeltierTest.Stage.DONE
+
+            if self.wait_peltier_timer.check():
                 logging.debug(f"Stage {self.__stage.name}. Bad.")
 
                 current_temp = self.current_temp.get()
