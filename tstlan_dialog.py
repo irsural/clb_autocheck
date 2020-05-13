@@ -71,18 +71,19 @@ class TstlanDialog(QtWidgets.QDialog):
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.ui.variables_table.setItem(row, self.Column.INDEX, item)
 
-                widget = QtWidgets.QWidget()
-                cb = QtWidgets.QCheckBox()
                 try:
-                    cb.setChecked(self.settings.tstlan_marks[row])
+                    mark_state = self.settings.tstlan_marks[row]
                 except IndexError:
-                    cb.setChecked(False)
+                    mark_state = False
+                mark_widget = self.create_table_checkbox(mark_state)
+                self.ui.variables_table.setCellWidget(row, self.Column.MARK, mark_widget)
 
-                layout = QtWidgets.QHBoxLayout(widget)
-                layout.addWidget(cb)
-                layout.setAlignment(QtCore.Qt.AlignCenter)
-                layout.setContentsMargins(0, 0, 0, 0)
-                self.ui.variables_table.setCellWidget(row, self.Column.MARK, widget)
+                try:
+                    graph_state = self.settings.tstlan_graphs[row]
+                except IndexError:
+                    graph_state = False
+                graph_widget = self.create_table_checkbox(graph_state)
+                self.ui.variables_table.setCellWidget(row, self.Column.GRAPH, graph_widget)
 
                 item = QtWidgets.QTableWidgetItem(variable.name)
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
@@ -93,6 +94,22 @@ class TstlanDialog(QtWidgets.QDialog):
                 self.ui.variables_table.setItem(row, self.Column.TYPE, item)
 
                 self.ui.variables_table.setItem(row, self.Column.VALUE, NumberTableWidgetItem(""))
+
+    @staticmethod
+    def create_table_checkbox(a_cb_state) -> QtWidgets.QWidget:
+        widget = QtWidgets.QWidget()
+        cb = QtWidgets.QCheckBox()
+        cb.setChecked(a_cb_state)
+
+        layout = QtWidgets.QHBoxLayout(widget)
+        layout.addWidget(cb)
+        layout.setAlignment(QtCore.Qt.AlignCenter)
+        layout.setContentsMargins(0, 0, 0, 0)
+        return widget
+
+    @staticmethod
+    def get_table_checkbox_state(a_table_widget: QtWidgets.QWidget) -> int:
+        return int(a_table_widget.layout().itemAt(0).widget().isChecked())
 
     def read_variables(self):
         self.ui.variables_table.blockSignals(True)
@@ -153,13 +170,19 @@ class TstlanDialog(QtWidgets.QDialog):
                                     self.ui.variables_table.horizontalHeader().saveState())
         self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
 
-        cb_states = [0] * self.ui.variables_table.rowCount()
+        mark_states = [0] * self.ui.variables_table.rowCount()
+        graph_states = [0] * self.ui.variables_table.rowCount()
         for i in range(self.ui.variables_table.rowCount()):
             cb_number = int(self.ui.variables_table.item(i, self.Column.NUMBER).text())
-            state = int(self.ui.variables_table.cellWidget(i, self.Column.MARK).layout().itemAt(0).widget().isChecked())
-            cb_states[cb_number] = state
 
-        self.settings.tstlan_marks = cb_states
+            mark_state = self.get_table_checkbox_state(self.ui.variables_table.cellWidget(i, self.Column.MARK))
+            graph_state = self.get_table_checkbox_state(self.ui.variables_table.cellWidget(i, self.Column.GRAPH))
+
+            mark_states[cb_number] = mark_state
+            graph_states[cb_number] = graph_state
+
+        self.settings.tstlan_marks = mark_states
+        self.settings.tstlan_graphs = graph_states
 
         a_event.accept()
 

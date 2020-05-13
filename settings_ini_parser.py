@@ -60,6 +60,9 @@ class Settings(QtCore.QObject):
     TSTLAN_MARKS_KEY = "tstlan_marks"
     TSTLAN_MARKS_DEFAULT = "0"
 
+    TSTLAN_GRAPH_KEY = "tstlan_graph"
+    TSTLAN_GRAPH_DEFAULT = "0"
+
     TESTS_REPEAT_COUNT_KEY = "tests_repeat_count"
     TESTS_REPEAT_COUNT_DEFAULT = "0"
 
@@ -94,6 +97,7 @@ class Settings(QtCore.QObject):
         self.__tstlan_update_time = 0
         self.__tstlan_show_marks = 0
         self.__tstlan_makrs = []
+        self.__tstlan_graphs = []
 
         self.__tests_repeat_count = []
         self.__tests_collapsed_states = []
@@ -156,6 +160,9 @@ class Settings(QtCore.QObject):
 
         self.__tstlan_makrs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_MARKS_KEY,
                                                    self.TSTLAN_MARKS_DEFAULT, self.ValueType.LIST_INT)
+
+        self.__tstlan_graphs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_GRAPH_KEY,
+                                                    self.TSTLAN_GRAPH_DEFAULT, self.ValueType.LIST_INT)
 
         self.__tests_repeat_count = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_REPEAT_COUNT_KEY,
                                                          self.TESTS_REPEAT_COUNT_DEFAULT, self.ValueType.LIST_INT)
@@ -337,6 +344,20 @@ class Settings(QtCore.QObject):
         self.save()
 
         self.__tstlan_makrs = a_list
+
+    @property
+    def tstlan_graphs(self):
+        return self.__tstlan_graphs
+
+    @tstlan_graphs.setter
+    def tstlan_graphs(self, a_list: List[int]):
+        saved_string = ','.join(str(val) for val in a_list)
+        saved_string = saved_string.strip(',')
+
+        self.settings[self.MEASURE_SECTION][self.TSTLAN_GRAPH_KEY] = saved_string
+        self.save()
+
+        self.__tstlan_graphs = a_list
 
     @property
     def tests_repeat_count(self):
