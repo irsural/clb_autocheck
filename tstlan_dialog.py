@@ -44,7 +44,7 @@ class TstlanDialog(QtWidgets.QDialog):
 
         self.read_variables_timer = QtCore.QTimer(self)
         self.read_variables_timer.timeout.connect(self.read_variables)
-        self.read_variables_timer.start(1000)
+        self.read_variables_timer.start(self.ui.upadte_time_spinbox.value() * 1000)
 
         self.ui.variables_table.itemChanged.connect(self.write_variable)
         self.ui.name_filter_edit.textChanged.connect(self.filter_variables)
