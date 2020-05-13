@@ -42,7 +42,7 @@ class PeltierTest(ClbTest):
             self.current_temp = a_netvars.peltier_3_temperature
             self.polarity_pin = a_netvars.peltier_3_polarity_pin
             self.is_peltier_ready = a_netvars.peltier_3_ready
-        else: # a_peltier_number == PeltierTest.PeltierNumber.FOUTH
+        else: # a_peltier_number == PeltierTest.PeltierNumber.FOURTH
             self.temp_setpoint = a_netvars.peltier_4_temperature_setpoint
             self.temp_max = a_netvars.peltier_4_temperature_max
             self.current_temp = a_netvars.peltier_4_temperature

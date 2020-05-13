@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>743</width>
-    <height>645</height>
+    <width>672</width>
+    <height>651</height>
    </rect>
   </property>
   <property name="font">
@@ -24,20 +24,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="4">
-      <widget class="QLineEdit" name="name_filter_edit">
-       <property name="placeholderText">
-        <string>Поиск...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Время обновления, с</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1">
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -50,6 +36,20 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="1" column="2">
+      <widget class="QCheckBox" name="show_marked_checkbox">
+       <property name="text">
+        <string>Оставить отмеченные</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
+      <widget class="QLineEdit" name="name_filter_edit">
+       <property name="placeholderText">
+        <string>Поиск...</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QDoubleSpinBox" name="upadte_time_spinbox">
@@ -67,25 +67,22 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QCheckBox" name="show_marked_checkbox">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Оставить отмеченные</string>
+        <string>Время обновления, с</string>
        </property>
       </widget>
      </item>
      <item row="1" column="3">
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QPushButton" name="graphs_button">
+       <property name="text">
+        <string>Графики</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
-      </spacer>
+      </widget>
      </item>
     </layout>
    </item>
@@ -132,6 +129,11 @@
      <column>
       <property name="text">
        <string>Имя</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Граф.</string>
       </property>
      </column>
      <column>

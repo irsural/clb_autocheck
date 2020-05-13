@@ -1,3 +1,4 @@
+from typing import Dict, Tuple
 import logging
 
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -83,6 +84,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
             self.tests_widget.show_graph_requested.connect(self.show_test_graph)
+            self.graphs_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
 
             self.test_conductor = TestsConductor(self.tests)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
@@ -188,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_tstlan(self):
         try:
-            tstlan_dialog = TstlanDialog(self.netvars, self.settings)
+            tstlan_dialog = TstlanDialog(self.netvars, self.settings, self)
             tstlan_dialog.exec()
         except Exception as err:
             logging.debug(utils.exception_handler(err))
@@ -197,9 +199,16 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             graph_data = self.test_conductor.get_test_graph(a_group, a_name)
             if graph_data:
-                graphs_dialog = TestGraphDialog(graph_data, self.settings, self)
-                self.test_conductor.graphs_have_been_updated.connect(graphs_dialog.update_graphs)
-                graphs_dialog.exec()
+                try:
+                    graphs_dialog = self.graphs_dialogs[(a_group, a_name)]
+                    graphs_dialog.activateWindow()
+                except KeyError:
+                    graphs_dialog = TestGraphDialog(graph_data, self.settings, self)
+                    graphs_dialog.setWindowTitle(f'Графики теста "{a_group}: {a_name}"')
+                    self.graphs_dialogs[(a_group, a_name)] = graphs_dialog
+                    self.test_conductor.graphs_have_been_updated.connect(graphs_dialog.update_graphs)
+                    graphs_dialog.exec()
+                    del self.graphs_dialogs[(a_group, a_name)]
             else:
                 logging.warning("График для выбранного измерения не создан")
         except Exception as err:

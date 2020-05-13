@@ -15,8 +15,9 @@ class TstlanDialog(QtWidgets.QDialog):
         INDEX = 1
         MARK = 2
         NAME = 3
-        TYPE = 4
-        VALUE = 5
+        GRAPH = 4
+        TYPE = 5
+        VALUE = 6
 
     def __init__(self, a_variables: nv.NetworkVariables, a_settings: Settings, a_parent=None):
         super().__init__(a_parent)
