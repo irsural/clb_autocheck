@@ -190,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def open_tstlan(self):
         try:
-            tstlan_dialog = TstlanDialog(self.netvars, self.settings, self)
+            tstlan_dialog = TstlanDialog(self.netvars, self.calibrator, self.settings, self)
             tstlan_dialog.exec()
         except Exception as err:
             logging.debug(utils.exception_handler(err))
