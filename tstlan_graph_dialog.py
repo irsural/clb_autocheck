@@ -13,7 +13,16 @@ class TstlanGraphDialog(QtWidgets.QDialog):
     GRAPH_COLORS = (
         (255, 0, 0),
         (0, 255, 0),
-        (0, 0, 255)
+        (0, 0, 255),
+        (0, 204, 204),
+        (204, 0, 102),
+        (204, 204, 0),
+        (255, 0, 255),
+        (102, 153, 153),
+        (255, 153, 0),
+        (102, 204, 255),
+        (0, 255, 153),
+        (204, 102, 255),
     )
 
     def __init__(self, a_graph_data: Dict[str, Tuple[List[float], List[float]]], a_settings: Settings,

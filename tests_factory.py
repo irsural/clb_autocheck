@@ -10,7 +10,7 @@ from clb_tests.test_peltier import PeltierTest
 from clb_tests.test_coolers import CoolerTest
 from clb_tests.test_signals import SignalTest
 from clb_tests.test_cables import CablesTest
-from clb_tests.tests_base import EmptyTest
+# from clb_tests.tests_base import EmptyTest
 
 
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db: NetvarsDatabase):

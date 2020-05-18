@@ -79,7 +79,7 @@ class TestsConductor(QtCore.QObject):
         super().__init__()
 
         self.tests = a_tests
-        self.test_results = [TestResults() for i in range(len(self.tests))]
+        self.test_results = [TestResults() for _ in range(len(self.tests))]
 
         self.enabled_tests = []
         self.prepare_timer = utils.Timer(1.5)
@@ -190,8 +190,7 @@ class TestsConductor(QtCore.QObject):
                         current_results.read_variables_to_graph()
                         self.graphs_have_been_updated.emit()
 
-                elif current_test.status() in (tests_base.ClbTest.Status.SUCCESS,
-                                               tests_base.ClbTest.Status.FAIL):
+                elif current_test.status() in (tests_base.ClbTest.Status.SUCCESS, tests_base.ClbTest.Status.FAIL):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
                     if current_test.has_error():

@@ -178,7 +178,7 @@ class Settings(QtCore.QObject):
     def check_ini_value(self, a_section, a_key, a_default, a_value_type: ValueType):
         try:
             value = self.ValueTypeConvertFoo[a_value_type](self.settings[a_section][a_key])
-        except (KeyError, ValueError) as err:
+        except (KeyError, ValueError):
             self.settings[a_section][a_key] = a_default
             utils.save_settings(self.CONFIG_PATH, self.settings)
             value = self.ValueTypeConvertFoo[a_value_type](a_default)
