@@ -90,6 +90,10 @@ class ClbTest(abc.ABC):
     def get_last_error(self) -> str:
         pass
 
+    @abc.abstractmethod
+    def abort_on_fail(self) -> bool:
+        pass
+
 
 class EmptyTest(ClbTest):
     def __init__(self):
@@ -119,3 +123,6 @@ class EmptyTest(ClbTest):
 
     def get_last_error(self) -> str:
         return "Пустой тест"
+
+    def abort_on_fail(self) -> bool:
+        return False

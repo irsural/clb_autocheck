@@ -53,3 +53,6 @@ class ReleaseCheckTest(ClbTest):
 
     def get_last_error(self) -> str:
         return self.error_message
+
+    def abort_on_fail(self) -> bool:
+        return False

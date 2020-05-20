@@ -86,7 +86,7 @@ class TestsConductor(QtCore.QObject):
         self.timeout_timer = utils.Timer(30)
 
         # Работает в цикличном режиме
-        self.read_graphs_time = utils.Timer(0.5)
+        self.read_graphs_time = utils.Timer(0.2)
         self.read_graphs_time.start()
 
         self.__started = False
@@ -197,9 +197,16 @@ class TestsConductor(QtCore.QObject):
                         logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
                                         f'\nОшибки:\n{current_test.get_last_error()}')
 
-                    current_results.set_current_result_status(current_test.status())
+                    current_test_status = current_test.status()
+                    current_results.set_current_result_status(current_test_status)
                     current_test.stop()
-                    self.next_test(a_first_test=False)
+
+                    if current_test_status == tests_base.ClbTest.Status.FAIL and current_test.abort_on_fail():
+                        logging.warning("Провал данного теста критичен. Следующие тесты проводиться не будут")
+                        self.stop()
+                        self.tests_done.emit()
+                    else:
+                        self.next_test(a_first_test=False)
             else:
                 logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
                 if current_test.has_error():
@@ -208,7 +215,12 @@ class TestsConductor(QtCore.QObject):
 
                 current_results.set_current_result_status(tests_base.ClbTest.Status.FAIL)
                 current_test.stop()
-                self.next_test(a_first_test=False)
+                if current_test.abort_on_fail():
+                    logging.warning("Провал данного теста критичен. Следующие тесты проводиться не будут")
+                    self.stop()
+                    self.tests_done.emit()
+                else:
+                    self.next_test(a_first_test=False)
 
     def started(self):
         return self.__started

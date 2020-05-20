@@ -61,3 +61,6 @@ class SupplyVoltageTest(ClbTest):
 
     def get_last_error(self) -> str:
         return ClbTest.get_calibrator_last_error(self.netvars)
+
+    def abort_on_fail(self) -> bool:
+        return True
