@@ -22,8 +22,7 @@ class SignalTest(ClbTest):
 
     def prepare(self) -> bool:
         if not clb.is_voltage_signal[self.signal_type]:
-            # Замкнуть клеммы
-            pass
+            self.netvars.short_circuit_password.set(clb.SHORT_CIRCUIT_PASSWORD)
 
         if self.calibrator.amplitude == self.amplitude and self.calibrator.signal_type == self.signal_type and \
                 not self.calibrator.signal_enable:
@@ -42,6 +41,7 @@ class SignalTest(ClbTest):
     def stop(self):
         self.__status = ClbTest.Status.NOT_CHECKED
         self.calibrator.signal_enable = False
+        self.netvars.short_circuit_password.set(0)
         self.hold_signal_timer.stop()
 
     def tick(self):

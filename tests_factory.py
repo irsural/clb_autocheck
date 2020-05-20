@@ -231,21 +231,24 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    test = SignalTest(a_amplitude=0.1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator)
+    test = SignalTest(a_amplitude=0.1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
+                      a_timeout_s=60)
     test.set_group("I~")
     test.set_name("110 мА")
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
                                  "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
     tests.append(test)
 
-    test = SignalTest(a_amplitude=1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator)
+    test = SignalTest(a_amplitude=1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
+                      a_timeout_s=60)
     test.set_group("I~")
     test.set_name("1.1 А")
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
                                  "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
     tests.append(test)
 
-    test = SignalTest(a_amplitude=10, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator)
+    test = SignalTest(a_amplitude=10, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
+                      a_timeout_s=60)
     test.set_group("I~")
     test.set_name("11 А")
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,

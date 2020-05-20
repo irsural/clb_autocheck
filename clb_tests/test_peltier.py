@@ -163,4 +163,3 @@ class PeltierTest(ClbTest):
 
     def abort_on_fail(self) -> bool:
         return False
-

@@ -15,6 +15,9 @@ class NetworkVariables:
         self.__calibrator = a_calibrator
         self.__variables_info = self.get_variables_from_ini(a_variables_ini_path)
 
+        self.short_circuit_password = BufferedVariable(
+            VariableInfo(a_index=20, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.core_t_calibration = BufferedVariable(
             VariableInfo(a_index=36, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 

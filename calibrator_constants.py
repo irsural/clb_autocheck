@@ -16,6 +16,8 @@ MIN_FREQUENCY = 35
 
 FREQUENCY_MIN_STEP = 1
 
+SHORT_CIRCUIT_PASSWORD = 4242
+
 
 class Polatiry(enum.IntEnum):
     POS = 0

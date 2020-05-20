@@ -86,7 +86,7 @@ class TestsConductor(QtCore.QObject):
         self.timeout_timer = utils.Timer(30)
 
         # Работает в цикличном режиме
-        self.read_graphs_time = utils.Timer(0.2)
+        self.read_graphs_time = utils.Timer(0.1)
         self.read_graphs_time.start()
 
         self.__started = False
