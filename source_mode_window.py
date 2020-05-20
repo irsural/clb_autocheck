@@ -1,8 +1,11 @@
+import logging
+
 from PyQt5 import QtCore, QtWidgets, QtGui
 from PyQt5.QtCore import pyqtSignal, QTimer
 
 
 from ui.py.source_mode_form import Ui_Form as SourceModeForm
+from network_variables import NetworkVariables
 import calibrator_constants as clb
 from settings_ini_parser import Settings
 import qt_utils
@@ -13,7 +16,8 @@ import utils
 class SourceModeWidget(QtWidgets.QWidget):
     close_confirmed = pyqtSignal()
 
-    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv, a_parent=None):
+    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv, a_network_variables: NetworkVariables,
+                 a_parent=None):
         super().__init__(a_parent)
 
         self.ui = SourceModeForm()
@@ -25,12 +29,12 @@ class SourceModeWidget(QtWidgets.QWidget):
 
         self.settings = a_settings
 
-        self.setWindowTitle("Режим источника")
-
         self.calibrator = a_calibrator
         self.clb_state = clb.State.DISCONNECTED
         self.signal_type = clb.SignalType.ACI
         self.mode = clb.Mode.SOURCE
+
+        self.netvars = a_network_variables
 
         self.units = clb.signal_type_to_units[self.signal_type]
         self.value_to_user = utils.value_to_user_with_units(self.units)
@@ -54,6 +58,16 @@ class SourceModeWidget(QtWidgets.QWidget):
         self.clb_check_timer = QTimer()
         self.clb_check_timer.timeout.connect(self.sync_clb_parameters)
         self.clb_check_timer.start(10)
+
+        self.update_netvars_timer = QTimer()
+        self.update_netvars_timer.timeout.connect(self.update_netvars)
+        self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
+
+        self.next_error_timer = QTimer()
+        self.next_error_timer.timeout.connect(self.show_next_error)
+        self.next_error_index = 0
+
+        self.ui.errors_out_button.clicked.connect(self.start_errors_output)
 
     def __del__(self):
         print("source mode deleted")
@@ -108,6 +122,18 @@ class SourceModeWidget(QtWidgets.QWidget):
             self.mode = self.calibrator.mode
             self.mode_to_radio[self.mode].setChecked(True)
 
+    def update_netvars(self):
+        self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
+
+        firmware_type = "RELEASE" if self.netvars.release_firmware.get() else "DEBUG"
+        self.ui.firmware_info_label.setText(f"{self.netvars.software_revision.get()} {firmware_type}")
+
+        self.ui.errors_count_label.setText(str(self.netvars.error_count.get()))
+        if self.netvars.error_count.get() > 0:
+            self.ui.errors_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.ui.errors_label.setStyleSheet("QLabel { color : black; }")
+
     def enable_signal(self, a_signal_enable):
         self.calibrator.signal_enable = a_signal_enable
         self.update_signal_enable_state(a_signal_enable)
@@ -140,7 +166,6 @@ class SourceModeWidget(QtWidgets.QWidget):
     # noinspection PyTypeChecker
     def wheelEvent(self, event: QtGui.QWheelEvent):
         steps = qt_utils.get_wheel_steps(event)
-        steps = -steps if self.settings.mouse_inversion else steps
 
         keys = event.modifiers()
         if keys & QtCore.Qt.ShiftModifier:
@@ -194,6 +219,31 @@ class SourceModeWidget(QtWidgets.QWidget):
         except ValueError:
             # Отлавливает некорректный ввод
             pass
+
+    def start_errors_output(self):
+        if self.netvars.error_count.get() > 0:
+            self.next_error_index = 0
+            self.next_error_timer.start(1200)
+
+    def show_next_error(self):
+        error_index = self.netvars.error_index.get()
+        error_count = self.netvars.error_count.get()
+        if error_index >= error_count:
+            # На случай если во время вывода ошибок их состояние было изменено извне
+            self.next_error_timer.stop()
+        else:
+            if self.next_error_index == error_index:
+                error_code = self.netvars.error_code.get()
+                logging.warning(f"Ошибка №{error_index + 1}: "
+                                f"Код {error_code}. {clb.error_code_to_message[error_code]}.")
+
+                next_error_index = error_index + 1
+                if next_error_index >= error_count:
+                    self.netvars.clear_error_occurred_status.set(1)
+                    self.next_error_timer.stop()
+                else:
+                    self.next_error_index = next_error_index
+                    self.netvars.error_index.set(next_error_index)
 
     def aci_radio_checked(self):
         self.update_signal_type(clb.SignalType.ACI)

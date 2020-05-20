@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import QWidget
 
@@ -36,3 +38,27 @@ class TableEditDoubleClick(QtWidgets.QItemDelegate):
 class NonOverlappingDoubleClick(NonOverlappingPainter, TableEditDoubleClick):
     def __init__(self, a_parent):
         super().__init__(a_parent)
+
+
+class ComboboxIgnoreWheel(QtWidgets.QComboBox):
+    def __init__(self, a_parent):
+        super().__init__(a_parent)
+
+    def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
+        e.ignore()
+
+
+class ComboboxCellDelegate(QtWidgets.QItemDelegate):
+    def __init__(self, a_parent: QtCore.QObject, a_values: Tuple[str]):
+        super().__init__(a_parent)
+        self.cb_values = a_values
+
+    def createEditor(self, parent: QWidget, option, index: QtCore.QModelIndex) -> QtWidgets.QWidget:
+        editor = ComboboxIgnoreWheel(parent)
+        for val in self.cb_values:
+            editor.addItem(val)
+        editor.setCurrentText(index.data())
+        return editor
+
+    def setEditorData(self, editor: QWidget, index: QtCore.QModelIndex) -> None:
+        editor.setCurrentText(index.data())

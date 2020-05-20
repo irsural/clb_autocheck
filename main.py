@@ -24,4 +24,4 @@ if __name__ == "__main__":
         w = MainWindow()
         sys.exit(app.exec())
     except Exception as err:
-        print("MAIN: ", exception_handler(err))
+        print("MAIN: " + exception_handler(err))

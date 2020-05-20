@@ -24,6 +24,12 @@ class QEditDoubleClick(QtWidgets.QLineEdit):
                     break
         a_event.accept()
 
+    def keyPressEvent(self, a_event: QtGui.QKeyEvent) -> None:
+        super().keyPressEvent(a_event)
+        if a_event.key() == QtCore.Qt.Key_Enter or a_event.key() == QtCore.Qt.Key_Return:
+            self.editingFinished.emit()
+            a_event.accept()
+
 
 class QEditCopyButton(QEditDoubleClick):
     def __init__(self, a_parent=None):

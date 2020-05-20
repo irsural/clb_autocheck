@@ -3,6 +3,7 @@ from configparser import ConfigParser
 from enum import IntEnum
 from sys import exc_info
 import math
+import time
 import re
 
 
@@ -219,9 +220,9 @@ def exception_handler(a_exception):
     filename = frame.f_code.co_filename
     checkcache(filename)
     line = getline(filename, lineno, frame.f_globals)
-    print("Exception{0} in {1}\n"
-          "Line {2}: '{3}'\n"
-          "Message: {4}".format(type(a_exception), filename, lineno, line.strip(), a_exception))
+    return "Exception{0} in {1}\n"\
+           "Line {2}: '{3}'\n"\
+           "Message: {4}".format(type(a_exception), filename, lineno, line.strip(), a_exception)
 
 
 def get_array_min_diff(a_array: list):
@@ -231,3 +232,31 @@ def get_array_min_diff(a_array: list):
         diff = unique_array[i + 1] - unique_array[i]
         min_diff = diff if diff < min_diff else min_diff
     return round(min_diff, 9)
+
+
+class Timer:
+    def __init__(self, a_interval_s: float):
+        self.interval_s = a_interval_s
+        self.start_time = 0
+        self.stop_time = 0
+        self.__started = False
+
+    def start(self, a_interval_s=None):
+        self.__started = True
+        self.start_time = time.time()
+        if a_interval_s is not None:
+            self.interval_s = a_interval_s
+        self.stop_time = self.start_time + self.interval_s
+
+    def stop(self):
+        self.start_time = 0
+        self.stop_time = 0
+        self.__started = False
+
+    def check(self):
+        if not self.__started:
+            return False
+        return time.time() > self.stop_time
+
+    def started(self):
+        return self.__started

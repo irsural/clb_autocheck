@@ -1,6 +1,7 @@
 import ctypes
 import enum
 import os.path
+import logging
 from platform import system as cur_system
 
 import calibrator_constants as clb
@@ -8,8 +9,9 @@ import utils
 
 if cur_system() == "Windows":
     dll_name = "clb_driver_dll.dll"
-    debug_dll_path = "C:\\Users\\503.IRS\\Desktop\\Qt Projects\\clb_driver_dll\\" \
-                     "build-clb_driver_dll-Desktop_Qt_5_14_1_MSVC2017_32bit-Release\\release\\clb_driver_dll.dll"
+    debug_dll_path = ""
+    # debug_dll_path = "C:\\Users\\503.IRS\\Desktop\\Qt Projects\\clb_driver_dll\\" \
+    #                  "build-clb_driver_dll-Desktop_Qt_5_14_1_MSVC2017_32bit-Release\\release\\clb_driver_dll.dll"
 elif cur_system() == "Linux":
     dll_name = "libclb_driver_dll.so"
     debug_dll_path = "/home/astra/Загрузки/clb_driver_dll/build-clb_driver_dll-Desktop-Release/libclb_driver_dll.so"
@@ -22,7 +24,7 @@ else:
 def set_up_driver(a_full_path):
     if os.path.exists(a_full_path):
         clb_driver_lib = ctypes.CDLL(a_full_path)
-        print("debug dll")
+        logging.debug("debug dll")
     else:
         clb_driver_lib = ctypes.CDLL("./" + dll_name)
 
@@ -67,18 +69,10 @@ class UsbDrv:
         BUSY = 3
         ERROR = 4
 
-    # enum_to_usb_status = {
-    #     UsbState.DISABLED: "Отключено",
-    #     UsbState.BUSY: "Подключение...",
-    #     UsbState.CONNECTED: "Подключено",
-    #     UsbState.ERROR: "Ошибка",
-    #     UsbState.NOT_SUPPORTED: "",
-    # }
-
-    def __init__(self, a_clb_dll):
+    def __init__(self, a_clb_dll, a_data_size):
         self.clb_dll = a_clb_dll
         # Обязательно перед любыми действиями с clb_driver_dll
-        self.clb_dll.usb_init()
+        self.clb_dll.usb_init(a_data_size)
 
         self.clb_dev_list_changed = False
         self.clb_dev_list = []
@@ -135,6 +129,21 @@ class ClbDrv:
         self.__signal_on = False
         self.__mode = clb.Mode.SOURCE
         self.__signal_ready = False
+        self.__state = clb.State.DISCONNECTED
+
+        buf1_t = ctypes.c_char * 1
+        buf2_t = ctypes.c_char * 2
+        buf4_t = ctypes.c_char * 4
+        buf8_t = ctypes.c_char * 8
+        buf10_t = ctypes.c_char * 10
+
+        self.__read_buffers = {
+            1: buf1_t(),
+            2: buf2_t(),
+            4: buf4_t(),
+            8: buf8_t(),
+            10: buf10_t(),
+        }
 
     def connect(self, a_clb_name: str):
         self.__amplitude = 0
@@ -144,6 +153,7 @@ class ClbDrv:
         self.__signal_on = False
         self.__mode = clb.Mode.SOURCE
         self.__signal_ready = False
+        self.__state = clb.State.DISCONNECTED
 
         if a_clb_name:
             self.__clb_dll.connect_usb(a_clb_name.encode("ascii"))
@@ -166,9 +176,9 @@ class ClbDrv:
 
     @amplitude.setter
     def amplitude(self, a_amplitude: float):
-        self.__amplitude = clb.bound_amplitude(a_amplitude, self.__signal_type)
-        self.__clb_dll.set_amplitude(abs(self.__amplitude))
-        self.__set_polarity_by_amplitude_sign(self.__amplitude)
+        amplitude = clb.bound_amplitude(a_amplitude, self.__signal_type)
+        self.__clb_dll.set_amplitude(abs(amplitude))
+        self.__set_polarity_by_amplitude_sign(amplitude)
 
     def limit_amplitude(self, a_amplitude, a_lower, a_upper):
         """
@@ -199,8 +209,8 @@ class ClbDrv:
 
     @frequency.setter
     def frequency(self, a_frequency: float):
-        self.__frequency = utils.bound(a_frequency, clb.MIN_FREQUENCY, clb.MAX_FREQUENCY)
-        self.__clb_dll.set_frequency(self.__frequency)
+        frequency = utils.bound(a_frequency, clb.MIN_FREQUENCY, clb.MAX_FREQUENCY)
+        self.__clb_dll.set_frequency(frequency)
 
     def signal_type_changed(self):
         actual_signal_type = self.__clb_dll.get_signal_type()
@@ -216,11 +226,18 @@ class ClbDrv:
 
     @signal_type.setter
     def signal_type(self, a_signal_type: int):
-        self.__signal_type = a_signal_type
         self.__clb_dll.set_signal_type(a_signal_type)
 
     def is_signal_ready(self):
         return self.__clb_dll.is_signal_ready()
+
+    @property
+    def state(self):
+        return self.__state
+
+    @state.setter
+    def state(self, a_state: clb.State):
+        self.__state = a_state
 
     # def polarity_changed(self):
     #     actual_polarity = self.__clb_dll.get_polarity()
@@ -263,7 +280,6 @@ class ClbDrv:
 
     @signal_enable.setter
     def signal_enable(self, a_signal_enable: int):
-        self.__signal_on = a_signal_enable
         self.__clb_dll.signal_enable(a_signal_enable)
 
     def mode_changed(self):
@@ -280,8 +296,20 @@ class ClbDrv:
 
     @mode.setter
     def mode(self, a_mode: int):
-        self.__mode = a_mode
         self.__clb_dll.set_mode(a_mode)
 
     def fast_control_mode_enable(self, a_enable: int):
         self.__clb_dll.fast_control_mode_enable(a_enable)
+
+    def read_raw_bytes(self, a_start_index: int, a_bytes_count: int):
+        self.__clb_dll.read_bytes(self.__read_buffers[a_bytes_count], a_start_index, a_bytes_count)
+        return self.__read_buffers[a_bytes_count]
+
+    def write_raw_bytes(self, a_start_index: int, a_bytes_count: int, a_bytes):
+        self.__clb_dll.write_bytes(a_bytes, a_start_index, a_bytes_count)
+
+    def read_bit(self, a_byte_index: int, a_bit_index: int) -> int:
+        return self.__clb_dll.read_bit(a_byte_index, a_bit_index)
+
+    def write_bit(self, a_byte_index: int, a_bit_index: int, a_value: int):
+        self.__clb_dll.write_bit(a_byte_index, a_bit_index, a_value)

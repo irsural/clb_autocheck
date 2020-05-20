@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icons">
+    <file>gif/loader2.gif</file>
+    <file>gif/loader.gif</file>
     <file>icons/excel.png</file>
     <file>gif/warning.gif</file>
     <file>icons/add.svg</file>
@@ -8,6 +10,9 @@
     <file>icons/duplicate.png</file>
     <file>icons/edit.png</file>
     <file>icons/ok.png</file>
+    <file>icons/checkbox_empty.png</file>
+    <file>icons/checkbox_fail.png</file>
+    <file>icons/checkbox_ok.png</file>
     <file>icons/minus2.png</file>
     <file>icons/pause.png</file>
     <file>icons/play.png</file>

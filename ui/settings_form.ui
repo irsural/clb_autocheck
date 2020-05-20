@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>563</width>
-    <height>416</height>
+    <width>592</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -57,6 +57,12 @@
       </property>
       <item>
        <widget class="QListWidget" name="settings_menu_list">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="contextMenuPolicy">
          <enum>Qt::CustomContextMenu</enum>
         </property>
@@ -97,14 +103,14 @@ QListWidget::item {
          <bool>false</bool>
         </property>
         <property name="currentRow">
-         <number>0</number>
+         <number>-1</number>
         </property>
         <property name="sortingEnabled">
          <bool>false</bool>
         </property>
         <item>
          <property name="text">
-          <string>Дополнительные параметры измерений</string>
+          <string>Сетевые переменные</string>
          </property>
          <property name="background">
           <brush brushstyle="NoBrush">
@@ -119,11 +125,6 @@ QListWidget::item {
         <item>
          <property name="text">
           <string>Параметры шага</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Другие параметры измерения</string>
          </property>
         </item>
        </widget>
@@ -159,29 +160,81 @@ QListWidget::item {
           <property name="currentIndex">
            <number>1</number>
           </property>
-          <widget class="QWidget" name="marks_page">
-           <layout class="QGridLayout" name="gridLayout">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item row="0" column="0">
-             <layout class="QVBoxLayout" name="marks_layout"/>
+          <widget class="QWidget" name="network_variables_page">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QTableView" name="netvars_table">
+              <property name="font">
+               <font>
+                <pointsize>8</pointsize>
+               </font>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QPushButton" name="add_row_button">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources/icons.qrc">
+                  <normaloff>:/icons/icons/plus.png</normaloff>:/icons/icons/plus.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delete_row_button">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../resources/icons.qrc">
+                  <normaloff>:/icons/icons/minus2.png</normaloff>:/icons/icons/minus2.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
           <widget class="QWidget" name="step_parameters_page">
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QGroupBox" name="fixed_range_groupbox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="title">
                <string>Фиксированный шаг</string>
               </property>
@@ -266,26 +319,6 @@ QListWidget::item {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="disable_scroll_on_table_checkbox">
-                   <property name="text">
-                    <string>Отключить прокрутку шага,
-если курсор мыши находится
-на таблице измерения</string>
-                   </property>
-                   <property name="checked">
-                    <bool>false</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="mouse_inversion_checkbox">
-                   <property name="text">
-                    <string>Инвертировать
-колесо мыши</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <spacer name="verticalSpacer">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
@@ -301,47 +334,10 @@ QListWidget::item {
                 </layout>
                </widget>
               </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
-                <property name="leftMargin">
-                 <number>9</number>
-                </property>
-                <property name="topMargin">
-                 <number>6</number>
-                </property>
-                <property name="rightMargin">
-                 <number>9</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>6</number>
-                </property>
-                <item>
-                 <widget class="QLabel" name="label_4">
-                  <property name="whatsThis">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Во время измерения, при нажатии кнопки &amp;quot;Перейти к точке&amp;quot;, на калибраторе будет установлено значение: &lt;/p&gt;&lt;p&gt;&amp;quot;выбранная точка +(-) начальное отклонение&amp;quot;. &lt;/p&gt;&lt;p&gt;Начальное отклонение задается в процентах от максимума шкалы поверяемого прибора.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Начальное отклонение, %</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QSpinBox" name="start_deviation_spinbox">
-                  <property name="maximum">
-                   <number>100</number>
-                  </property>
-                  <property name="value">
-                   <number>5</number>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
              </layout>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="other_parameters_page"/>
          </widget>
         </item>
        </layout>
@@ -388,10 +384,10 @@ QListWidget::item {
           <string>Принять</string>
          </property>
          <property name="autoDefault">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="default">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -401,7 +397,9 @@ QListWidget::item {
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>settings_menu_list</sender>
