@@ -84,8 +84,6 @@ class PeltierTest(ClbTest):
 
     def tick(self):
         if self.__stage in (PeltierTest.Stage.TEMP_UP, PeltierTest.Stage.TEMP_DOWN):
-            logging.debug(f"Stage {self.__stage.name}")
-
             self.start_temp = self.current_temp.get()
             self.expected_temp = self.start_temp + self.setpoint_shift \
                 if self.__stage == PeltierTest.Stage.TEMP_UP else self.start_temp - self.setpoint_shift
@@ -104,7 +102,6 @@ class PeltierTest(ClbTest):
                 self.ready_hold_timer.start()
             else:
                 if self.ready_hold_timer.check():
-                    logging.debug(f"Stage {self.__stage.name}. Success.")
                     self.__stage = PeltierTest.Stage.TEMP_DOWN if self.__stage == PeltierTest.Stage.WAIT_TEMP_UP \
                         else PeltierTest.Stage.DONE
 
@@ -115,18 +112,13 @@ class PeltierTest(ClbTest):
                 next_stage = True
 
             elif self.wait_peltier_timer.check():
-                logging.debug(f"Stage {self.__stage.name}. Bad.")
-
-                logging.debug(f"Stage {self.__stage.name}. Peltier timeout.")
                 self.error_message += f"Не удалось выйти на уставку {self.expected_temp}. " \
                                       f"Измеренное значение {current_temp}.\n"
                 if not self.__is_temperature_changed(current_temp, self.start_temp):
-                    logging.debug(f"Stage {self.__stage.name}. Broken.")
                     self.error_message += "Пельтье сломано\n"
                 elif self.__is_wrong_polarity(self.start_temp, current_temp, self.expected_temp):
                     self.change_polarity()
                 else:
-                    logging.debug(f"Stage {self.__stage.name}. Timeout.")
                     self.error_message += "Истек таймаут\n"
 
                 next_stage = True
@@ -136,21 +128,17 @@ class PeltierTest(ClbTest):
                     else PeltierTest.Stage.DONE
 
         elif self.__stage == PeltierTest.Stage.DONE:
-            logging.debug(f"Stage {self.__stage.name}. Done.")
-
             if not self.error_message:
                 self.__status = ClbTest.Status.SUCCESS
             else:
                 self.__status = ClbTest.Status.FAIL
 
     def change_polarity(self):
-        logging.debug(f"Stage {self.__stage.name}. Wrong polarity.")
         self.polarity_pin.set(int(not self.polarity_pin.get()))
         self.error_message += "Установлена неверная полярность\n" \
                               "Полярность была изменена. Повторите тест\n"
 
     def __is_temperature_changed(self, a_current_temp: float, a_start_temp: float):
-        logging.debug(f"{a_start_temp} / {a_current_temp} / {abs((a_start_temp - a_current_temp) / a_current_temp * 100)}")
         return abs((a_start_temp - a_current_temp) / a_current_temp * 100) > self.temp_has_not_changes_window_percent
 
     def __is_wrong_polarity(self, a_start_temp: float, a_current_temp: float, a_expected_temp: float):

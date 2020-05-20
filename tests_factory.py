@@ -64,7 +64,8 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_variables_to_graph({"Уставка": a_netvars.peltier_1_temperature_setpoint,
                                  "Температура": a_netvars.peltier_1_temperature,
                                  "Выход pid-регулятора": a_netvars.peltier_1_pid_out,
-                                 "amplitude_code_float": a_netvars.peltier_1_amplitude_code_float})
+                                 "amplitude_code_float": a_netvars.peltier_1_amplitude_code_float,
+                                 "Бит готовности": a_netvars.peltier_1_ready})
     tests.append(test)
 
     test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.SECOND, a_netvars=a_netvars, a_ready_hold_timer=30,
@@ -73,7 +74,8 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_name("№2")
     test.set_variables_to_graph({"Уставка": a_netvars.peltier_2_temperature_setpoint,
                                  "Температура": a_netvars.peltier_2_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_2_pid_out})
+                                 "Выход pid-регулятора": a_netvars.peltier_2_pid_out,
+                                 "Бит готовности": a_netvars.peltier_2_ready})
     tests.append(test)
 
     test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.THIRD, a_netvars=a_netvars, a_ready_hold_timer=30,
@@ -82,7 +84,8 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_name("№3")
     test.set_variables_to_graph({"Уставка": a_netvars.peltier_3_temperature_setpoint,
                                  "Температура": a_netvars.peltier_3_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_3_pid_out})
+                                 "Выход pid-регулятора": a_netvars.peltier_3_pid_out,
+                                 "Бит готовности": a_netvars.peltier_3_ready})
     tests.append(test)
 
     test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FOURTH, a_netvars=a_netvars, a_ready_hold_timer=30,
@@ -91,7 +94,8 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_name("№4")
     test.set_variables_to_graph({"Уставка": a_netvars.peltier_4_temperature_setpoint,
                                  "Температура": a_netvars.peltier_4_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_4_pid_out})
+                                 "Выход pid-регулятора": a_netvars.peltier_4_pid_out,
+                                 "Бит готовности": a_netvars.peltier_4_ready})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
