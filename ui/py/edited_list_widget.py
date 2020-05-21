@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(225, 292)
+        Form.resize(221, 288)
         font = QtGui.QFont()
         font.setPointSize(10)
         Form.setFont(font)
