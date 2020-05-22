@@ -96,6 +96,15 @@ class NetworkVariables:
         self.fast_adc_slow = BufferedVariable(
             VariableInfo(a_index=229, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.aux_stabilizer_4v_dac_code_float = BufferedVariable(
+            VariableInfo(a_index=374, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.aux_stabilizer_45v_dac_code_float = BufferedVariable(
+            VariableInfo(a_index=378, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
+        self.aux_stabilizer_600v_dac_code_float = BufferedVariable(
+            VariableInfo(a_index=382, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+
         self.aux_stabilizer_adc_dc_600v_voltage = BufferedVariable(
             VariableInfo(a_index=428, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
