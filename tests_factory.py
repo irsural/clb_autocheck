@@ -33,7 +33,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Питание кулеров": a_netvars.cooling_power_supply_voltage})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    ref_v_map = {Aux60vControl: 14.746}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 14.746}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -42,7 +42,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 40.}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 40.}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -51,7 +51,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 60.}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 60.}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -60,7 +60,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 14.746, Aux600vControl: 13.3}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 14.746, AuxStabilizersTest.AuxType.V600: 13.3}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -71,7 +71,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 20., Aux600vControl: 200}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 20., AuxStabilizersTest.AuxType.V600: 200}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -82,7 +82,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 20., Aux600vControl: 600}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 20., AuxStabilizersTest.AuxType.V600: 600}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -93,7 +93,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 14.746, Aux4vControl: 2}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 14.746, AuxStabilizersTest.AuxType.V4: 2}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -104,7 +104,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 4 В": a_netvars.aux_stabilizer_4v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 20., Aux4vControl: 3}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 20., AuxStabilizersTest.AuxType.V4: 3}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")
@@ -115,7 +115,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 4 В": a_netvars.aux_stabilizer_4v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {Aux60vControl: 20., Aux4vControl: 4}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: 20., AuxStabilizersTest.AuxType.V4: 4}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=100)
     test.set_group("Предварительные стабилизаторы")

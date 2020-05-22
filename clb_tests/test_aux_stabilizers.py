@@ -26,6 +26,7 @@ class Aux60vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
+        logging.debug(f"stop {Aux60vControl.name}")
         pass
 
 
@@ -42,6 +43,7 @@ class Aux600vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
+        logging.debug(f"stop {Aux600vControl.name}")
         pass
 
 
@@ -58,15 +60,33 @@ class Aux4vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
+        logging.debug(f"stop {Aux4vControl.name}")
         pass
 
 
 class AuxStabilizersTest(ClbTest):
+    class AuxType(IntEnum):
+        V60 = 0,
+        V600 = 1,
+        V4 = 2
+
+    AUX_TYPE_TO_AUX_CONTROL = {
+        AuxType.V60: Aux60vControl,
+        AuxType.V600: Aux600vControl,
+        AuxType.V4: Aux4vControl,
+    }
+
+    AUX_CONTROL_TO_AUX_TYPE = {
+        Aux60vControl:  AuxType.V60,
+        Aux600vControl:  AuxType.V600,
+        Aux4vControl:  AuxType.V4,
+    }
+
     class Stage(IntEnum):
         PREPARE = 0
         WAIT_VOLTAGE = 1
 
-    def __init__(self, a_ref_v_map: Dict[AuxControl, float], a_netvars: NetworkVariables,
+    def __init__(self, a_ref_v_map: Dict[AuxType, float], a_netvars: NetworkVariables,
                  a_aux_fail_timeout_s: int = 40, a_hold_voltage_timeout_s: int = 10, a_timeout_s: int = 100):
         super().__init__()
 
@@ -100,9 +120,11 @@ class AuxStabilizersTest(ClbTest):
         self.error_message = ""
         self.hold_voltage_timer.stop()
         self.aux_fail_timer.stop()
+        for aux_type in reversed(list(self.ref_v_map.keys())):
+            AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[aux_type].stop(self.netvars)
 
     def tick(self):
-        voltage_setpoint = self.ref_v_map[self.current_aux]
+        voltage_setpoint = self.ref_v_map[AuxStabilizersTest.AUX_CONTROL_TO_AUX_TYPE[self.current_aux]]
 
         if self.__stage == AuxStabilizersTest.Stage.PREPARE:
             if self.current_aux.set_voltage(voltage_setpoint, self.netvars):
@@ -140,7 +162,7 @@ class AuxStabilizersTest(ClbTest):
 
     def get_next_aux(self):
         try:
-            return next(self.aux_iter)
+            return AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[next(self.aux_iter)]
         except StopIteration:
             return None
 
