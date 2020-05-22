@@ -15,6 +15,7 @@ class TestsTreeWidget(QtCore.QObject):
         STATUS = 3
 
     show_graph_requested = QtCore.pyqtSignal(str, str)
+    show_errors_requested = QtCore.pyqtSignal(str, str)
 
     def __init__(self, a_tests: List[ClbTest], a_tree_widget: QtWidgets.QTreeWidget, a_settings: Settings):
         super().__init__()
@@ -23,7 +24,7 @@ class TestsTreeWidget(QtCore.QObject):
 
         self.create_tree(a_tests)
 
-        self.tree_widget.itemDoubleClicked.connect(self.send_request_for_graph)
+        self.tree_widget.itemDoubleClicked.connect(self.send_request_for_data)
 
         try:
             self.restore_checkboxes_state()
@@ -178,12 +179,16 @@ class TestsTreeWidget(QtCore.QObject):
             # У греппы "Тесты" нет статуса
             self.set_status_icon(status_label, self.get_group_status(group_item))
 
-    def send_request_for_graph(self, a_item: QtWidgets.QTreeWidgetItem, a_column: int):
+    def send_request_for_data(self, a_item: QtWidgets.QTreeWidgetItem, a_column: int):
         # Если итем - тест, а не группа
         if a_column != self.Column.REPEAT_COUNT and a_item.childCount() == 0:
             test_group = a_item.parent().text(self.Column.TESTS_TREE)
             test_name = a_item.text(self.Column.TESTS_TREE)
-            self.show_graph_requested.emit(test_group, test_name)
+
+            if a_column == self.Column.STATUS:
+                self.show_errors_requested.emit(test_group, test_name)
+            else:
+                self.show_graph_requested.emit(test_group, test_name)
 
     def restore_checkboxes_state(self):
         enabled_list = self.settings.enabled_tests_list

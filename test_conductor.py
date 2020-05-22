@@ -11,20 +11,24 @@ import utils
 class TestResults:
     def __init__(self):
         self.statuses = []
+        self.errors = []
         self.variables_to_graph = {}
         self.__graph_data = []
         self.graph_normalize_time_value = 0
 
-    def set_current_result_status(self, a_status: tests_base.ClbTest.Status):
+    def set_current_result(self, a_status: tests_base.ClbTest.Status, a_error: str):
         self.statuses[-1] = a_status
+        self.errors[-1] = a_error
 
     def new_result(self):
         self.statuses.append(tests_base.ClbTest.Status.NOT_CHECKED)
+        self.errors.append("")
         if self.variables_to_graph:
             self.__graph_data.append({name: ([], []) for name in self.variables_to_graph.keys()})
 
     def delete_results(self):
         self.statuses = []
+        self.errors = []
         self.variables_to_graph = {}
         self.__graph_data = []
 
@@ -39,6 +43,9 @@ class TestResults:
             if status == tests_base.ClbTest.Status.FAIL:
                 return tests_base.ClbTest.Status.FAIL
         return tests_base.ClbTest.Status.SUCCESS
+
+    def get_errors(self):
+        return self.errors
 
     def get_results_count(self) -> int:
         return len(self.statuses)
@@ -193,12 +200,10 @@ class TestsConductor(QtCore.QObject):
                 elif current_test.status() in (tests_base.ClbTest.Status.SUCCESS, tests_base.ClbTest.Status.FAIL):
                     logging.info(f'ТЕСТ "{current_test.group()}: {current_test.name()}" '
                                  f'результат {current_test.status().name}')
-                    if current_test.has_error():
-                        logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                        f'\nОшибки:\n{current_test.get_last_error()}')
 
                     current_test_status = current_test.status()
-                    current_results.set_current_result_status(current_test_status)
+                    error = "" if not current_test.has_error() else current_test.get_last_error()
+                    current_results.set_current_result(current_test_status, error)
                     current_test.stop()
 
                     if current_test_status == tests_base.ClbTest.Status.FAIL and current_test.abort_on_fail():
@@ -209,11 +214,9 @@ class TestsConductor(QtCore.QObject):
                         self.next_test(a_first_test=False)
             else:
                 logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
-                if current_test.has_error():
-                    logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" ' 
-                                    f'\nОшибки:\n{current_test.get_last_error()}')
 
-                current_results.set_current_result_status(tests_base.ClbTest.Status.FAIL)
+                error = "" if not current_test.has_error() else current_test.get_last_error()
+                current_results.set_current_result(tests_base.ClbTest.Status.FAIL, f"{error} ТАЙМАУТ\n")
                 current_test.stop()
                 if current_test.abort_on_fail():
                     logging.warning("Провал данного теста критичен. Следующие тесты проводиться не будут")
@@ -229,4 +232,10 @@ class TestsConductor(QtCore.QObject):
         for idx, test in enumerate(self.tests):
             if test.group() == a_group and test.name() == a_name:
                 return self.test_results[idx].get_graph_data()
+        assert False, f'Тест "{a_group}: {a_name}" не найден'
+
+    def get_test_errors(self, a_group: str, a_name: str) -> List[str]:
+        for idx, test in enumerate(self.tests):
+            if test.group() == a_group and test.name() == a_name:
+                return self.test_results[idx].get_errors()
         assert False, f'Тест "{a_group}: {a_name}" не найден'

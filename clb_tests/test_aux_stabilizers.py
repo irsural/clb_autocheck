@@ -26,7 +26,6 @@ class Aux60vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
-        logging.debug(f"stop {Aux60vControl.name}")
         pass
 
 
@@ -43,7 +42,6 @@ class Aux600vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
-        logging.debug(f"stop {Aux600vControl.name}")
         pass
 
 
@@ -60,7 +58,6 @@ class Aux4vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
-        logging.debug(f"stop {Aux4vControl.name}")
         pass
 
 
@@ -143,7 +140,7 @@ class AuxStabilizersTest(ClbTest):
 
             if self.aux_fail_timer.check():
                 self.error_message += f"Стабилизатор {self.current_aux.name} не вышел на " \
-                                      f"уставку {voltage_setpoint}. Измеренное значение {aux_current_voltage}\n"
+                                      f"уставку {voltage_setpoint} В. Измеренное значение {aux_current_voltage}\n"
                 self.next_test()
 
     def next_test(self):

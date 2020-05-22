@@ -10,6 +10,7 @@ from source_mode_window import SourceModeWidget
 from network_variables import NetworkVariables
 from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
+from dialog_with_text import DialogWithText
 from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
 from tstlan_dialog import TstlanDialog
@@ -84,7 +85,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
             self.tests_widget.show_graph_requested.connect(self.show_test_graph)
+            self.tests_widget.show_errors_requested.connect(self.show_test_errors)
             self.graphs_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
+            self.errors_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
 
             self.test_conductor = TestsConductor(self.tests)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
@@ -211,6 +214,29 @@ class MainWindow(QtWidgets.QMainWindow):
                     del self.graphs_dialogs[(a_group, a_name)]
             else:
                 logging.warning("График для выбранного измерения не создан")
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
+
+    def show_test_errors(self, a_group: str, a_name: str):
+        try:
+            errors_list = self.test_conductor.get_test_errors(a_group, a_name)
+            has_errors = True if any(error != "" for error in errors_list) else False
+            if has_errors:
+                try:
+                    errors_dialog = self.errors_dialogs[(a_group, a_name)]
+                    errors_dialog.activateWindow()
+                except KeyError:
+                    nl = "\n"
+                    errors_list = [f'<p style=" color:#ff0000;">Тест №{num + 1}</p>{error.replace(nl, "<br>")}'
+                                   for num, error in enumerate(errors_list)]
+
+                    errors_dialog = DialogWithText(errors_list, self.settings, self)
+                    errors_dialog.setWindowTitle(f'Ошибки теста "{a_group}: {a_name}"')
+                    self.errors_dialogs[(a_group, a_name)] = errors_dialog
+                    errors_dialog.exec()
+                    del self.errors_dialogs[(a_group, a_name)]
+            else:
+                logging.warning("Выбранный тест не содержит ошибок")
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
