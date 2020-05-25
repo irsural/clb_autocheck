@@ -17,7 +17,7 @@ class CablesTest(ClbTest):
         self.netvars = a_netvars
         self.__timeout_s = a_timeout_s
 
-        self.temperature_min = 28
+        self.temperature_min = 20
         self.temperature_max = 45
 
         self.dependent_variables = {

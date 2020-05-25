@@ -19,7 +19,7 @@ class DialogWithText(QtWidgets.QDialog):
         self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
         self.show()
 
-        self.ui.textEdit.setText("\n".join(a_text_strings))
+        self.ui.textEdit.setText("".join(a_text_strings))
 
     def __del__(self):
         print("dialog with text deleted")
