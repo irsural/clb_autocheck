@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 import logging
+import json
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -96,6 +97,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
+            self.ui.save_button.clicked.connect(self.save_results)
+            self.ui.load_button.clicked.connect(self.load_results)
+
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
             self.tick_timer.start(10)
@@ -153,6 +157,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def lock_interface(self, a_lock):
         self.source_mode_widget.ui.control_box.setDisabled(a_lock)
         self.tests_widget.lock_interface(a_lock)
+        self.ui.load_button.setDisabled(a_lock)
+        self.ui.save_button.setDisabled(a_lock)
 
     def autocheck_button_clicked(self):
         try:
@@ -237,6 +243,46 @@ class MainWindow(QtWidgets.QMainWindow):
                     del self.errors_dialogs[(a_group, a_name)]
             else:
                 logging.warning("Выбранный тест не содержит ошибок")
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
+
+    def save_results(self):
+        try:
+            chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Сохранить результаты",
+                                                                   self.settings.last_save_results_folder,
+                                                                   "Результаты проверки (*.car)")
+            if chosen_file != "":
+                results = {}
+                for test in self.tests:
+                    test_results = self.test_conductor.get_test_results(test.group(), test.name())
+                    results[f"{test.group()}:{test.name()}"] = test_results.data_to_serialize()
+
+                with open(chosen_file, 'w') as file:
+                    file.write(json.dumps(results, indent=4))
+
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
+
+    def load_results(self):
+        try:
+            chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Выберите файл",
+                                                                   self.settings.last_save_results_folder,
+                                                                   "Результаты проверки (*.car)")
+            if chosen_file != "":
+                self.settings.last_save_results_folder = chosen_file
+
+                with open(chosen_file, 'r') as file:
+                    test_results: Dict[str, Dict] = json.load(file)
+
+                for test_name in test_results.keys():
+                    sep = test_name.find(':')
+                    group, name = test_name[:sep], test_name[sep + 1:]
+
+                    try:
+                        self.test_conductor.set_test_results(group, name, test_results[test_name])
+                    except ValueError:
+                        logging.warning(f"Тест {group}: {name} не найден! Результаты не восстановлены")
+
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 

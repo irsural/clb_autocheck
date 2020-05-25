@@ -15,6 +15,7 @@ class Ui_Dialog(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(838, 554)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
+        self.verticalLayout.setContentsMargins(0, 5, 0, 0)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.test_number_tabbar_layout = QtWidgets.QHBoxLayout()

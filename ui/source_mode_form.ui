@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
@@ -571,7 +583,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

@@ -1,6 +1,9 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
+from copy import deepcopy
 import logging
 import time
+import json
+
 from PyQt5 import QtCore
 
 from network_variables import BufferedVariable
@@ -13,7 +16,7 @@ class TestResults:
         self.statuses = []
         self.errors = []
         self.variables_to_graph = {}
-        self.__graph_data = []
+        self.graph_data = []
         self.graph_normalize_time_value = 0
 
     def set_current_result(self, a_status: tests_base.ClbTest.Status, a_error: str):
@@ -24,16 +27,18 @@ class TestResults:
         self.statuses.append(tests_base.ClbTest.Status.NOT_CHECKED)
         self.errors.append("")
         if self.variables_to_graph:
-            self.__graph_data.append({name: ([], []) for name in self.variables_to_graph.keys()})
+            self.graph_data.append({name: ([], []) for name in self.variables_to_graph.keys()})
 
     def delete_results(self):
         self.statuses = []
         self.errors = []
         self.variables_to_graph = {}
-        self.__graph_data = []
+        self.graph_data = []
 
     def get_final_status(self) -> tests_base.ClbTest.Status:
-        assert self.statuses, "Ни одного результата не создано!!"
+        # assert self.statuses, "Ни одного результата не создано!!"
+        if not self.statuses:
+            return tests_base.ClbTest.Status.NOT_CHECKED
 
         if self.statuses[0] == tests_base.ClbTest.Status.NOT_CHECKED:
             return tests_base.ClbTest.Status.NOT_CHECKED
@@ -54,7 +59,7 @@ class TestResults:
         return self.statuses.count(tests_base.ClbTest.Status.SUCCESS)
 
     def get_graph_data(self) -> List[Dict[str, Tuple[List[float], List[float]]]]:
-        return self.__graph_data
+        return self.graph_data
 
     def set_variables_to_graph(self, a_variables_to_graph: Dict[str, BufferedVariable]):
         self.variables_to_graph = a_variables_to_graph
@@ -64,7 +69,7 @@ class TestResults:
 
         for variable in self.variables_to_graph.keys():
             value = self.variables_to_graph[variable].get()
-            current_graph = self.__graph_data[-1][variable]
+            current_graph = self.graph_data[-1][variable]
 
             if not current_graph[0]:
                 self.graph_normalize_time_value = timestamp
@@ -73,8 +78,23 @@ class TestResults:
             # Список Y-ов
             current_graph[1].append(value)
 
+    def data_to_serialize(self):
+        results_dict = self.__dict__
+        # Не сериализуется нормально, сохранять не обязательно
+        results_dict["variables_to_graph"] = {}
+        return results_dict
+        # return json.dumps(self, cls=TestResultsEncoder, indent=4)
+
     def __str__(self):
-        return f"{self.statuses}\n{self.__graph_data}"
+        return f"{self.statuses}\n{self.graph_data}"
+
+
+class TestResultsEncoder(json.JSONEncoder):
+    def default(self, o):
+        results_dict = o.__dict__
+        # Не сериализуется нормально, сохранять не обязательно
+        results_dict["variables_to_graph"] = {}
+        return results_dict
 
 
 class TestsConductor(QtCore.QObject):
@@ -239,3 +259,26 @@ class TestsConductor(QtCore.QObject):
             if test.group() == a_group and test.name() == a_name:
                 return self.test_results[idx].get_errors()
         assert False, f'Тест "{a_group}: {a_name}" не найден'
+
+    def get_test_results(self, a_group: str, a_name: str) -> Union[None, TestResults]:
+        for idx, test in enumerate(self.tests):
+            if test.group() == a_group and test.name() == a_name:
+                return self.test_results[idx]
+        return None
+
+    def set_test_results(self, a_group: str, a_name: str, a_test_results: Dict):
+        for idx, test in enumerate(self.tests):
+            if test.group() == a_group and test.name() == a_name:
+                test_result = TestResults()
+                test_result.statuses = a_test_results["statuses"]
+                test_result.errors = a_test_results["errors"]
+                test_result.variables_to_graph = {}
+                test_result.graph_data = a_test_results["graph_data"]
+                test_result.graph_normalize_time_value = a_test_results["graph_normalize_time_value"]
+
+                self.test_results[idx] = test_result
+
+                self.test_status_changed.emit(a_group, a_name, test_result.get_final_status(),
+                                              test_result.get_success_results_count())
+                return
+        raise ValueError

@@ -15,6 +15,7 @@ class Ui_Dialog(object):
         Dialog.setObjectName("Dialog")
         Dialog.resize(838, 554)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
+        self.verticalLayout.setContentsMargins(3, 3, 3, 3)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
         self.chart_layout = QtWidgets.QHBoxLayout()

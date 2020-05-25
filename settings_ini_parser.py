@@ -69,6 +69,8 @@ class Settings(QtCore.QObject):
     TESTS_COLLAPSED_STATES_KEY = "tests_collapsed_states"
     TESTS_COLLAPSED_STATES_DEFAULT = "0"
 
+    LAST_SAVE_RESULTS_FOLDER_KEY = "last_save_results_folder"
+
     GEOMETRY_SECTION = "Geometry"
     HEADERS_SECTION = "Headers"
 
@@ -102,6 +104,8 @@ class Settings(QtCore.QObject):
         self.__tests_repeat_count = []
         self.__tests_collapsed_states = []
 
+        self.__last_save_results_folder = ""
+
         self.settings = configparser.ConfigParser()
         try:
             self.restore_settings()
@@ -121,7 +125,8 @@ class Settings(QtCore.QObject):
                 self.TSTLAN_SHOW_MARKS_KEY: self.TSTLAN_SHOW_MARKS_DEFAULT,
                 self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT,
                 self.TESTS_REPEAT_COUNT_KEY: self.TESTS_REPEAT_COUNT_DEFAULT,
-                self.TESTS_COLLAPSED_STATES_KEY: self.TESTS_COLLAPSED_STATES_DEFAULT
+                self.TESTS_COLLAPSED_STATES_KEY: self.TESTS_COLLAPSED_STATES_DEFAULT,
+                self.LAST_SAVE_RESULTS_FOLDER_KEY: "",
             }
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
@@ -170,6 +175,9 @@ class Settings(QtCore.QObject):
         self.__tests_collapsed_states = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_COLLAPSED_STATES_KEY,
                                                              self.TESTS_COLLAPSED_STATES_DEFAULT,
                                                              self.ValueType.LIST_INT)
+
+        self.__last_save_results_folder = self.check_ini_value(self.MEASURE_SECTION, self.LAST_SAVE_RESULTS_FOLDER_KEY,
+                                                               "", self.ValueType.STRING)
 
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
@@ -386,3 +394,14 @@ class Settings(QtCore.QObject):
         self.save()
 
         self.__tests_collapsed_states = a_list
+
+    @property
+    def last_save_results_folder(self):
+        return self.__last_save_results_folder
+
+    @last_save_results_folder.setter
+    def last_save_results_folder(self, a_last_save_results_folder: str):
+        self.settings[self.MEASURE_SECTION][self.LAST_SAVE_RESULTS_FOLDER_KEY] = a_last_save_results_folder
+        self.save()
+
+        self.__last_save_results_folder = a_last_save_results_folder
