@@ -112,7 +112,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
-            self.ui.save_button.clicked.connect(self.save_results)
+            self.ui.save_button.clicked.connect(self.save_button_clicked)
             self.ui.load_button.clicked.connect(self.load_results)
 
             self.tick_timer = QtCore.QTimer(self)
@@ -259,8 +259,11 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
+    def save_button_clicked(self, a_state):
+        self.save_results()
+
+    @utils.exception_decorator
     def save_results(self):
-        try:
             chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Сохранить результаты",
                                                                    self.settings.last_save_results_folder,
                                                                    "Результаты проверки (*.car)")
@@ -272,9 +275,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 with open(chosen_file, 'w') as file:
                     file.write(json.dumps(results, indent=4))
-
-        except Exception as err:
-            logging.debug(utils.exception_handler(err))
 
     def load_results(self):
         try:

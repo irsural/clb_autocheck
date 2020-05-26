@@ -1,5 +1,7 @@
 from linecache import checkcache, getline
 from configparser import ConfigParser
+import traceback
+import logging
 from enum import IntEnum
 from sys import exc_info
 import math
@@ -223,6 +225,22 @@ def exception_handler(a_exception):
     return "Exception{0} in {1}\n"\
            "Line {2}: '{3}'\n"\
            "Message: {4}".format(type(a_exception), filename, lineno, line.strip(), a_exception)
+
+
+def get_decorator(errors=(Exception, ), default_value=None, log_out_foo=print):
+    def decorator(func):
+        def new_func(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except errors:
+                log_out_foo(traceback.format_exc())
+                return default_value
+        return new_func
+    return decorator
+
+
+exception_decorator = get_decorator(log_out_foo=logging.debug)
+assertion_decorator = get_decorator(errors=(AssertionError, ), log_out_foo=logging.debug)
 
 
 def get_array_min_diff(a_array: list):
