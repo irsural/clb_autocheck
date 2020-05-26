@@ -1,5 +1,4 @@
 from typing import List, Dict, Tuple, Union
-from copy import deepcopy
 import logging
 import time
 import json
@@ -36,18 +35,14 @@ class TestResults:
         self.graph_data = []
 
     def get_final_status(self) -> tests_base.ClbTest.Status:
-        # assert self.statuses, "Ни одного результата не создано!!"
-        if not self.statuses:
+        if not self.statuses or self.statuses[0] == tests_base.ClbTest.Status.NOT_CHECKED:
             return tests_base.ClbTest.Status.NOT_CHECKED
-
-        if self.statuses[0] == tests_base.ClbTest.Status.NOT_CHECKED:
-            return tests_base.ClbTest.Status.NOT_CHECKED
-
-        for status in self.statuses:
-            assert status != (tests_base.ClbTest.Status.IN_PROCESS, tests_base.ClbTest.Status.NOT_CHECKED)
-            if status == tests_base.ClbTest.Status.FAIL:
-                return tests_base.ClbTest.Status.FAIL
-        return tests_base.ClbTest.Status.SUCCESS
+        else:
+            for status in self.statuses:
+                assert status != (tests_base.ClbTest.Status.IN_PROCESS, tests_base.ClbTest.Status.NOT_CHECKED)
+                if status == tests_base.ClbTest.Status.FAIL:
+                    return tests_base.ClbTest.Status.FAIL
+            return tests_base.ClbTest.Status.SUCCESS
 
     def get_errors(self):
         return self.errors
@@ -233,7 +228,7 @@ class TestsConductor(QtCore.QObject):
                     else:
                         self.next_test(a_first_test=False)
             else:
-                logging.warning(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
+                logging.debug(f'ТЕСТ "{current_test.group()}: {current_test.name()}" TIMEOUT')
 
                 error = "" if not current_test.has_error() else current_test.get_last_error()
                 current_results.set_current_result(tests_base.ClbTest.Status.FAIL, f"{error} ТАЙМАУТ\n")

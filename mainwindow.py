@@ -17,9 +17,9 @@ from test_conductor import TestsConductor
 from tstlan_dialog import TstlanDialog
 from qt_utils import QTextEditLogger
 import calibrator_constants as clb
+from clb_tests import tests_base
 import constants as cfg
 import tests_factory
-from clb_tests import tests_base
 import clb_dll
 import utils
 
@@ -45,7 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.setMovie(self.loader)
 
         try:
-            self.settings = Settings(self)
+            self.settings = Settings()
             ini_ok = True
         except BadIniException:
             ini_ok = False
@@ -108,8 +108,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_up_logger(self):
         log = QTextEditLogger(self, self.ui.log_text_edit)
-        # log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-        #                                    datefmt='%Y-%m-%d %H:%M:%S'))
         log.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
 
         logging.getLogger().addHandler(log)

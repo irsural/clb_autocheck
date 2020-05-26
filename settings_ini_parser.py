@@ -5,7 +5,6 @@ import logging
 import base64
 import os
 
-from PyQt5.QtCore import pyqtSignal
 from PyQt5 import QtCore
 
 import utils
@@ -15,7 +14,7 @@ class BadIniException(Exception):
     pass
 
 
-class Settings(QtCore.QObject):
+class Settings:
     CONFIG_PATH = "./settings.ini"
 
     class ValueType(IntEnum):
@@ -33,11 +32,12 @@ class Settings(QtCore.QObject):
         ValueType.STRING: str
     }
 
-    MEASURE_SECTION = "Measure"
+    PARAMETERS_SECTION = "Parameters"
     FIXED_STEP_KEY = "fixed_step_list"
     FIXED_STEP_DEFAULT = "0.0001,0.01,0.1,1,10,20,100"
 
     CHECKBOX_STATES_DEFAULT = "0"
+    CHECKBOX_STATES_KEY = "checkbox_states"
 
     FIXED_STEP_IDX_KEY = "fixed_step_idx"
     FIXED_STEP_IDX_DEFAULT = "0"
@@ -72,21 +72,8 @@ class Settings(QtCore.QObject):
     LAST_SAVE_RESULTS_FOLDER_KEY = "last_save_results_folder"
 
     GEOMETRY_SECTION = "Geometry"
-    HEADERS_SECTION = "Headers"
 
-    CHECKBOX_STATES_KEY = "checkbox_states"
-
-    # В ini файлы сохраняются QByteArray, в которых могут быть переносы строки, которые херят ini файл
-    LF = '\n'
-    LF_SUBSTITUTE = "\t\t\t\t"
-    CR = '\r'
-    CR_SUBSTITUTE = '\f\f\f\f'
-
-    fixed_step_changed = pyqtSignal()
-
-    def __init__(self, a_parent=None):
-        super().__init__(a_parent)
-
+    def __init__(self):
         self.__fixed_step_list = []
         self.__fixed_step_idx = 0
 
@@ -115,7 +102,7 @@ class Settings(QtCore.QObject):
     # noinspection DuplicatedCode
     def restore_settings(self):
         if not os.path.exists(self.CONFIG_PATH):
-            self.settings[self.MEASURE_SECTION] = {
+            self.settings[self.PARAMETERS_SECTION] = {
                 self.FIXED_STEP_KEY: self.FIXED_STEP_DEFAULT,
                 self.FIXED_STEP_IDX_KEY: self.FIXED_STEP_IDX_DEFAULT,
                 self.STEP_ROUGH_KEY: self.STEP_ROUGH_DEFAULT,
@@ -131,52 +118,52 @@ class Settings(QtCore.QObject):
             utils.save_settings(self.CONFIG_PATH, self.settings)
         else:
             self.settings.read(self.CONFIG_PATH)
-            self.add_ini_section(self.MEASURE_SECTION)
+            self.add_ini_section(self.PARAMETERS_SECTION)
 
-        self.__fixed_step_list = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_KEY,
+        self.__fixed_step_list = self.check_ini_value(self.PARAMETERS_SECTION, self.FIXED_STEP_KEY,
                                                       self.FIXED_STEP_DEFAULT, self.ValueType.LIST_FLOAT)
 
-        self.__checkbox_states = self.check_ini_value(self.MEASURE_SECTION, self.CHECKBOX_STATES_KEY,
+        self.__checkbox_states = self.check_ini_value(self.PARAMETERS_SECTION, self.CHECKBOX_STATES_KEY,
                                                       self.CHECKBOX_STATES_DEFAULT, self.ValueType.LIST_INT)
 
-        self.__fixed_step_idx = self.check_ini_value(self.MEASURE_SECTION, self.FIXED_STEP_IDX_KEY,
+        self.__fixed_step_idx = self.check_ini_value(self.PARAMETERS_SECTION, self.FIXED_STEP_IDX_KEY,
                                                      self.FIXED_STEP_IDX_DEFAULT, self.ValueType.INT)
         self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
 
-        self.__rough_step = self.check_ini_value(self.MEASURE_SECTION, self.STEP_ROUGH_KEY,
+        self.__rough_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_ROUGH_KEY,
                                                  self.STEP_ROUGH_DEFAULT, self.ValueType.FLOAT)
         self.__rough_step = utils.bound(self.__rough_step, 0., 100.)
 
-        self.__common_step = self.check_ini_value(self.MEASURE_SECTION, self.STEP_COMMON_KEY,
+        self.__common_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_COMMON_KEY,
                                                   self.STEP_COMMON_DEFAULT, self.ValueType.FLOAT)
         self.__common_step = utils.bound(self.__common_step, 0., 100.)
 
-        self.__exact_step = self.check_ini_value(self.MEASURE_SECTION, self.STEP_EXACT_KEY,
+        self.__exact_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_EXACT_KEY,
                                                  self.STEP_EXACT_DEFAULT, self.ValueType.FLOAT)
         self.__exact_step = utils.bound(self.__exact_step, 0., 100.)
 
-        self.__tstlan_update_time = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_UPDATE_TIME_KEY,
+        self.__tstlan_update_time = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_UPDATE_TIME_KEY,
                                                          self.TSTLAN_UPDATE_TIME_DEFAULT, self.ValueType.FLOAT)
         self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
 
-        self.__tstlan_show_marks = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_SHOW_MARKS_KEY,
+        self.__tstlan_show_marks = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_SHOW_MARKS_KEY,
                                                         self.TSTLAN_SHOW_MARKS_DEFAULT, self.ValueType.INT)
         self.__tstlan_show_marks = utils.bound(self.__tstlan_show_marks, 0, 1)
 
-        self.__tstlan_makrs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_MARKS_KEY,
+        self.__tstlan_makrs = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_MARKS_KEY,
                                                    self.TSTLAN_MARKS_DEFAULT, self.ValueType.LIST_INT)
 
-        self.__tstlan_graphs = self.check_ini_value(self.MEASURE_SECTION, self.TSTLAN_GRAPH_KEY,
+        self.__tstlan_graphs = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_GRAPH_KEY,
                                                     self.TSTLAN_GRAPH_DEFAULT, self.ValueType.LIST_INT)
 
-        self.__tests_repeat_count = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_REPEAT_COUNT_KEY,
+        self.__tests_repeat_count = self.check_ini_value(self.PARAMETERS_SECTION, self.TESTS_REPEAT_COUNT_KEY,
                                                          self.TESTS_REPEAT_COUNT_DEFAULT, self.ValueType.LIST_INT)
 
-        self.__tests_collapsed_states = self.check_ini_value(self.MEASURE_SECTION, self.TESTS_COLLAPSED_STATES_KEY,
+        self.__tests_collapsed_states = self.check_ini_value(self.PARAMETERS_SECTION, self.TESTS_COLLAPSED_STATES_KEY,
                                                              self.TESTS_COLLAPSED_STATES_DEFAULT,
                                                              self.ValueType.LIST_INT)
 
-        self.__last_save_results_folder = self.check_ini_value(self.MEASURE_SECTION, self.LAST_SAVE_RESULTS_FOLDER_KEY,
+        self.__last_save_results_folder = self.check_ini_value(self.PARAMETERS_SECTION, self.LAST_SAVE_RESULTS_FOLDER_KEY,
                                                                "", self.ValueType.STRING)
 
     def add_ini_section(self, a_name: str):
@@ -213,14 +200,14 @@ class Settings(QtCore.QObject):
             return QtCore.QByteArray()
 
     def save_header_state(self, a_header_name: str, a_state: QtCore.QByteArray):
-        self.add_ini_section(self.HEADERS_SECTION)
+        self.add_ini_section(self.PARAMETERS_SECTION)
 
-        self.settings[self.HEADERS_SECTION][a_header_name] = self.__to_base64(a_state)
+        self.settings[self.PARAMETERS_SECTION][a_header_name] = self.__to_base64(a_state)
         self.save()
 
     def get_last_header_state(self, a_header_name: str):
         try:
-            state_bytes = self.settings[self.HEADERS_SECTION][a_header_name]
+            state_bytes = self.settings[self.PARAMETERS_SECTION][a_header_name]
             return QtCore.QByteArray(self.__from_base64(state_bytes))
         except (KeyError, ValueError):
             return QtCore.QByteArray()
@@ -246,12 +233,11 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in final_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.FIXED_STEP_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.FIXED_STEP_KEY] = saved_string
         self.save()
 
         self.__fixed_step_list = [val for val in final_list]
         self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
-        self.fixed_step_changed.emit()
 
     @property
     def enabled_tests_list(self):
@@ -262,7 +248,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
         self.save()
 
         self.__checkbox_states = a_list
@@ -273,7 +259,7 @@ class Settings(QtCore.QObject):
 
     @fixed_step_idx.setter
     def fixed_step_idx(self, a_idx: int):
-        self.settings[self.MEASURE_SECTION][self.FIXED_STEP_IDX_KEY] = str(a_idx)
+        self.settings[self.PARAMETERS_SECTION][self.FIXED_STEP_IDX_KEY] = str(a_idx)
         self.save()
 
         self.__fixed_step_idx = a_idx
@@ -285,7 +271,7 @@ class Settings(QtCore.QObject):
 
     @rough_step.setter
     def rough_step(self, a_step: float):
-        self.settings[self.MEASURE_SECTION][self.STEP_ROUGH_KEY] = str(a_step)
+        self.settings[self.PARAMETERS_SECTION][self.STEP_ROUGH_KEY] = str(a_step)
         self.save()
 
         self.__rough_step = a_step
@@ -297,7 +283,7 @@ class Settings(QtCore.QObject):
 
     @common_step.setter
     def common_step(self, a_step: float):
-        self.settings[self.MEASURE_SECTION][self.STEP_COMMON_KEY] = str(a_step)
+        self.settings[self.PARAMETERS_SECTION][self.STEP_COMMON_KEY] = str(a_step)
         self.save()
 
         self.__common_step = a_step
@@ -309,7 +295,7 @@ class Settings(QtCore.QObject):
 
     @exact_step.setter
     def exact_step(self, a_step: float):
-        self.settings[self.MEASURE_SECTION][self.STEP_EXACT_KEY] = str(a_step)
+        self.settings[self.PARAMETERS_SECTION][self.STEP_EXACT_KEY] = str(a_step)
         self.save()
 
         self.__exact_step = a_step
@@ -321,7 +307,7 @@ class Settings(QtCore.QObject):
 
     @tstlan_update_time.setter
     def tstlan_update_time(self, a_time: float):
-        self.settings[self.MEASURE_SECTION][self.TSTLAN_UPDATE_TIME_KEY] = str(a_time)
+        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_UPDATE_TIME_KEY] = str(a_time)
         self.save()
 
         self.__tstlan_update_time = a_time
@@ -333,7 +319,7 @@ class Settings(QtCore.QObject):
 
     @tstlan_show_marks.setter
     def tstlan_show_marks(self, a_enable: int):
-        self.settings[self.MEASURE_SECTION][self.TSTLAN_SHOW_MARKS_KEY] = str(a_enable)
+        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_SHOW_MARKS_KEY] = str(a_enable)
         self.save()
 
         self.__tstlan_show_marks = a_enable
@@ -348,7 +334,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.TSTLAN_MARKS_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_MARKS_KEY] = saved_string
         self.save()
 
         self.__tstlan_makrs = a_list
@@ -362,7 +348,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.TSTLAN_GRAPH_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_GRAPH_KEY] = saved_string
         self.save()
 
         self.__tstlan_graphs = a_list
@@ -376,7 +362,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.TESTS_REPEAT_COUNT_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.TESTS_REPEAT_COUNT_KEY] = saved_string
         self.save()
 
         self.__tests_repeat_count = a_list
@@ -390,7 +376,7 @@ class Settings(QtCore.QObject):
         saved_string = ','.join(str(val) for val in a_list)
         saved_string = saved_string.strip(',')
 
-        self.settings[self.MEASURE_SECTION][self.TESTS_COLLAPSED_STATES_KEY] = saved_string
+        self.settings[self.PARAMETERS_SECTION][self.TESTS_COLLAPSED_STATES_KEY] = saved_string
         self.save()
 
         self.__tests_collapsed_states = a_list
@@ -401,7 +387,7 @@ class Settings(QtCore.QObject):
 
     @last_save_results_folder.setter
     def last_save_results_folder(self, a_last_save_results_folder: str):
-        self.settings[self.MEASURE_SECTION][self.LAST_SAVE_RESULTS_FOLDER_KEY] = a_last_save_results_folder
+        self.settings[self.PARAMETERS_SECTION][self.LAST_SAVE_RESULTS_FOLDER_KEY] = a_last_save_results_folder
         self.save()
 
         self.__last_save_results_folder = a_last_save_results_folder
