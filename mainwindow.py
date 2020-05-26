@@ -45,7 +45,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.setMovie(self.loader)
 
         try:
-            self.settings = Settings()
+            self.settings = Settings("./settings.ini", [
+                Settings.VariableInfo(a_name="fixed_step_list", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_FLOAT, a_default=[0.0001,0.01,0.1,1,10,20,100]),
+                Settings.VariableInfo(a_name="checkbox_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="fixed_step_idx", a_section="PARAMETERS", a_type=Settings.ValueType.INT),
+                Settings.VariableInfo(a_name="rough_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.5),
+                Settings.VariableInfo(a_name="common_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.05),
+                Settings.VariableInfo(a_name="exact_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.002),
+                Settings.VariableInfo(a_name="tstlan_update_time", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.2),
+                Settings.VariableInfo(a_name="tstlan_show_marks", a_section="PARAMETERS", a_type=Settings.ValueType.INT, a_default=0),
+                Settings.VariableInfo(a_name="tstlan_marks", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tstlan_graphs", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tests_repeat_count", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tests_collapsed_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="last_save_results_folder", a_section="PARAMETERS", a_type=Settings.ValueType.STRING)
+            ])
+
             ini_ok = True
         except BadIniException:
             ini_ok = False

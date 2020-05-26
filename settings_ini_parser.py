@@ -1,12 +1,12 @@
 from enum import IntEnum
 from typing import List
 import configparser
-import logging
 import base64
 import os
 
 from PyQt5 import QtCore
 
+import settings_properties as prop
 import utils
 
 
@@ -14,8 +14,26 @@ class BadIniException(Exception):
     pass
 
 
-class Settings:
-    CONFIG_PATH = "./settings.ini"
+class PropertyOwner(type):
+    def __new__(mcs, name, bases, attrs):
+        # Ищет члены, унаследованные от Property и устанавливает им поля name в соответствии с инменем переменной
+        for n, v in attrs.items():
+            if issubclass(type(v), prop.Property):
+                v.name = n
+        return super(PropertyOwner, mcs).__new__(mcs, name, bases, attrs)
+
+
+def add_properties_to_class(instance, a_properties):
+    """
+    Создает новый класс со свойством prop_name типа propr, унаследованный от instance
+    """
+    class_name = instance.__class__.__name__ + 'WithProperties'
+    child_class = type(class_name, (instance.__class__,), a_properties)
+    instance.__class__ = child_class
+
+
+class Settings(metaclass=PropertyOwner):
+    GEOMETRY_SECTION = "GEOMETRY"
 
     class ValueType(IntEnum):
         INT = 0
@@ -23,171 +41,73 @@ class Settings:
         LIST_FLOAT = 2
         LIST_INT = 3
         STRING = 4
+        BYTES = 5
 
-    ValueTypeConvertFoo = {
-        ValueType.INT: int,
-        ValueType.FLOAT: float,
-        ValueType.LIST_FLOAT: lambda s: [float(val) for val in s.split(',')],
-        ValueType.LIST_INT: lambda s: [int(val) for val in s.split(',')],
-        ValueType.STRING: str
-    }
+    class VariableInfo:
+        def __init__(self, a_name: str, a_section: str, a_type, a_default=None):
+            self.name = a_name
+            self.section = a_section
+            self.type_ = a_type
+            self.default = a_default
 
-    PARAMETERS_SECTION = "Parameters"
-    FIXED_STEP_KEY = "fixed_step_list"
-    FIXED_STEP_DEFAULT = "0.0001,0.01,0.1,1,10,20,100"
-
-    CHECKBOX_STATES_DEFAULT = "0"
-    CHECKBOX_STATES_KEY = "checkbox_states"
-
-    FIXED_STEP_IDX_KEY = "fixed_step_idx"
-    FIXED_STEP_IDX_DEFAULT = "0"
-
-    STEP_ROUGH_KEY = "rough_step"
-    STEP_ROUGH_DEFAULT = "0.5"
-
-    STEP_COMMON_KEY = "common_step"
-    STEP_COMMON_DEFAULT = "0.05"
-
-    STEP_EXACT_KEY = "exact_step"
-    STEP_EXACT_DEFAULT = "0.002"
-
-    TSTLAN_UPDATE_TIME_KEY = "tstlan_update_time"
-    TSTLAN_UPDATE_TIME_DEFAULT = "1"
-
-    TSTLAN_SHOW_MARKS_KEY = "tstlan_show_marks"
-    TSTLAN_SHOW_MARKS_DEFAULT = "0"
-
-    TSTLAN_MARKS_KEY = "tstlan_marks"
-    TSTLAN_MARKS_DEFAULT = "0"
-
-    TSTLAN_GRAPH_KEY = "tstlan_graph"
-    TSTLAN_GRAPH_DEFAULT = "0"
-
-    TESTS_REPEAT_COUNT_KEY = "tests_repeat_count"
-    TESTS_REPEAT_COUNT_DEFAULT = "0"
-
-    TESTS_COLLAPSED_STATES_KEY = "tests_collapsed_states"
-    TESTS_COLLAPSED_STATES_DEFAULT = "0"
-
-    LAST_SAVE_RESULTS_FOLDER_KEY = "last_save_results_folder"
-
-    GEOMETRY_SECTION = "Geometry"
-
-    def __init__(self):
-        self.__fixed_step_list = []
-        self.__fixed_step_idx = 0
-
-        self.__checkbox_states = []
-
-        self.__rough_step = 0
-        self.__common_step = 0
-        self.__exact_step = 0
-
-        self.__tstlan_update_time = 0
-        self.__tstlan_show_marks = 0
-        self.__tstlan_makrs = []
-        self.__tstlan_graphs = []
-
-        self.__tests_repeat_count = []
-        self.__tests_collapsed_states = []
-
-        self.__last_save_results_folder = ""
-
+    def __init__(self, a_ini_path, a_variables: List[VariableInfo]):
+        self.ini_path = a_ini_path
         self.settings = configparser.ConfigParser()
-        try:
-            self.restore_settings()
-        except configparser.ParsingError:
-            raise BadIniException
 
-    # noinspection DuplicatedCode
-    def restore_settings(self):
-        if not os.path.exists(self.CONFIG_PATH):
-            self.settings[self.PARAMETERS_SECTION] = {
-                self.FIXED_STEP_KEY: self.FIXED_STEP_DEFAULT,
-                self.FIXED_STEP_IDX_KEY: self.FIXED_STEP_IDX_DEFAULT,
-                self.STEP_ROUGH_KEY: self.STEP_ROUGH_DEFAULT,
-                self.STEP_COMMON_KEY: self.STEP_COMMON_DEFAULT,
-                self.STEP_EXACT_KEY: self.STEP_EXACT_DEFAULT,
-                self.TSTLAN_UPDATE_TIME_KEY: self.TSTLAN_UPDATE_TIME_DEFAULT,
-                self.TSTLAN_SHOW_MARKS_KEY: self.TSTLAN_SHOW_MARKS_DEFAULT,
-                self.TSTLAN_MARKS_KEY: self.TSTLAN_MARKS_DEFAULT,
-                self.TESTS_REPEAT_COUNT_KEY: self.TESTS_REPEAT_COUNT_DEFAULT,
-                self.TESTS_COLLAPSED_STATES_KEY: self.TESTS_COLLAPSED_STATES_DEFAULT,
-                self.LAST_SAVE_RESULTS_FOLDER_KEY: "",
-            }
-            utils.save_settings(self.CONFIG_PATH, self.settings)
+        self.__variables = {}
+        self.__sections = set()
+
+        for variable in a_variables:
+            self.add_variable(variable)
+        add_properties_to_class(self, self.__variables)
+
+        self.restore()
+
+    def add_variable(self, a_variable_info: VariableInfo):
+        if a_variable_info.type_ == Settings.ValueType.LIST_FLOAT:
+            self.__variables[a_variable_info.name] = prop.ListOfFloatProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
+        elif a_variable_info.type_ == Settings.ValueType.LIST_INT:
+            self.__variables[a_variable_info.name] = prop.ListOfIntProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
+        elif a_variable_info.type_ == Settings.ValueType.FLOAT:
+            self.__variables[a_variable_info.name] = prop.FloatProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
+        elif a_variable_info.type_ == Settings.ValueType.INT:
+            self.__variables[a_variable_info.name] = prop.IntProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
+        elif a_variable_info.type_ == Settings.ValueType.STRING:
+            self.__variables[a_variable_info.name] = prop.StringProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
+        elif a_variable_info.type_ == Settings.ValueType.BYTES:
+            self.__variables[a_variable_info.name] = prop.BytesProperty(
+                self.ini_path, self.settings, a_variable_info.section, a_variable_info.default)
         else:
-            self.settings.read(self.CONFIG_PATH)
-            self.add_ini_section(self.PARAMETERS_SECTION)
+            assert False, "Settings: Нереализованный тип"
 
-        self.__fixed_step_list = self.check_ini_value(self.PARAMETERS_SECTION, self.FIXED_STEP_KEY,
-                                                      self.FIXED_STEP_DEFAULT, self.ValueType.LIST_FLOAT)
-
-        self.__checkbox_states = self.check_ini_value(self.PARAMETERS_SECTION, self.CHECKBOX_STATES_KEY,
-                                                      self.CHECKBOX_STATES_DEFAULT, self.ValueType.LIST_INT)
-
-        self.__fixed_step_idx = self.check_ini_value(self.PARAMETERS_SECTION, self.FIXED_STEP_IDX_KEY,
-                                                     self.FIXED_STEP_IDX_DEFAULT, self.ValueType.INT)
-        self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
-
-        self.__rough_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_ROUGH_KEY,
-                                                 self.STEP_ROUGH_DEFAULT, self.ValueType.FLOAT)
-        self.__rough_step = utils.bound(self.__rough_step, 0., 100.)
-
-        self.__common_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_COMMON_KEY,
-                                                  self.STEP_COMMON_DEFAULT, self.ValueType.FLOAT)
-        self.__common_step = utils.bound(self.__common_step, 0., 100.)
-
-        self.__exact_step = self.check_ini_value(self.PARAMETERS_SECTION, self.STEP_EXACT_KEY,
-                                                 self.STEP_EXACT_DEFAULT, self.ValueType.FLOAT)
-        self.__exact_step = utils.bound(self.__exact_step, 0., 100.)
-
-        self.__tstlan_update_time = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_UPDATE_TIME_KEY,
-                                                         self.TSTLAN_UPDATE_TIME_DEFAULT, self.ValueType.FLOAT)
-        self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
-
-        self.__tstlan_show_marks = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_SHOW_MARKS_KEY,
-                                                        self.TSTLAN_SHOW_MARKS_DEFAULT, self.ValueType.INT)
-        self.__tstlan_show_marks = utils.bound(self.__tstlan_show_marks, 0, 1)
-
-        self.__tstlan_makrs = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_MARKS_KEY,
-                                                   self.TSTLAN_MARKS_DEFAULT, self.ValueType.LIST_INT)
-
-        self.__tstlan_graphs = self.check_ini_value(self.PARAMETERS_SECTION, self.TSTLAN_GRAPH_KEY,
-                                                    self.TSTLAN_GRAPH_DEFAULT, self.ValueType.LIST_INT)
-
-        self.__tests_repeat_count = self.check_ini_value(self.PARAMETERS_SECTION, self.TESTS_REPEAT_COUNT_KEY,
-                                                         self.TESTS_REPEAT_COUNT_DEFAULT, self.ValueType.LIST_INT)
-
-        self.__tests_collapsed_states = self.check_ini_value(self.PARAMETERS_SECTION, self.TESTS_COLLAPSED_STATES_KEY,
-                                                             self.TESTS_COLLAPSED_STATES_DEFAULT,
-                                                             self.ValueType.LIST_INT)
-
-        self.__last_save_results_folder = self.check_ini_value(self.PARAMETERS_SECTION, self.LAST_SAVE_RESULTS_FOLDER_KEY,
-                                                               "", self.ValueType.STRING)
+        self.__sections.add(a_variable_info.section)
 
     def add_ini_section(self, a_name: str):
         if not self.settings.has_section(a_name):
             self.settings.add_section(a_name)
 
-    def check_ini_value(self, a_section, a_key, a_default, a_value_type: ValueType):
+    def restore(self):
         try:
-            value = self.ValueTypeConvertFoo[a_value_type](self.settings[a_section][a_key])
-        except (KeyError, ValueError):
-            self.settings[a_section][a_key] = a_default
-            utils.save_settings(self.CONFIG_PATH, self.settings)
-            value = self.ValueTypeConvertFoo[a_value_type](a_default)
-        return value
+            if not os.path.exists(self.ini_path):
+                self.save()
 
-    def save(self):
-        utils.save_settings(self.CONFIG_PATH, self.settings)
+            for section in self.__sections:
+                self.add_ini_section(section)
+
+            self.settings.read(self.ini_path)
+
+        except configparser.ParsingError:
+            raise BadIniException
 
     def save_geometry(self, a_window_name: str, a_geometry: QtCore.QByteArray):
         try:
-            self.add_ini_section(self.GEOMETRY_SECTION)
-
+            self.add_ini_section(Settings.GEOMETRY_SECTION)
             self.settings[self.GEOMETRY_SECTION][a_window_name] = self.__to_base64(a_geometry)
-
             self.save()
         except Exception as err:
             print(utils.exception_handler(err))
@@ -200,14 +120,13 @@ class Settings:
             return QtCore.QByteArray()
 
     def save_header_state(self, a_header_name: str, a_state: QtCore.QByteArray):
-        self.add_ini_section(self.PARAMETERS_SECTION)
-
-        self.settings[self.PARAMETERS_SECTION][a_header_name] = self.__to_base64(a_state)
+        self.add_ini_section(Settings.GEOMETRY_SECTION)
+        self.settings[Settings.GEOMETRY_SECTION][a_header_name] = self.__to_base64(a_state)
         self.save()
 
     def get_last_header_state(self, a_header_name: str):
         try:
-            state_bytes = self.settings[self.PARAMETERS_SECTION][a_header_name]
+            state_bytes = self.settings[Settings.GEOMETRY_SECTION][a_header_name]
             return QtCore.QByteArray(self.__from_base64(state_bytes))
         except (KeyError, ValueError):
             return QtCore.QByteArray()
@@ -220,174 +139,40 @@ class Settings:
     def __from_base64(a_string: str):
         return base64.b64decode(a_string)
 
-    @property
-    def fixed_step_list(self):
-        return self.__fixed_step_list
+    def save(self):
+        with open(self.ini_path, 'w') as config_file:
+            self.settings.write(config_file)
 
-    @fixed_step_list.setter
-    def fixed_step_list(self, a_list: List[float]):
-        # Удаляет дубликаты
-        final_list = list(dict.fromkeys(a_list))
-        final_list.sort()
 
-        saved_string = ','.join(str(val) for val in final_list)
-        saved_string = saved_string.strip(',')
+if __name__ == "__main__":
+    # Пример использования
 
-        self.settings[self.PARAMETERS_SECTION][self.FIXED_STEP_KEY] = saved_string
-        self.save()
+    import sys
+    from PyQt5 import QtWidgets, QtGui
 
-        self.__fixed_step_list = [val for val in final_list]
-        self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
+    a = Settings("./test_settings.ini", [
+        Settings.VariableInfo(a_name="list_float", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_FLOAT),
+        Settings.VariableInfo(a_name="list_int", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+        Settings.VariableInfo(a_name="float1", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=123.),
+        Settings.VariableInfo(a_name="int1", a_section="PARAMETERS", a_type=Settings.ValueType.INT, a_default=222),
+        Settings.VariableInfo(a_name="str1", a_section="PARAMETERS", a_type=Settings.ValueType.STRING, a_default="haha")
+    ])
 
-    @property
-    def enabled_tests_list(self):
-        return self.__checkbox_states
+    print(a.list_float, a.list_int, a.float1, a.int1, a.str1)
 
-    @enabled_tests_list.setter
-    def enabled_tests_list(self, a_list: List[int]):
-        saved_string = ','.join(str(val) for val in a_list)
-        saved_string = saved_string.strip(',')
+    a.list_float = [31., 33., 333.]
+    a.list_int = [11, 2, 3]
+    a.float1 = 11.
+    a.int1 = 331
+    a.str1 = "he1he"
 
-        self.settings[self.PARAMETERS_SECTION][self.CHECKBOX_STATES_KEY] = saved_string
-        self.save()
+    app = QtWidgets.QApplication(sys.argv)
 
-        self.__checkbox_states = a_list
+    w = QtWidgets.QDialog()
+    w.setWindowTitle('Simple')
+    w.restoreGeometry(a.get_last_geometry("dialog"))
+    w.exec()
 
-    @property
-    def fixed_step_idx(self):
-        return self.__fixed_step_idx
+    a.save_geometry("dialog", w.saveGeometry())
 
-    @fixed_step_idx.setter
-    def fixed_step_idx(self, a_idx: int):
-        self.settings[self.PARAMETERS_SECTION][self.FIXED_STEP_IDX_KEY] = str(a_idx)
-        self.save()
-
-        self.__fixed_step_idx = a_idx
-        self.__fixed_step_idx = utils.bound(self.__fixed_step_idx, 0, len(self.__fixed_step_list) - 1)
-
-    @property
-    def rough_step(self):
-        return self.__rough_step
-
-    @rough_step.setter
-    def rough_step(self, a_step: float):
-        self.settings[self.PARAMETERS_SECTION][self.STEP_ROUGH_KEY] = str(a_step)
-        self.save()
-
-        self.__rough_step = a_step
-        self.__rough_step = utils.bound(self.__rough_step, 0., 100.)
-
-    @property
-    def common_step(self):
-        return self.__common_step
-
-    @common_step.setter
-    def common_step(self, a_step: float):
-        self.settings[self.PARAMETERS_SECTION][self.STEP_COMMON_KEY] = str(a_step)
-        self.save()
-
-        self.__common_step = a_step
-        self.__common_step = utils.bound(self.__common_step, 0., 100.)
-
-    @property
-    def exact_step(self):
-        return self.__exact_step
-
-    @exact_step.setter
-    def exact_step(self, a_step: float):
-        self.settings[self.PARAMETERS_SECTION][self.STEP_EXACT_KEY] = str(a_step)
-        self.save()
-
-        self.__exact_step = a_step
-        self.__exact_step = utils.bound(self.__exact_step, 0., 100.)
-
-    @property
-    def tstlan_update_time(self):
-        return self.__tstlan_update_time
-
-    @tstlan_update_time.setter
-    def tstlan_update_time(self, a_time: float):
-        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_UPDATE_TIME_KEY] = str(a_time)
-        self.save()
-
-        self.__tstlan_update_time = a_time
-        self.__tstlan_update_time = utils.bound(self.__tstlan_update_time, 0.1, 100.)
-
-    @property
-    def tstlan_show_marks(self):
-        return self.__tstlan_show_marks
-
-    @tstlan_show_marks.setter
-    def tstlan_show_marks(self, a_enable: int):
-        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_SHOW_MARKS_KEY] = str(a_enable)
-        self.save()
-
-        self.__tstlan_show_marks = a_enable
-        self.__tstlan_show_marks = utils.bound(self.__tstlan_show_marks, 0, 1)
-
-    @property
-    def tstlan_marks(self):
-        return self.__tstlan_makrs
-
-    @tstlan_marks.setter
-    def tstlan_marks(self, a_list: List[int]):
-        saved_string = ','.join(str(val) for val in a_list)
-        saved_string = saved_string.strip(',')
-
-        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_MARKS_KEY] = saved_string
-        self.save()
-
-        self.__tstlan_makrs = a_list
-
-    @property
-    def tstlan_graphs(self):
-        return self.__tstlan_graphs
-
-    @tstlan_graphs.setter
-    def tstlan_graphs(self, a_list: List[int]):
-        saved_string = ','.join(str(val) for val in a_list)
-        saved_string = saved_string.strip(',')
-
-        self.settings[self.PARAMETERS_SECTION][self.TSTLAN_GRAPH_KEY] = saved_string
-        self.save()
-
-        self.__tstlan_graphs = a_list
-
-    @property
-    def tests_repeat_count(self):
-        return self.__tests_repeat_count
-
-    @tests_repeat_count.setter
-    def tests_repeat_count(self, a_list: List[int]):
-        saved_string = ','.join(str(val) for val in a_list)
-        saved_string = saved_string.strip(',')
-
-        self.settings[self.PARAMETERS_SECTION][self.TESTS_REPEAT_COUNT_KEY] = saved_string
-        self.save()
-
-        self.__tests_repeat_count = a_list
-
-    @property
-    def tests_collapsed_states(self):
-        return self.__tests_collapsed_states
-
-    @tests_collapsed_states.setter
-    def tests_collapsed_states(self, a_list: List[int]):
-        saved_string = ','.join(str(val) for val in a_list)
-        saved_string = saved_string.strip(',')
-
-        self.settings[self.PARAMETERS_SECTION][self.TESTS_COLLAPSED_STATES_KEY] = saved_string
-        self.save()
-
-        self.__tests_collapsed_states = a_list
-
-    @property
-    def last_save_results_folder(self):
-        return self.__last_save_results_folder
-
-    @last_save_results_folder.setter
-    def last_save_results_folder(self, a_last_save_results_folder: str):
-        self.settings[self.PARAMETERS_SECTION][self.LAST_SAVE_RESULTS_FOLDER_KEY] = a_last_save_results_folder
-        self.save()
-
-        self.__last_save_results_folder = a_last_save_results_folder
+    print(a.list_float, a.list_int, a.float1, a.int1, a.str1)

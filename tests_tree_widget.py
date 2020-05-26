@@ -191,7 +191,7 @@ class TestsTreeWidget(QtCore.QObject):
                 self.show_graph_requested.emit(test_group, test_name)
 
     def restore_checkboxes_state(self):
-        enabled_list = self.settings.enabled_tests_list
+        enabled_list = self.settings.checkbox_states
         idx = 0
         it = QtWidgets.QTreeWidgetItemIterator(self.tree_widget)
         while it.value():
@@ -208,7 +208,7 @@ class TestsTreeWidget(QtCore.QObject):
             idx += 1
             it += 1
 
-        self.settings.enabled_tests_list = enabled_list
+        self.settings.checkbox_states = enabled_list
 
     def save_repeat_count(self):
         repeat_count = []
