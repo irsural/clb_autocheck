@@ -145,6 +145,13 @@ class TestsTreeWidget(QtCore.QObject):
                 return test
         assert True, f'Тест "{a_group_name}: {a_test_name}" не найден !!'
 
+    def is_group_enabled(self, a_group_name: str):
+        matched_tests = self.tree_widget.findItems(a_group_name, QtCore.Qt.MatchFixedString |
+                                                   QtCore.Qt.MatchCaseSensitive | QtCore.Qt.MatchRecursive)
+        for test in matched_tests:
+            return test.checkState(TestsTreeWidget.Column.TESTS_TREE) != QtCore.Qt.Unchecked
+        return None
+
     def get_group_status(self, a_group_item) -> ClbTest.Status:
         group_status = ClbTest.Status.NOT_CHECKED
         all_success = True
