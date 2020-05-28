@@ -264,17 +264,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @utils.exception_decorator
     def save_results(self):
-            chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Сохранить результаты",
-                                                                   self.settings.last_save_results_folder,
-                                                                   "Результаты проверки (*.car)")
-            if chosen_file != "":
-                results = {}
-                for test in self.tests:
-                    test_results = self.test_conductor.get_test_results(test.group(), test.name())
-                    results[f"{test.group()}:{test.name()}"] = test_results.data_to_serialize()
+        suggest_filename = f"{QtCore.QDate.currentDate().toString('yyyyMMdd')} N4-25 №{self.netvars.id.get()}"
+        chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Сохранить результаты", f"{self.settings.last_save_results_folder}/{suggest_filename}",
+            "Результаты проверки (*.car)")
+        if chosen_file != "":
+            results = {}
+            for test in self.tests:
+                test_results = self.test_conductor.get_test_results(test.group(), test.name())
+                results[f"{test.group()}:{test.name()}"] = test_results.data_to_serialize()
 
-                with open(chosen_file, 'w') as file:
-                    file.write(json.dumps(results, indent=4))
+            with open(chosen_file, 'w') as file:
+                file.write(json.dumps(results, indent=4))
 
     def load_results(self):
         try:
@@ -282,7 +283,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                                                    self.settings.last_save_results_folder,
                                                                    "Результаты проверки (*.car)")
             if chosen_file != "":
-                self.settings.last_save_results_folder = chosen_file
+                self.settings.last_save_results_folder = chosen_file[:chosen_file.rfind("/")]
 
                 with open(chosen_file, 'r') as file:
                     test_results: Dict[str, Dict] = json.load(file)
