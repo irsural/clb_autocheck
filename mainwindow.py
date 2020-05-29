@@ -193,7 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QtWidgets.QMessageBox.warning(self, "Ошибка", "Тест предварительных стабилизаторов доступен для "
                                                               "прошивок старше 294 ревизии",
                                               QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.Yes)
-            else:
+            elif self.netvars.source_manual_mode_password.get() != clb.MANUAL_MODE_ENABLE_PASSWORD:
                 self.lock_interface(True)
                 self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
                 self.ui.autocheck_start_button.setText("Остановить")
@@ -201,6 +201,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 self.ui.loader_label.show()
                 self.loader.start()
+            else:
+                logging.warning("Включен ручной режим. Перезагрузите калибратор, чтобы запустить проверку")
         else:
             logging.warning("Калибратор не подключен, невозможно провести проверку")
 

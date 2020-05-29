@@ -93,17 +93,29 @@ class NetworkVariables:
         self.error_count = BufferedVariable(
             VariableInfo(a_index=208, a_type="u32"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
+        self.source_manual_mode_password = BufferedVariable(
+            VariableInfo(a_index=216, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.fast_adc_slow = BufferedVariable(
             VariableInfo(a_index=229, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 
         self.aux_stabilizer_4v_dac_code_float = BufferedVariable(
-            VariableInfo(a_index=374, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+            VariableInfo(a_index=374, a_type="float"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.aux_stabilizer_45v_dac_code_float = BufferedVariable(
-            VariableInfo(a_index=378, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+            VariableInfo(a_index=378, a_type="float"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.aux_stabilizer_600v_dac_code_float = BufferedVariable(
-            VariableInfo(a_index=382, a_type="float"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
+            VariableInfo(a_index=382, a_type="float"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.relay_200_600 = BufferedVariable(VariableInfo(
+            a_index=406, a_bit_index=0, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.relay_aux_stabilizer_600v = BufferedVariable(VariableInfo(
+            a_index=406, a_bit_index=1, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
+        self.relay_aux_stabilizer_4v = BufferedVariable(VariableInfo(
+            a_index=406, a_bit_index=4, a_type="bit"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
         self.aux_stabilizer_adc_dc_600v_voltage = BufferedVariable(
             VariableInfo(a_index=428, a_type="double"), a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
