@@ -33,48 +33,6 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Питание кулеров": a_netvars.cooling_power_supply_voltage})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    ref_v_map = {AuxStabilizersTest.AuxType.V60: (15., 20., 30., 40., 50., 60.)}
-    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
-                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
-    test.set_group("Предварительные стабилизаторы")
-    test.set_name("60 В")
-    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float})
-    tests.append(test)
-
-    ref_v_map = {AuxStabilizersTest.AuxType.V60: (20.,), AuxStabilizersTest.AuxType.V200: (30., 80., 130., 180., 200.)}
-    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
-                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
-    test.set_group("Предварительные стабилизаторы")
-    test.set_name("200 В")
-    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
-                                 "Напряжение на 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage,
-                                 "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
-    tests.append(test)
-
-    ref_v_map = {AuxStabilizersTest.AuxType.V60: (20.,), AuxStabilizersTest.AuxType.V600: (150., 240., 330., 510., 600)}
-    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
-                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
-    test.set_group("Предварительные стабилизаторы")
-    test.set_name("600 В")
-    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
-                                 "Напряжение на 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage,
-                                 "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
-    tests.append(test)
-
-    ref_v_map = {AuxStabilizersTest.AuxType.V60: (20.,), AuxStabilizersTest.AuxType.V4: (2, 2.5, 3, 3.5, 4)}
-    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
-                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
-    test.set_group("Предварительные стабилизаторы")
-    test.set_name("4 В")
-    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
-                                 "Напряжение на 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage,
-                                 "Уставка на 4 В": a_netvars.aux_stabilizer_4v_dac_code_float})
-    tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
     test = EepromVariablesTest(a_netvars_db=a_netvars_db, a_calibrator=a_calibrator)
     test.set_group("Тесты")
     test.set_name("Сетевые переменные")
@@ -296,6 +254,48 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_name("11 А")
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
                                  "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
+    tests.append(test)
+    # ТЕСТЫ ПРЕДВАРИТЕЛЬНЫХ СТАБИЛИЗАТОРОВ ДОЛЖНЫ БЫТЬ ПОСЛЕДНИМИ ------------------------------------------------------
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: (15., 20., 30., 40., 50., 60.)}
+    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
+                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
+    test.set_group("Предварительные стабилизаторы")
+    test.set_name("60 В")
+    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
+                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float})
+    tests.append(test)
+
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: (36.,), AuxStabilizersTest.AuxType.V200: (50., 85., 120., 155., 200.)}
+    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
+                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
+    test.set_group("Предварительные стабилизаторы")
+    test.set_name("200 В")
+    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
+                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
+                                 "Напряжение на 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage,
+                                 "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
+    tests.append(test)
+
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: (36.,), AuxStabilizersTest.AuxType.V600: (150., 240., 330., 510., 600)}
+    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
+                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
+    test.set_group("Предварительные стабилизаторы")
+    test.set_name("600 В")
+    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
+                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
+                                 "Напряжение на 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage,
+                                 "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
+    tests.append(test)
+
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: (24.,), AuxStabilizersTest.AuxType.V4: (2, 2.5, 3, 3.5, 4)}
+    test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
+                              a_hold_voltage_timeout_s=10, a_timeout_s=300)
+    test.set_group("Предварительные стабилизаторы")
+    test.set_name("4 В")
+    test.set_variables_to_graph({"Напряжение на 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
+                                 "Уставка на 60 В": a_netvars.aux_stabilizer_45v_dac_code_float,
+                                 "Напряжение на 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage,
+                                 "Уставка на 4 В": a_netvars.aux_stabilizer_4v_dac_code_float})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     return tests

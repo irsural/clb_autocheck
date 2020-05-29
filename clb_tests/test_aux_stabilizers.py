@@ -65,7 +65,7 @@ class Aux600vControl(AuxControl):
         if a_netvats.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
             if a_netvats.relay_200_600.get() == 0:
                 if a_netvats.relay_aux_stabilizer_600v.get() == 1:
-                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100.+5490., r2=9100., r3=330000., v0=2.5)
+                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100.+5490., r2=9100., r3=300000.*3., v0=2.5)
                     if round(a_netvats.aux_stabilizer_600v_dac_code_float.get(), 5) == round(dac_code, 5):
                         logging.debug(f"600 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                         real_voltage = voltage
@@ -133,12 +133,15 @@ class Aux4vControl(AuxControl):
 
         real_voltage = False
         if a_netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
-            dac_code, voltage = voltage_to_dac_code(a_voltage, r1=8200., r2=2200., r3=8200., v0=0.8)
-            logging.debug(f"60 В: Установлено {a_voltage} В, dac_code: {dac_code}")
-            if round(a_netvars.aux_stabilizer_45v_dac_code_float.get(), 5) == round(dac_code, 5):
-                real_voltage = voltage
+            if a_netvars.relay_aux_stabilizer_4v.get() == 1:
+                dac_code, voltage = voltage_to_dac_code(a_voltage, r1=8200., r2=2200., r3=8200., v0=0.8)
+                logging.debug(f"4 В: Установлено {a_voltage} В, dac_code: {dac_code}")
+                if round(a_netvars.aux_stabilizer_4v_dac_code_float.get(), 5) == round(dac_code, 5):
+                    real_voltage = voltage
+                else:
+                    a_netvars.aux_stabilizer_4v_dac_code_float.set(dac_code)
             else:
-                a_netvars.aux_stabilizer_45v_dac_code_float.set(dac_code)
+                a_netvars.relay_aux_stabilizer_4v.set(1)
         else:
             a_netvars.source_manual_mode_password.set(clb.MANUAL_MODE_ENABLE_PASSWORD)
 
@@ -206,6 +209,8 @@ class AuxStabilizersTest(ClbTest):
         # Напряжение с учетом дискрета DAC
         self.real_voltage = 0
 
+        self.cancel_test = False
+
         self.__stage = AuxStabilizersTest.Stage.PREPARE
         self.__saved_status = ClbTest.Status.NOT_CHECKED
         self.__status = ClbTest.Status.NOT_CHECKED
@@ -213,7 +218,7 @@ class AuxStabilizersTest(ClbTest):
         self.allow_deviation_percents = 10
 
     def start(self):
-        self.__status = ClbTest.Status.IN_PROCESS
+        self.__status = ClbTest.Status.IN_PROCESS if not self.cancel_test else ClbTest.Status.FAIL
         self.__stage = AuxStabilizersTest.Stage.PREPARE
         self.aux_iter = iter(self.ref_v_map.keys())
         self.current_aux = self.get_next_aux()
@@ -227,10 +232,15 @@ class AuxStabilizersTest(ClbTest):
         self.hold_voltage_timer.stop()
         self.aux_fail_timer.stop()
         self.check_prepare_timer.stop()
+        self.cancel_test = False
         for aux_type in reversed(list(self.ref_v_map.keys())):
             AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[aux_type].stop(self.netvars)
 
     def prepare(self) -> bool:
+        if self.netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
+            logging.warning("При начале теста предварительного стабилизатора был включен ручной режим. "
+                            "Перезагрузите калибратор и повторите попытку")
+            self.cancel_test = True
         return True
 
     def tick(self):
@@ -258,6 +268,10 @@ class AuxStabilizersTest(ClbTest):
                 self.hold_voltage_timer.start()
 
             if self.aux_fail_timer.check():
+                logging.warning(f"Aux {self.current_aux.name}. Уставка {self.current_voltage} В. "
+                                f"Измерено {aux_current_voltage} В. Отклонение {deviation}% !!!!! "
+                                f"Выставлено в DAC вольт: {self.real_voltage}")
+
                 self.error_message += f"Стабилизатор {self.current_aux.name} не вышел на " \
                                       f"уставку {self.current_voltage} В. " \
                                       f"Измеренное значение {aux_current_voltage} В. Отклонение {deviation}%. " \
