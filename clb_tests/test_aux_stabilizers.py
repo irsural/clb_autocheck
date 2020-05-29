@@ -16,7 +16,7 @@ class AuxControl:
 def voltage_to_dac_code(a_voltage: float, r1: float, r2: float, r3: float, v0: float):
     v_max = 3.3
     u1 = v0 + r1 * (v0 / r2 - (a_voltage - v0) / r3)
-    float_code = 1 - u1/v_max
+    float_code = 1 - u1 / v_max
     float_code = utils.bound(float_code, 0, 1)
 
     float_code_discrete = floor(float_code * 255) / 255
@@ -34,7 +34,7 @@ class Aux60vControl(AuxControl):
 
         real_voltage = 0.
         if a_netvats.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
-            dac_code, voltage = voltage_to_dac_code(a_voltage, r1=110.+4420., r2=7680., r3=62000.+4700., v0=2.5)
+            dac_code, voltage = voltage_to_dac_code(a_voltage, r1=110. + 4420., r2=7680., r3=62000. + 4700., v0=2.5)
             if round(a_netvats.aux_stabilizer_45v_dac_code_float.get(), 5) == round(dac_code, 5):
                 logging.debug(f"60 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                 real_voltage = voltage
@@ -51,7 +51,7 @@ class Aux60vControl(AuxControl):
 
     @staticmethod
     def stop(a_netvars: NetworkVariables):
-        a_netvars.source_manual_mode_password.set(clb.MANUAL_MODE_DISABLE_PASSWORD)
+        pass
 
 
 class Aux600vControl(AuxControl):
@@ -65,7 +65,8 @@ class Aux600vControl(AuxControl):
         if a_netvats.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
             if a_netvats.relay_200_600.get() == 0:
                 if a_netvats.relay_aux_stabilizer_600v.get() == 1:
-                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100.+5490., r2=9100., r3=300000.*3., v0=2.5)
+                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100. + 5490., r2=9100., r3=300000. * 3.,
+                                                            v0=2.5)
                     if round(a_netvats.aux_stabilizer_600v_dac_code_float.get(), 5) == round(dac_code, 5):
                         logging.debug(f"600 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                         real_voltage = voltage
@@ -100,7 +101,7 @@ class Aux200vControl(AuxControl):
         if a_netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
             if a_netvars.relay_200_600.get() == 1:
                 if a_netvars.relay_aux_stabilizer_600v.get() == 1:
-                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100.+5490., r2=9100., r3=330000., v0=2.5)
+                    dac_code, voltage = voltage_to_dac_code(a_voltage, r1=100. + 5490., r2=9100., r3=330000., v0=2.5)
                     if round(a_netvars.aux_stabilizer_600v_dac_code_float.get(), 5) == round(dac_code, 5):
                         logging.debug(f"200 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                         real_voltage = voltage
@@ -135,8 +136,8 @@ class Aux4vControl(AuxControl):
         if a_netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
             if a_netvars.relay_aux_stabilizer_4v.get() == 1:
                 dac_code, voltage = voltage_to_dac_code(a_voltage, r1=8200., r2=2200., r3=8200., v0=0.8)
-                logging.debug(f"4 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                 if round(a_netvars.aux_stabilizer_4v_dac_code_float.get(), 5) == round(dac_code, 5):
+                    logging.debug(f"4 В: Установлено {a_voltage} В, dac_code: {dac_code}")
                     real_voltage = voltage
                 else:
                     a_netvars.aux_stabilizer_4v_dac_code_float.set(dac_code)
@@ -171,10 +172,10 @@ class AuxStabilizersTest(ClbTest):
     }
 
     AUX_CONTROL_TO_AUX_TYPE = {
-        Aux60vControl:  AuxType.V60,
-        Aux200vControl:  AuxType.V200,
-        Aux600vControl:  AuxType.V600,
-        Aux4vControl:  AuxType.V4,
+        Aux60vControl: AuxType.V60,
+        Aux200vControl: AuxType.V200,
+        Aux600vControl: AuxType.V600,
+        Aux4vControl: AuxType.V4,
     }
 
     class Stage(IntEnum):
@@ -233,11 +234,18 @@ class AuxStabilizersTest(ClbTest):
         self.aux_fail_timer.stop()
         self.check_prepare_timer.stop()
         self.cancel_test = False
-        for aux_type in reversed(list(self.ref_v_map.keys())):
-            AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[aux_type].stop(self.netvars)
+        # for aux_type in reversed(list(self.ref_v_map.keys())):
+        #     AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[aux_type].stop(self.netvars)
+        self.netvars.source_manual_mode_password.set(0)
+        self.netvars.shutdown_execute_password.set(clb.SHUTDOWN_EXECUTE_PASSWORD)
 
     def prepare(self) -> bool:
-        if self.netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD:
+        if self.netvars.source_manual_mode_password.get() == clb.MANUAL_MODE_ENABLE_PASSWORD or \
+                self.netvars.aux_stabilizer_4v_dac_code_float.get() != 0 or \
+                self.netvars.aux_stabilizer_45v_dac_code_float.get() != 0 or \
+                self.netvars.aux_stabilizer_600v_dac_code_float.get() != 0 or \
+                self.netvars.relay_aux_stabilizer_4v.get() != 0 or \
+                self.netvars.relay_aux_stabilizer_600v.get() != 0:
             logging.warning("При начале теста предварительного стабилизатора был включен ручной режим. "
                             "Перезагрузите калибратор и повторите попытку")
             self.cancel_test = True
@@ -278,6 +286,13 @@ class AuxStabilizersTest(ClbTest):
                                       f"Выставлено в DAC вольт: {self.real_voltage}"
                 self.next_test()
         elif self.__stage == AuxStabilizersTest.Stage.WAIT_STOP:
+            if self.check_prepare_timer.check():
+                if self.netvars.source_manual_mode_password.get() == 0:
+                    self.netvars.shutdown_execute_password.set(clb.SHUTDOWN_EXECUTE_PASSWORD)
+                    self.check_prepare_timer.stop()
+                else:
+                    self.check_prepare_timer.start()
+
             if self.wait_stop_timer.check():
                 self.__status = self.__saved_status
 
@@ -288,6 +303,9 @@ class AuxStabilizersTest(ClbTest):
             self.__saved_status = ClbTest.Status.FAIL
             self.wait_stop_timer.start()
             self.__stage = AuxStabilizersTest.Stage.WAIT_STOP
+            self.netvars.source_manual_mode_password.set(0)
+            self.check_prepare_timer.start()
+
         else:
             self.__stage = AuxStabilizersTest.Stage.PREPARE
             self.check_prepare_timer.start()
@@ -300,13 +318,16 @@ class AuxStabilizersTest(ClbTest):
                 self.current_aux = self.get_next_aux()
 
                 if self.current_aux is not None:
-                    self.voltage_iter = iter(self.ref_v_map[AuxStabilizersTest.AUX_CONTROL_TO_AUX_TYPE[self.current_aux]])
+                    self.voltage_iter = iter(
+                        self.ref_v_map[AuxStabilizersTest.AUX_CONTROL_TO_AUX_TYPE[self.current_aux]])
                     self.current_voltage = self.get_next_voltage()
                 else:
                     # Текущий стабилизатор был последним
                     self.__saved_status = ClbTest.Status.FAIL if self.has_error() else ClbTest.Status.SUCCESS
                     self.wait_stop_timer.start()
                     self.__stage = AuxStabilizersTest.Stage.WAIT_STOP
+                    self.netvars.source_manual_mode_password.set(0)
+                    self.check_prepare_timer.start()
 
     def get_next_aux(self):
         try:
@@ -337,4 +358,4 @@ class AuxStabilizersTest(ClbTest):
         return self.error_message
 
     def abort_on_fail(self) -> bool:
-        return False
+        return True

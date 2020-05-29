@@ -21,6 +21,9 @@ class NetworkVariables:
         self.core_t_calibration = BufferedVariable(
             VariableInfo(a_index=36, a_type="double"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
 
+        self.shutdown_execute_password = BufferedVariable(
+            VariableInfo(a_index=24, a_type="u32"), a_mode=BufferedVariable.Mode.RW, a_calibrator=self.__calibrator)
+
         self.release_firmware = BufferedVariable(VariableInfo(a_index=69, a_bit_index=5, a_type="bit"),
                                                  a_mode=BufferedVariable.Mode.R, a_calibrator=self.__calibrator)
 

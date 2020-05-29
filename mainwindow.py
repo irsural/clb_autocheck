@@ -189,7 +189,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if aux_group_enabled is None:
                 logging.warning('Группа Предварительные стабилизаторы" не найдена')
 
-            elif self.netvars.software_revision.get() < 294 and aux_group_enabled:
+            elif self.netvars.software_revision.get() < 295 and aux_group_enabled:
                 QtWidgets.QMessageBox.warning(self, "Ошибка", "Тест предварительных стабилизаторов доступен для "
                                                               "прошивок старше 294 ревизии",
                                               QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.Yes)

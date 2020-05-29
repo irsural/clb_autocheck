@@ -287,7 +287,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
                                  "Уставка на 600 В": a_netvars.aux_stabilizer_600v_dac_code_float})
     tests.append(test)
 
-    ref_v_map = {AuxStabilizersTest.AuxType.V60: (24.,), AuxStabilizersTest.AuxType.V4: (2, 2.5, 3, 3.5, 4)}
+    ref_v_map = {AuxStabilizersTest.AuxType.V60: (22.,), AuxStabilizersTest.AuxType.V4: (2, 2.5, 3, 3.5, 4)}
     test = AuxStabilizersTest(a_ref_v_map=ref_v_map, a_netvars=a_netvars, a_aux_fail_timeout_s=40,
                               a_hold_voltage_timeout_s=10, a_timeout_s=300)
     test.set_group("Предварительные стабилизаторы")
