@@ -240,6 +240,7 @@ def get_decorator(errors=(Exception, ), default_value=None, log_out_foo=print):
 
 
 exception_decorator = get_decorator(log_out_foo=logging.debug)
+exception_decorator_print = get_decorator(log_out_foo=print)
 assertion_decorator = get_decorator(errors=(AssertionError, ), log_out_foo=logging.debug)
 
 
