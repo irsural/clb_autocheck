@@ -1,6 +1,6 @@
 import ui_to_py
-# ui_to_py.convert_ui("./ui", "./ui/py")
-# ui_to_py.convert_resources("./resources", ".")
+ui_to_py.convert_ui("./ui", "./ui/py")
+ui_to_py.convert_resources("./resources", ".")
 
 import sys
 
@@ -23,6 +23,11 @@ def main():
 
     w = MainWindow()
     sys.exit(app.exec())
+
+# Сборка через pyinstaller
+# Закомментарить первые 3 строки этого файла
+# pyinstaller --onefile --noconsole --icon=main_icon.ico --add-data C:\Windows\System32\vcruntime140d.dll;. --add-data C:\Windows\System32\ucrtbased.dll;. main.py
+
 
 
 if __name__ == "__main__":
