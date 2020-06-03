@@ -328,7 +328,7 @@ class AuxStabilizersTest(ClbTest):
 
         self.voltage_iter = None
         self.current_voltage_in_discretes = 0
-        # Напряжение с учетом дискрета DAC
+
         self.real_voltage = 0
 
         self.cancel_test = False
@@ -453,21 +453,20 @@ class AuxStabilizersTest(ClbTest):
             aux_control_type = AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[next(self.aux_iter)]
 
             if aux_control_type is Aux60vControl:
-                correction_deviation = 10
-                correct_expected_low_voltage = 18
-                correct_expected_high_voltage = 61
+                correct_expected_low_voltage = self.settings.aux_voltage_25_discretes_60v
+                correct_expected_high_voltage = self.settings.aux_voltage_230_discretes_60v
             elif aux_control_type is Aux200vControl:
-                correction_deviation = 10
-                correct_expected_low_voltage = 62
-                correct_expected_high_voltage = 217
+                correct_expected_low_voltage = self.settings.aux_voltage_25_discretes_200v
+                correct_expected_high_voltage = self.settings.aux_voltage_230_discretes_200v
             elif aux_control_type is Aux600vControl:
-                correction_deviation = 10
-                correct_expected_low_voltage = 169
-                correct_expected_high_voltage = 609
+                correct_expected_low_voltage = self.settings.aux_voltage_25_discretes_600v
+                correct_expected_high_voltage = self.settings.aux_voltage_230_discretes_600v
             else: # aux_control_type is Aux4vControl:
-                correction_deviation = 10
-                correct_expected_low_voltage = 1.7
-                correct_expected_high_voltage = 4.4
+                correct_expected_low_voltage = self.settings.aux_voltage_25_discretes_4v
+                correct_expected_high_voltage = self.settings.aux_voltage_230_discretes_4v
+
+            correction_deviation = self.settings.aux_correction_deviation
+            self.allow_deviation_percents = self.settings.aux_deviation
 
             return aux_control_type(correction_deviation, correct_expected_low_voltage, correct_expected_high_voltage)
         except StopIteration:

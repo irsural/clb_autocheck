@@ -58,7 +58,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 Settings.VariableInfo(a_name="tstlan_graphs", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
                 Settings.VariableInfo(a_name="tests_repeat_count", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
                 Settings.VariableInfo(a_name="tests_collapsed_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="last_save_results_folder", a_section="PARAMETERS", a_type=Settings.ValueType.STRING)
+                Settings.VariableInfo(a_name="last_save_results_folder", a_section="PARAMETERS", a_type=Settings.ValueType.STRING),
+                Settings.VariableInfo(a_name="aux_correction_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=10),
+                Settings.VariableInfo(a_name="aux_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=2),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=18),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=61),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=62),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=217),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=169),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=609),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=1.7),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=4.4),
             ])
 
             ini_ok = True
@@ -126,7 +136,8 @@ class MainWindow(QtWidgets.QMainWindow):
         log.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
 
         logging.getLogger().addHandler(log)
-        logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
         # logging.getLogger().setLevel(logging.WARN)
 
     def set_up_source_mode_widget(self) -> SourceModeWidget:
