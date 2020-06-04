@@ -61,6 +61,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="clear_results_button">
+            <property name="text">
+             <string>Сбросить</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>

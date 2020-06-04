@@ -26,7 +26,7 @@ def main():
 
 # Сборка через pyinstaller
 # Закомментарить первые 3 строки этого файла
-# pyinstaller --onefile --noconsole --icon=main_icon.ico --add-data C:\Windows\System32\vcruntime140d.dll;. --add-data C:\Windows\System32\ucrtbased.dll;. main.py
+# pyinstaller -n clb_autocheck --onefile --noconsole --icon=main_icon.ico --add-data C:\Windows\System32\vcruntime140d.dll;. --add-data C:\Windows\System32\ucrtbased.dll;. main.py
 
 
 

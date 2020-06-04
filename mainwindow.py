@@ -124,6 +124,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.ui.save_button.clicked.connect(self.save_button_clicked)
             self.ui.load_button.clicked.connect(self.load_results)
+            self.ui.clear_results_button.clicked.connect(self.clear_results)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
@@ -183,6 +184,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tests_widget.lock_interface(a_lock)
         self.ui.load_button.setDisabled(a_lock)
         self.ui.save_button.setDisabled(a_lock)
+        self.ui.clear_results_button.setDisabled(a_lock)
 
     def autocheck_button_clicked(self):
         try:
@@ -297,31 +299,35 @@ class MainWindow(QtWidgets.QMainWindow):
             with open(chosen_file, 'w') as file:
                 file.write(json.dumps(results, indent=4))
 
-    def load_results(self):
-        try:
-            chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Выберите файл",
-                                                                   self.settings.last_save_results_folder,
-                                                                   "Результаты проверки (*.car)")
-            if chosen_file != "":
-                self.settings.last_save_results_folder = chosen_file[:chosen_file.rfind("/")]
+    @utils.exception_decorator
+    def load_results(self, _):
+        chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Выберите файл",
+                                                               self.settings.last_save_results_folder,
+                                                               "Результаты проверки (*.car)")
+        if chosen_file != "":
+            self.settings.last_save_results_folder = chosen_file[:chosen_file.rfind("/")]
 
-                with open(chosen_file, 'r') as file:
-                    test_results: Dict[str, Dict] = json.load(file)
+            with open(chosen_file, 'r') as file:
+                test_results: Dict[str, Dict] = json.load(file)
 
-                self.ui.log_text_edit.setPlainText(test_results["log"])
-                del test_results["log"]
+            self.ui.log_text_edit.setPlainText(test_results["log"])
+            del test_results["log"]
 
-                for test_name in test_results.keys():
-                    sep = test_name.find(':')
-                    group, name = test_name[:sep], test_name[sep + 1:]
+            for test_name in test_results.keys():
+                sep = test_name.find(':')
+                group, name = test_name[:sep], test_name[sep + 1:]
 
-                    try:
-                        self.test_conductor.set_test_results(group, name, test_results[test_name])
-                    except ValueError:
-                        logging.warning(f"Тест {group}: {name} не найден! Результаты не восстановлены")
+                try:
+                    self.test_conductor.set_test_results(group, name, test_results[test_name])
+                except ValueError:
+                    logging.warning(f"Тест {group}: {name} не найден! Результаты не восстановлены")
 
-        except Exception as err:
-            logging.debug(utils.exception_handler(err))
+    def clear_results(self):
+        for test in self.tests:
+            test_results = self.test_conductor.get_test_results(test.group(), test.name())
+            test_results.delete_results()
+            self.tests_widget.set_test_status(test.group(), test.name(), test_results.get_final_status(),
+                                              test_results.get_success_results_count())
 
     def open_settings(self):
         try:

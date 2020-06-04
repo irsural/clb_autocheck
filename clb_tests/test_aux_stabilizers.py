@@ -119,20 +119,20 @@ class AuxControl:
         self.k = (self.measured_point_high_voltage - self.measured_point_low_voltage) / \
                  (AuxControl.CORRECT_POINT_HIGH_DISCRETES - AuxControl.CORRECT_POINT_LOW_DISCRETES)
         self.b = self.measured_point_low_voltage - self.k * AuxControl.CORRECT_POINT_LOW_DISCRETES
-        logging.debug(f"k={self.k};\tb={self.b}")
+        logging.debug(f"k={self.k:.3f};\tb={self.b:.3f}")
 
     def get_corrected_voltage(self, a_discretes: int):
         return self.k * a_discretes + self.b
 
     def get_correction_info_low_point(self):
-        return f"Измерено в точке 25 дискретов ЦАП: {self.measured_point_low_voltage}. Ожидаемое напряжение: " \
-               f"{self.correct_point_low_voltage}. Отклонение: " \
-               f"{self.get_deviation_percents(self.measured_point_low_voltage, self.correct_point_low_voltage)}"
+        return f"Измерено в точке 25 дискретов ЦАП: {self.measured_point_low_voltage:.3f}. Ожидаемое напряжение: " \
+               f"{self.correct_point_low_voltage:.3f}. Отклонение: " \
+               f"{self.get_deviation_percents(self.measured_point_low_voltage, self.correct_point_low_voltage):.3f}%"
 
     def get_correction_info_high_point(self):
-        return f"Измерено в точке 230 дискретов ЦАП: {self.measured_point_high_voltage}. "\
-               f"Ожидаемое напряжение: {self.correct_point_high_voltage}. Отклонение: " \
-               f"{self.get_deviation_percents(self.measured_point_high_voltage, self.correct_point_high_voltage)}"
+        return f"Измерено в точке 230 дискретов ЦАП: {self.measured_point_high_voltage:.3f}. "\
+               f"Ожидаемое напряжение: {self.correct_point_high_voltage:.3f}. Отклонение: " \
+               f"{self.get_deviation_percents(self.measured_point_high_voltage, self.correct_point_high_voltage):.3f}%"
 
 
 class Aux60vControl(AuxControl):
@@ -152,7 +152,7 @@ class Aux60vControl(AuxControl):
                 discretes_float = self.discretes_to_float(a_discretes)
                 if round(a_netvats.aux_stabilizer_45v_dac_code_float.get(), 5) == round(discretes_float, 5):
                     real_voltage = self.get_corrected_voltage(a_discretes)
-                    logging.info(f"Aux 60 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                    logging.info(f"Aux 60 В: Установлено (float) {discretes_float:.3f}. В дискретах ЦАП: {a_discretes}")
                 else:
                     a_netvats.aux_stabilizer_45v_dac_code_float.set(discretes_float)
         else:
@@ -187,7 +187,7 @@ class Aux600vControl(AuxControl):
 
                         discretes_float = self.discretes_to_float(a_discretes)
                         if round(a_netvars.aux_stabilizer_600v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                            logging.info(f"Aux 600 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                            logging.info(f"Aux 600 В: Установлено (float) {discretes_float:.3f}. В дискретах ЦАП: {a_discretes}")
                             real_voltage = self.get_corrected_voltage(a_discretes)
                         else:
                             a_netvars.aux_stabilizer_600v_dac_code_float.set(discretes_float)
@@ -227,7 +227,7 @@ class Aux200vControl(AuxControl):
 
                         discretes_float = self.discretes_to_float(a_discretes)
                         if round(a_netvars.aux_stabilizer_600v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                            logging.info(f"Aux 200 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                            logging.info(f"Aux 200 В: Установлено (float) {discretes_float:.3f}. В дискретах ЦАП: {a_discretes}")
                             real_voltage = self.get_corrected_voltage(a_discretes)
                         else:
                             a_netvars.aux_stabilizer_600v_dac_code_float.set(discretes_float)
@@ -266,7 +266,7 @@ class Aux4vControl(AuxControl):
 
                     discretes_float = self.discretes_to_float(a_discretes)
                     if round(a_netvars.aux_stabilizer_4v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                        logging.info(f"Aux 4 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                        logging.info(f"Aux 4 В: Установлено (float) {discretes_float:.3f}. В дискретах ЦАП: {a_discretes}")
                         real_voltage = self.get_corrected_voltage(a_discretes)
                     else:
                         a_netvars.aux_stabilizer_4v_dac_code_float.set(discretes_float)
@@ -412,20 +412,20 @@ class AuxStabilizersTest(ClbTest):
             deviation = self.get_deviation_percents(aux_current_voltage, self.real_voltage)
             if deviation < self.allow_deviation_percents:
                 if self.hold_voltage_timer.check():
-                    logging.warning(f"Aux {self.current_aux.name}. Ожидаемое напряжение {self.real_voltage}. "
-                                    f"Измерено {aux_current_voltage} В. Отклонение {deviation}%.")
+                    logging.warning(f"Aux {self.current_aux.name}. Ожидаемое напряжение {self.real_voltage:.3f}. "
+                                    f"Измерено {aux_current_voltage:.3f} В. Отклонение {deviation:.3f}%.")
                     self.next_test()
             else:
                 self.hold_voltage_timer.start()
 
             if self.aux_fail_timer.check():
-                logging.warning(f"Aux {self.current_aux.name}. Ожидаемое напряжение {self.real_voltage}. "
-                                f"Измерено {aux_current_voltage} В. Отклонение {deviation}% !!!")
+                logging.warning(f"Aux {self.current_aux.name}. Ожидаемое напряжение {self.real_voltage:.3f}. "
+                                f"Измерено {aux_current_voltage:.3f} В. Отклонение {deviation:.3f}% !!!")
 
                 self.error_message += f"Стабилизатор {self.current_aux.name} не вышел на " \
                                       f"уставку {self.current_voltage_in_discretes} дискретов ЦАП. " \
-                                      f"Измеренное значение {aux_current_voltage} В. Отклонение {deviation}%. " \
-                                      f"Ожидаемое напряжение: {self.real_voltage}"
+                                      f"Измеренное значение {aux_current_voltage:.3f} В. Отклонение {deviation:.3f}%. " \
+                                      f"Ожидаемое напряжение: {self.real_voltage:.3f}"
                 self.next_test()
         elif self.__stage == AuxStabilizersTest.Stage.WAIT_STOP:
             if self.check_prepare_timer.check():
