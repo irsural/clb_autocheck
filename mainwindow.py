@@ -102,6 +102,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.timeout.connect(self.close)
             self.SIGNAL_OFF_TIME_MS = 200
 
+            self.previous_id = 0
+
             self.ui.enter_settings_action.triggered.connect(self.open_settings)
 
             self.source_mode_widget = self.set_up_source_mode_widget()
@@ -178,6 +180,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_state = current_state
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
+
+        current_id = self.netvars.id.get()
+        if current_id != self.previous_id:
+            if current_id != 0:
+                self.previous_id = current_id
+                self.clear_results()
 
     def lock_interface(self, a_lock):
         self.source_mode_widget.ui.control_box.setDisabled(a_lock)
