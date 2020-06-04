@@ -24,11 +24,6 @@ def main():
     w = MainWindow()
     sys.exit(app.exec())
 
-# Сборка через pyinstaller
-# Закомментарить первые 3 строки этого файла
-# pyinstaller -n clb_autocheck --onefile --noconsole --icon=main_icon.ico --add-data C:\Windows\System32\vcruntime140d.dll;. --add-data C:\Windows\System32\ucrtbased.dll;. main.py
-
-
 
 if __name__ == "__main__":
     main()
