@@ -57,7 +57,10 @@ class AuxControl:
 
     @staticmethod
     def get_deviation_percents(a_first_val, a_second_val):
-        return abs(a_first_val - a_second_val) / a_first_val * 100
+        if a_first_val == 0:
+            return a_first_val
+        else:
+            return abs(a_first_val - a_second_val) / a_first_val * 100
 
     @staticmethod
     def discretes_to_float(a_discretes: int) -> float:
@@ -70,19 +73,17 @@ class AuxControl:
     def make_correction(self, a_dac_float_var: BufferedVariable, a_get_voltage_var: BufferedVariable) -> bool:
         if self.__stage == AuxControl.Stage.SET_LOW:
             if AuxControl.CORRECT_POINT_LOW_DISCRETES == round(self.float_to_discretes(a_dac_float_var.get()), 5):
-                logging.debug("Коррекция точки 25 дискретов ЦАП")
+                logging.info("Коррекция точки 25 дискретов ЦАП")
                 self.wait_setpoint_timer.start()
                 self.__stage = AuxControl.NEXT_STAGE[self.__stage]
             else:
                 a_dac_float_var.set(self.discretes_to_float(AuxControl.CORRECT_POINT_LOW_DISCRETES))
 
         elif self.__stage == AuxControl.Stage.WAIT_LOW:
-            if self.get_deviation_percents(self.correct_point_low_voltage, a_get_voltage_var.get()) < self.allow_deviation_percents:
+            self.measured_point_low_voltage = a_get_voltage_var.get()
+            if self.get_deviation_percents(self.correct_point_low_voltage, self.measured_point_low_voltage) < self.allow_deviation_percents:
                 if self.wait_setpoint_timer.check():
-                    self.measured_point_low_voltage = a_get_voltage_var.get()
-                    logging.debug(f"Измерено в точке 25 дискретов ЦАП: {self.measured_point_low_voltage}. "
-                                  f"Ожидаемое напряжение: {self.correct_point_low_voltage}. "
-                                  f"Отклонение: {self.get_deviation_percents(self.measured_point_low_voltage, self.correct_point_low_voltage)}")
+                    logging.info(self.get_correction_info_low_point())
 
                     self.wait_setpoint_timer.stop()
                     self.__stage = AuxControl.NEXT_STAGE[self.__stage]
@@ -91,19 +92,17 @@ class AuxControl:
 
         elif self.__stage == AuxControl.Stage.SET_HIGH:
             if AuxControl.CORRECT_POINT_HIGH_DISCRETES == round(self.float_to_discretes(a_dac_float_var.get()), 5):
-                logging.debug("Коррекция точки 230 дискретов ЦАП")
+                logging.info("Коррекция точки 230 дискретов ЦАП")
                 self.wait_setpoint_timer.start()
                 self.__stage = AuxControl.NEXT_STAGE[self.__stage]
             else:
                 a_dac_float_var.set(self.discretes_to_float(AuxControl.CORRECT_POINT_HIGH_DISCRETES))
 
         elif self.__stage == AuxControl.Stage.WAIT_HIGH:
-            if self.get_deviation_percents(self.correct_point_high_voltage, a_get_voltage_var.get()) < self.allow_deviation_percents:
+            self.measured_point_high_voltage = a_get_voltage_var.get()
+            if self.get_deviation_percents(self.correct_point_high_voltage, self.measured_point_high_voltage) < self.allow_deviation_percents:
                 if self.wait_setpoint_timer.check():
-                    self.measured_point_high_voltage = a_get_voltage_var.get()
-                    logging.debug(f"Измерено в точке 230 дискретов ЦАП: {self.measured_point_high_voltage}. "
-                                  f"Ожидаемое напряжение: {self.correct_point_high_voltage}. "
-                                  f"Отклонение: {self.get_deviation_percents(self.measured_point_high_voltage, self.correct_point_high_voltage)}")
+                    logging.info(self.get_correction_info_high_point())
 
                     self.wait_setpoint_timer.stop()
                     self.k_b_calc()
@@ -125,6 +124,16 @@ class AuxControl:
     def get_corrected_voltage(self, a_discretes: int):
         return self.k * a_discretes + self.b
 
+    def get_correction_info_low_point(self):
+        return f"Измерено в точке 25 дискретов ЦАП: {self.measured_point_low_voltage}. Ожидаемое напряжение: " \
+               f"{self.correct_point_low_voltage}. Отклонение: " \
+               f"{self.get_deviation_percents(self.measured_point_low_voltage, self.correct_point_low_voltage)}"
+
+    def get_correction_info_high_point(self):
+        return f"Измерено в точке 230 дискретов ЦАП: {self.measured_point_high_voltage}. "\
+               f"Ожидаемое напряжение: {self.correct_point_high_voltage}. Отклонение: " \
+               f"{self.get_deviation_percents(self.measured_point_high_voltage, self.correct_point_high_voltage)}"
+
 
 class Aux60vControl(AuxControl):
     name = "60 В"
@@ -143,7 +152,7 @@ class Aux60vControl(AuxControl):
                 discretes_float = self.discretes_to_float(a_discretes)
                 if round(a_netvats.aux_stabilizer_45v_dac_code_float.get(), 5) == round(discretes_float, 5):
                     real_voltage = self.get_corrected_voltage(a_discretes)
-                    logging.debug(f"Aux 60 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                    logging.info(f"Aux 60 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
                 else:
                     a_netvats.aux_stabilizer_45v_dac_code_float.set(discretes_float)
         else:
@@ -178,7 +187,7 @@ class Aux600vControl(AuxControl):
 
                         discretes_float = self.discretes_to_float(a_discretes)
                         if round(a_netvars.aux_stabilizer_600v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                            logging.debug(f"Aux 600 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                            logging.info(f"Aux 600 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
                             real_voltage = self.get_corrected_voltage(a_discretes)
                         else:
                             a_netvars.aux_stabilizer_600v_dac_code_float.set(discretes_float)
@@ -218,7 +227,7 @@ class Aux200vControl(AuxControl):
 
                         discretes_float = self.discretes_to_float(a_discretes)
                         if round(a_netvars.aux_stabilizer_600v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                            logging.debug(f"Aux 200 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                            logging.info(f"Aux 200 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
                             real_voltage = self.get_corrected_voltage(a_discretes)
                         else:
                             a_netvars.aux_stabilizer_600v_dac_code_float.set(discretes_float)
@@ -257,7 +266,7 @@ class Aux4vControl(AuxControl):
 
                     discretes_float = self.discretes_to_float(a_discretes)
                     if round(a_netvars.aux_stabilizer_4v_dac_code_float.get(), 5) == round(discretes_float, 5):
-                        logging.debug(f"Aux 4 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
+                        logging.info(f"Aux 4 В: Установлено (float) {discretes_float}. В дискретах ЦАП: {a_discretes}")
                         real_voltage = self.get_corrected_voltage(a_discretes)
                     else:
                         a_netvars.aux_stabilizer_4v_dac_code_float.set(discretes_float)
@@ -319,6 +328,7 @@ class AuxStabilizersTest(ClbTest):
         self.error_message = ""
 
         self.check_prepare_timer = utils.Timer(1.1)
+        self.prepare_fail_timer = utils.Timer(20)
         self.hold_voltage_timer = utils.Timer(a_hold_voltage_timeout_s)
         self.aux_fail_timer = utils.Timer(a_aux_fail_timeout_s)
         self.wait_stop_timer = utils.Timer(5)
@@ -347,6 +357,7 @@ class AuxStabilizersTest(ClbTest):
         self.voltage_iter = iter(self.ref_v_map[AuxStabilizersTest.AUX_CONTROL_TO_AUX_TYPE[type(self.current_aux)]])
         self.current_voltage_in_discretes = self.get_next_voltage()
         self.check_prepare_timer.start()
+        self.prepare_fail_timer.start()
 
     def stop(self):
         self.__status = ClbTest.Status.NOT_CHECKED
@@ -354,6 +365,7 @@ class AuxStabilizersTest(ClbTest):
         self.hold_voltage_timer.stop()
         self.aux_fail_timer.stop()
         self.check_prepare_timer.stop()
+        self.prepare_fail_timer.stop()
         self.cancel_test = False
         # for aux_type in reversed(list(self.ref_v_map.keys())):
         #     AuxStabilizersTest.AUX_TYPE_TO_AUX_CONTROL[aux_type].stop(self.netvars)
@@ -380,6 +392,17 @@ class AuxStabilizersTest(ClbTest):
                     self.aux_fail_timer.start()
                     self.hold_voltage_timer.start()
                     self.__stage = AuxStabilizersTest.Stage.WAIT_VOLTAGE
+
+                elif self.prepare_fail_timer.check():
+                    self.error_message += f"Не удалось провести коррекцию\n" \
+                                          f"{self.current_aux.get_correction_info_low_point()}\n" \
+                                          f"{self.current_aux.get_correction_info_high_point()}\n"
+                    self.__saved_status = ClbTest.Status.FAIL
+                    self.wait_stop_timer.start()
+                    self.__stage = AuxStabilizersTest.Stage.WAIT_STOP
+                    self.netvars.source_manual_mode_password.set(0)
+                    self.check_prepare_timer.start()
+
                 else:
                     self.check_prepare_timer.start()
 
@@ -428,6 +451,7 @@ class AuxStabilizersTest(ClbTest):
         else:
             self.__stage = AuxStabilizersTest.Stage.PREPARE
             self.check_prepare_timer.start()
+            self.prepare_fail_timer.start()
             self.hold_voltage_timer.stop()
             self.aux_fail_timer.stop()
 
