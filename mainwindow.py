@@ -281,11 +281,8 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as err:
             logging.debug(utils.exception_handler(err))
 
-    def save_button_clicked(self, a_state):
-        self.save_results()
-
     @utils.exception_decorator
-    def save_results(self):
+    def save_button_clicked(self, _):
         suggest_filename = f"{QtCore.QDate.currentDate().toString('yyyyMMdd')} N4-25 №{self.netvars.id.get()}"
         chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(
             self, "Сохранить результаты", f"{self.settings.last_save_results_folder}/{suggest_filename}",
@@ -295,6 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for test in self.tests:
                 test_results = self.test_conductor.get_test_results(test.group(), test.name())
                 results[f"{test.group()}:{test.name()}"] = test_results.data_to_serialize()
+            results["log"] = self.ui.log_text_edit.toPlainText()
 
             with open(chosen_file, 'w') as file:
                 file.write(json.dumps(results, indent=4))
@@ -309,6 +307,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
                 with open(chosen_file, 'r') as file:
                     test_results: Dict[str, Dict] = json.load(file)
+
+                self.ui.log_text_edit.setPlainText(test_results["log"])
+                del test_results["log"]
 
                 for test_name in test_results.keys():
                     sep = test_name.find(':')
