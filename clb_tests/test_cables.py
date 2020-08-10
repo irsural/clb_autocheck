@@ -17,7 +17,7 @@ class CablesTest(ClbTest):
         self.netvars = a_netvars
         self.__timeout_s = a_timeout_s
 
-        self.temperature_min = 28
+        self.temperature_min = 20
         self.temperature_max = 45
 
         self.dependent_variables = {
@@ -46,7 +46,6 @@ class CablesTest(ClbTest):
             value = self.dependent_variables[variable_name].get()
             if value < self.temperature_min or value > self.temperature_max:
                 self.error_message += f"Переменная {variable_name} имеет странное значение {value}\n"
-                logging.debug(f"Переменная {variable_name} имеет странное значение {value}\n")
 
         if not self.error_message:
             self.__status = ClbTest.Status.SUCCESS

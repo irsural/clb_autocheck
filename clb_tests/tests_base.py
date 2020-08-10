@@ -19,19 +19,22 @@ class ClbTest(abc.ABC):
 
     @staticmethod
     def get_calibrator_last_error(a_netvars: NetworkVariables) -> str:
-        error_code = a_netvars.error_code.get()
-        error_count = a_netvars.error_count.get()
-        error_index = a_netvars.error_index.get()
-        error_msg = f"({error_index + 1} из {error_count}). "
+        if ClbTest.does_calibrator_has_error(a_netvars):
+            error_code = a_netvars.error_code.get()
+            error_count = a_netvars.error_count.get()
+            error_index = a_netvars.error_index.get()
+            error_msg = f"({error_index + 1} из {error_count}). "
 
-        try:
-            error_msg += clb.error_code_to_message[error_code]
-        except KeyError:
-            error_msg += "Незарегистрированная ошибка"
+            try:
+                error_msg += clb.error_code_to_message[error_code]
+            except KeyError:
+                error_msg += "Незарегистрированная ошибка"
 
-        error_msg += f". Код {error_code}"
+            error_msg += f". Код {error_code}\n"
 
-        a_netvars.clear_error_occurred_status.set(1)
+            a_netvars.clear_error_occurred_status.set(1)
+        else:
+            error_msg = ""
         return error_msg
 
     @abc.abstractmethod

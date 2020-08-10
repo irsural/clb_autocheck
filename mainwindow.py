@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 import logging
+import json
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
@@ -10,14 +11,15 @@ from source_mode_window import SourceModeWidget
 from network_variables import NetworkVariables
 from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
+from dialog_with_text import DialogWithText
 from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
 from tstlan_dialog import TstlanDialog
 from qt_utils import QTextEditLogger
 import calibrator_constants as clb
+from clb_tests import tests_base
 import constants as cfg
 import tests_factory
-from clb_tests import tests_base
 import clb_dll
 import utils
 
@@ -43,7 +45,32 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.setMovie(self.loader)
 
         try:
-            self.settings = Settings(self)
+            self.settings = Settings("./settings.ini", [
+                Settings.VariableInfo(a_name="fixed_step_list", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_FLOAT, a_default=[0.0001,0.01,0.1,1,10,20,100]),
+                Settings.VariableInfo(a_name="checkbox_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="fixed_step_idx", a_section="PARAMETERS", a_type=Settings.ValueType.INT),
+                Settings.VariableInfo(a_name="rough_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.5),
+                Settings.VariableInfo(a_name="common_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.05),
+                Settings.VariableInfo(a_name="exact_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.002),
+                Settings.VariableInfo(a_name="tstlan_update_time", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.2),
+                Settings.VariableInfo(a_name="tstlan_show_marks", a_section="PARAMETERS", a_type=Settings.ValueType.INT, a_default=0),
+                Settings.VariableInfo(a_name="tstlan_marks", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tstlan_graphs", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tests_repeat_count", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="tests_collapsed_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
+                Settings.VariableInfo(a_name="last_save_results_folder", a_section="PARAMETERS", a_type=Settings.ValueType.STRING),
+                Settings.VariableInfo(a_name="aux_correction_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=10),
+                Settings.VariableInfo(a_name="aux_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=2),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=18),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=61.2),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=61),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=215),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=165),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=605),
+                Settings.VariableInfo(a_name="aux_voltage_25_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=1.73),
+                Settings.VariableInfo(a_name="aux_voltage_230_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=4.6),
+            ])
+
             ini_ok = True
         except BadIniException:
             ini_ok = False
@@ -75,16 +102,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.timeout.connect(self.close)
             self.SIGNAL_OFF_TIME_MS = 200
 
+            self.previous_id = 0
+
             self.ui.enter_settings_action.triggered.connect(self.open_settings)
 
             self.source_mode_widget = self.set_up_source_mode_widget()
             self.show()
 
-            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db)
+            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db, self.settings)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
             self.tests_widget.show_graph_requested.connect(self.show_test_graph)
+            self.tests_widget.show_errors_requested.connect(self.show_test_errors)
             self.graphs_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
+            self.errors_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
 
             self.test_conductor = TestsConductor(self.tests)
             self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
@@ -92,6 +123,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.test_conductor.test_status_changed.connect(self.set_test_status)
 
             self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
+
+            self.ui.save_button.clicked.connect(self.save_button_clicked)
+            self.ui.load_button.clicked.connect(self.load_results)
+            self.ui.clear_results_button.clicked.connect(self.clear_results)
 
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
@@ -101,12 +136,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_up_logger(self):
         log = QTextEditLogger(self, self.ui.log_text_edit)
-        # log.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(module)s - %(message)s',
-        #                                    datefmt='%Y-%m-%d %H:%M:%S'))
         log.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
 
         logging.getLogger().addHandler(log)
-        logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
         # logging.getLogger().setLevel(logging.WARN)
 
     def set_up_source_mode_widget(self) -> SourceModeWidget:
@@ -147,9 +181,18 @@ class MainWindow(QtWidgets.QMainWindow):
             self.calibrator.state = current_state
             self.usb_status_changed.emit(self.clb_state)
 
+        current_id = self.netvars.id.get()
+        if current_id != self.previous_id:
+            if current_id != 0:
+                self.previous_id = current_id
+                self.clear_results()
+
     def lock_interface(self, a_lock):
         self.source_mode_widget.ui.control_box.setDisabled(a_lock)
         self.tests_widget.lock_interface(a_lock)
+        self.ui.load_button.setDisabled(a_lock)
+        self.ui.save_button.setDisabled(a_lock)
+        self.ui.clear_results_button.setDisabled(a_lock)
 
     def autocheck_button_clicked(self):
         try:
@@ -163,13 +206,24 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def start_autocheck(self):
         if self.calibrator.state != clb.State.DISCONNECTED:
-            self.lock_interface(True)
-            self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
-            self.ui.autocheck_start_button.setText("Остановить")
-            self.test_conductor.start()
+            aux_group_enabled = self.tests_widget.is_group_enabled("Предварительные стабилизаторы")
+            if aux_group_enabled is None:
+                logging.warning('Группа Предварительные стабилизаторы" не найдена')
 
-            self.ui.loader_label.show()
-            self.loader.start()
+            elif self.netvars.software_revision.get() < 295 and aux_group_enabled:
+                QtWidgets.QMessageBox.warning(self, "Ошибка", "Тест предварительных стабилизаторов доступен для "
+                                                              "прошивок старше 294 ревизии",
+                                              QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.Yes)
+            elif self.netvars.source_manual_mode_password.get() != clb.MANUAL_MODE_ENABLE_PASSWORD:
+                self.lock_interface(True)
+                self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
+                self.ui.autocheck_start_button.setText("Остановить")
+                self.test_conductor.start()
+
+                self.ui.loader_label.show()
+                self.loader.start()
+            else:
+                logging.warning("Включен ручной режим. Перезагрузите калибратор, чтобы запустить проверку")
         else:
             logging.warning("Калибратор не подключен, невозможно провести проверку")
 
@@ -213,6 +267,75 @@ class MainWindow(QtWidgets.QMainWindow):
                 logging.warning("График для выбранного измерения не создан")
         except Exception as err:
             logging.debug(utils.exception_handler(err))
+
+    def show_test_errors(self, a_group: str, a_name: str):
+        try:
+            errors_list = self.test_conductor.get_test_errors(a_group, a_name)
+            has_errors = True if any(error != "" for error in errors_list) else False
+            if has_errors:
+                try:
+                    errors_dialog = self.errors_dialogs[(a_group, a_name)]
+                    errors_dialog.activateWindow()
+                except KeyError:
+                    nl = "\n"
+                    errors_list = [f'<p style=" color:#ff0000;">Тест №{num + 1}</p>{error.replace(nl, "<br>")}'
+                                   for num, error in enumerate(errors_list)]
+
+                    errors_dialog = DialogWithText(errors_list, self.settings, self)
+                    errors_dialog.setWindowTitle(f'Ошибки теста "{a_group}: {a_name}"')
+                    self.errors_dialogs[(a_group, a_name)] = errors_dialog
+                    errors_dialog.exec()
+                    del self.errors_dialogs[(a_group, a_name)]
+            else:
+                logging.warning("Выбранный тест не содержит ошибок")
+        except Exception as err:
+            logging.debug(utils.exception_handler(err))
+
+    @utils.exception_decorator
+    def save_button_clicked(self, _):
+        suggest_filename = f"{QtCore.QDate.currentDate().toString('yyyyMMdd')} N4-25 №{self.netvars.id.get()}"
+        chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Сохранить результаты", f"{self.settings.last_save_results_folder}/{suggest_filename}",
+            "Результаты проверки (*.car)")
+        if chosen_file != "":
+            results = {}
+            for test in self.tests:
+                test_results = self.test_conductor.get_test_results(test.group(), test.name())
+                results[f"{test.group()}:{test.name()}"] = test_results.data_to_serialize()
+            results["log"] = self.ui.log_text_edit.toPlainText()
+
+            with open(chosen_file, 'w') as file:
+                file.write(json.dumps(results, indent=4))
+
+    @utils.exception_decorator
+    def load_results(self, _):
+        chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Выберите файл",
+                                                               self.settings.last_save_results_folder,
+                                                               "Результаты проверки (*.car)")
+        if chosen_file != "":
+            self.settings.last_save_results_folder = chosen_file[:chosen_file.rfind("/")]
+
+            with open(chosen_file, 'r') as file:
+                test_results: Dict[str, Dict] = json.load(file)
+
+            self.ui.log_text_edit.setPlainText(test_results["log"])
+            del test_results["log"]
+
+            for test_name in test_results.keys():
+                sep = test_name.find(':')
+                group, name = test_name[:sep], test_name[sep + 1:]
+
+                try:
+                    self.test_conductor.set_test_results(group, name, test_results[test_name])
+                except ValueError:
+                    logging.warning(f"Тест {group}: {name} не найден! Результаты не восстановлены")
+
+    def clear_results(self):
+        for test in self.tests:
+            test_results = self.test_conductor.get_test_results(test.group(), test.name())
+            test_results.delete_results()
+            self.tests_widget.set_test_status(test.group(), test.name(), test_results.get_final_status(),
+                                              test_results.get_success_results_count())
 
     def open_settings(self):
         try:

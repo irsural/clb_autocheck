@@ -268,4 +268,7 @@ class TstlanDialog(QtWidgets.QDialog):
 
 class NumberTableWidgetItem(QtWidgets.QTableWidgetItem):
     def __lt__(self, other: QtWidgets.QTableWidgetItem):
-        return float(self.text()) < float(other.text())
+        try:
+            return float(self.text().replace(',', '.')) < float(other.text().replace(',', '.'))
+        except ValueError:
+            return False

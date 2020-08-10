@@ -45,6 +45,17 @@ class SettingsDialog(QtWidgets.QDialog):
         self.ui.rough_step_spinbox.setValue(self.settings.rough_step)
         self.ui.common_step_spinbox.setValue(self.settings.common_step)
 
+        self.ui.correction_deviation_spinbox.setValue(self.settings.aux_correction_deviation)
+        self.ui.deviation_spinbox.setValue(self.settings.aux_deviation)
+        self.ui.voltage_25_discretes_60v_spinbox.setValue(self.settings.aux_voltage_25_discretes_60v)
+        self.ui.voltage_230_discretes_60v_spinbox.setValue(self.settings.aux_voltage_230_discretes_60v)
+        self.ui.voltage_25_discretes_200v_spinbox.setValue(self.settings.aux_voltage_25_discretes_200v)
+        self.ui.voltage_230_discretes_200v_spinbox.setValue(self.settings.aux_voltage_230_discretes_200v)
+        self.ui.voltage_25_discretes_600v_spinbox.setValue(self.settings.aux_voltage_25_discretes_600v)
+        self.ui.voltage_230_discretes_600v_spinbox.setValue(self.settings.aux_voltage_230_discretes_600v)
+        self.ui.voltage_25_discretes_4v_spinbox.setValue(self.settings.aux_voltage_25_discretes_4v)
+        self.ui.voltage_230_discretes_4v_spinbox.setValue(self.settings.aux_voltage_230_discretes_4v)
+
         self.ui.netvars_table.setModel(self.netvars_db.model())
         self.ui.netvars_table.setItemDelegateForColumn(NetvarsDatabase.Column.TYPE,
                                                        ComboboxCellDelegate(self, self.netvars_db.allowed_types()))
@@ -99,6 +110,17 @@ class SettingsDialog(QtWidgets.QDialog):
 
         if self.settings.exact_step != self.ui.exact_step_spinbox.value():
             self.settings.exact_step = self.ui.exact_step_spinbox.value()
+
+        self.settings.aux_correction_deviation = self.ui.correction_deviation_spinbox.value()
+        self.settings.aux_deviation = self.ui.deviation_spinbox.value()
+        self.settings.aux_voltage_25_discretes_60v = self.ui.voltage_25_discretes_60v_spinbox.value()
+        self.settings.aux_voltage_230_discretes_60v = self.ui.voltage_230_discretes_60v_spinbox.value()
+        self.settings.aux_voltage_25_discretes_200v = self.ui.voltage_25_discretes_200v_spinbox.value()
+        self.settings.aux_voltage_230_discretes_200v = self.ui.voltage_230_discretes_200v_spinbox.value()
+        self.settings.aux_voltage_25_discretes_600v = self.ui.voltage_25_discretes_600v_spinbox.value()
+        self.settings.aux_voltage_230_discretes_600v = self.ui.voltage_230_discretes_600v_spinbox.value()
+        self.settings.aux_voltage_25_discretes_4v = self.ui.voltage_25_discretes_4v_spinbox.value()
+        self.settings.aux_voltage_230_discretes_4v = self.ui.voltage_230_discretes_4v_spinbox.value()
 
         return True
 

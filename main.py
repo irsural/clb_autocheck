@@ -8,10 +8,11 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtCore
 
 from mainwindow import MainWindow
-from utils import exception_handler
+from utils import exception_decorator_print
 
 
-if __name__ == "__main__":
+@exception_decorator_print
+def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
 
@@ -20,8 +21,10 @@ if __name__ == "__main__":
     translator.load("/".join([path, "qtbase_ru.qm"]))
     app.installTranslator(translator)
 
-    try:
-        w = MainWindow()
-        sys.exit(app.exec())
-    except Exception as err:
-        print("MAIN: " + exception_handler(err))
+    w = MainWindow()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
+    input("Error. Press enter to continue...")

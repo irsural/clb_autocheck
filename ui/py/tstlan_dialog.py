@@ -19,6 +19,7 @@ class Ui_Dialog(object):
         Dialog.setFont(font)
         Dialog.setFocusPolicy(QtCore.Qt.TabFocus)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
         self.verticalLayout.setObjectName("verticalLayout")
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setObjectName("gridLayout")

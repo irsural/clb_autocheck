@@ -16,6 +16,7 @@ class SignalTest(ClbTest):
         self.calibrator = a_calibrator
         self.netvars = a_netvars
         self.__timeout_s = a_timeout_s
+        self.error_message = ""
 
         self.hold_signal_timer = utils.Timer(a_hold_signal_timeout_s)
         self.__status = ClbTest.Status.NOT_CHECKED
@@ -40,6 +41,7 @@ class SignalTest(ClbTest):
 
     def stop(self):
         self.__status = ClbTest.Status.NOT_CHECKED
+        self.error_message = ""
         self.calibrator.signal_enable = False
         self.netvars.short_circuit_password.set(0)
         self.hold_signal_timer.stop()
@@ -52,7 +54,7 @@ class SignalTest(ClbTest):
                 if self.hold_signal_timer.check():
                     self.__status = ClbTest.Status.SUCCESS
         else:
-            logging.debug("Обнаружено выключение сигнала")
+            self.error_message += "Обнаружено выключение сигнала\n"
             self.__status = ClbTest.Status.FAIL
 
     def status(self) -> ClbTest.Status:
@@ -62,10 +64,10 @@ class SignalTest(ClbTest):
         return self.__timeout_s
 
     def has_error(self) -> bool:
-        return ClbTest.does_calibrator_has_error(self.netvars)
+        return ClbTest.does_calibrator_has_error(self.netvars) or bool(self.error_message)
 
     def get_last_error(self) -> str:
-        return ClbTest.get_calibrator_last_error(self.netvars)
+        return ClbTest.get_calibrator_last_error(self.netvars) + f"{self.error_message}"
 
     def abort_on_fail(self) -> bool:
         return False
