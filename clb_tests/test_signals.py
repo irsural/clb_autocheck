@@ -4,7 +4,7 @@ from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
 import irspy.clb.calibrator_constants as clb
 from irspy.clb.clb_dll import ClbDrv
-import utils
+from irspy import utils
 
 
 class SignalTest(ClbTest):

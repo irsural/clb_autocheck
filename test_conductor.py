@@ -7,7 +7,7 @@ from PyQt5 import QtCore
 
 from irspy.clb.network_variables import BufferedVariable
 from clb_tests import tests_base
-import utils
+from irspy import utils
 
 
 class TestResults:

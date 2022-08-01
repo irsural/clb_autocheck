@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5 import QtCore
 
 from mainwindow import MainWindow
-from utils import exception_decorator_print
+from irspy.utils import exception_decorator_print
 
 
 @exception_decorator_print

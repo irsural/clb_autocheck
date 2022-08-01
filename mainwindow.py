@@ -23,7 +23,7 @@ from qt_utils import QTextEditLogger
 from clb_tests import tests_base
 import constants as cfg
 import tests_factory
-import utils
+from irspy import utils
 
 
 class MainWindow(QtWidgets.QMainWindow):

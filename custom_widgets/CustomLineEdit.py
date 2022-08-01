@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-import utils
+from irspy import utils
 
 
 class QEditDoubleClick(QtWidgets.QLineEdit):

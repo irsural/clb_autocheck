@@ -10,7 +10,7 @@ from network_variables_database import NetvarsDatabase
 from irspy.qt.qt_settings_ini_parser import QtSettings
 import irspy.clb.calibrator_constants as clb
 
-import utils
+from irspy import utils
 
 
 class SettingsDialog(QtWidgets.QDialog):

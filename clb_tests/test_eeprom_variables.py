@@ -6,7 +6,7 @@ from irspy.clb.network_variables import BufferedVariable
 from clb_tests.tests_base import ClbTest
 from irspy.clb.clb_dll import ClbDrv
 
-import utils
+from irspy import utils
 
 
 class EepromVariablesTest(ClbTest):

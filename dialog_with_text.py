@@ -5,7 +5,7 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ui.py.dialog_with_text import Ui_Dialog as DialogForm
 from irspy.qt.qt_settings_ini_parser import QtSettings
-import utils
+from irspy import utils
 
 
 class DialogWithText(QtWidgets.QDialog):

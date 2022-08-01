@@ -6,7 +6,7 @@ import pyqtgraph
 
 from ui.py.test_graphs_dialog import Ui_Dialog as GraphForm
 from irspy.qt.qt_settings_ini_parser import QtSettings
-import utils
+from irspy import utils
 
 
 class TestGraphDialog(QtWidgets.QDialog):

@@ -7,7 +7,7 @@ from irspy.clb.network_variables import NetworkVariables, BufferedVariable
 from clb_tests.tests_base import ClbTest
 from irspy.qt.qt_settings_ini_parser import QtSettings
 import irspy.clb.calibrator_constants as clb
-import utils
+from irspy import utils
 
 
 def voltage_to_dac_code(a_voltage: float, r1: float, r2: float, r3: float, v0: float):
