@@ -16,8 +16,8 @@ import utils
 class SourceModeWidget(QtWidgets.QWidget):
     close_confirmed = pyqtSignal()
 
-    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv, a_network_variables: NetworkVariables,
-                 a_parent=None):
+    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv,
+                 a_network_variables: NetworkVariables, a_parent=None):
         super().__init__(a_parent)
 
         self.ui = SourceModeForm()
@@ -101,7 +101,7 @@ class SourceModeWidget(QtWidgets.QWidget):
 
     def update_clb_status(self, a_status: clb.State):
         self.clb_state = a_status
-        # self.ui.clb_state_label.setText(clb.enum_to_state[a_status])
+        self.ui.clb_state_label.setText(clb.state_to_text[a_status])
 
     def connect_to_clb(self, a_clb_name):
         self.calibrator.connect(a_clb_name)
@@ -123,10 +123,12 @@ class SourceModeWidget(QtWidgets.QWidget):
             self.mode_to_radio[self.mode].setChecked(True)
 
     def update_netvars(self):
-        self.ui.fast_adc_label.setText(f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
+        self.ui.fast_adc_label.setText(
+            f"({utils.float_to_string(self.netvars.fast_adc_slow.get())})")
 
         firmware_type = "RELEASE" if self.netvars.release_firmware.get() else "DEBUG"
-        self.ui.firmware_info_label.setText(f"{self.netvars.software_revision.get()} {firmware_type}")
+        self.ui.firmware_info_label.setText(
+            f"{self.netvars.software_revision.get()} {firmware_type}")
 
         self.ui.errors_count_label.setText(str(self.netvars.error_count.get()))
         if self.netvars.error_count.get() > 0:

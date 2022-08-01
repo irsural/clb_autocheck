@@ -1,6 +1,5 @@
 from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
-import utils
 
 
 class ReleaseCheckTest(ClbTest):

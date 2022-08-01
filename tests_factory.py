@@ -178,7 +178,7 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
 
     test = SignalTest(a_amplitude=400, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars, a_calibrator=a_calibrator)
     test.set_group("U~")
-    test.set_name("600 В")
+    test.set_name("630 В")
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
                                  "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
     tests.append(test)
