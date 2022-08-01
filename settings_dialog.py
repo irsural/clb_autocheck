@@ -3,9 +3,9 @@ import logging
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 
-from custom_widgets.EditListDialog import EditedListWithUnits
-from ui.py.settings_form import Ui_Dialog as SettingsForm
 from custom_widgets.QTableDelegates import ComboboxCellDelegate, TableEditDoubleClick
+from irspy.qt.custom_widgets.EditListDialog import EditedListWithUnits
+from ui.py.settings_form import Ui_Dialog as SettingsForm
 from network_variables_database import NetvarsDatabase
 from irspy.qt.qt_settings_ini_parser import QtSettings
 import irspy.clb.calibrator_constants as clb

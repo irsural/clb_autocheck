@@ -8,20 +8,19 @@ from irspy.qt.custom_widgets.tstlan_dialog import TstlanDialog
 import irspy.clb.clb_dll as clb_dll
 import irspy.clb.calibrator_constants as clb
 
-from irspy.settings_ini_parser import BadIniException
+from irspy.qt.custom_widgets.source_mode_widget import SourceModeWidget
+from irspy.qt.custom_widgets.dialog_with_text import DialogWithText
 from irspy.clb.network_variables import NetworkVariables
 from ui.py.mainwindow import Ui_MainWindow as MainForm
 from network_variables_database import NetvarsDatabase
-from source_mode_window import SourceModeWidget
+from irspy.settings_ini_parser import BadIniException
 from settings import get_clb_autocheck_settings
 from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
-from dialog_with_text import DialogWithText
 from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
 from qt_utils import QTextEditLogger
 from clb_tests import tests_base
-import irspy.constants as cfg
 import tests_factory
 from irspy import utils
 
@@ -82,10 +81,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.ui.enter_settings_action.triggered.connect(self.open_settings)
 
+            self.ui.errors_out_button.clicked.connect(self.start_errors_output)
+
             self.source_mode_widget = self.set_up_source_mode_widget()
             self.show()
 
-            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db, self.settings)
+            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db,
+                                                    self.settings)
 
             self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
             self.tests_widget.show_graph_requested.connect(self.show_test_graph)
@@ -98,7 +100,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.test_conductor.tests_done.connect(self.stop_autocheck)
             self.test_conductor.test_status_changed.connect(self.set_test_status)
 
-            self.source_mode_widget.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
+            self.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
 
             self.ui.save_button.clicked.connect(self.save_button_clicked)
             self.ui.load_button.clicked.connect(self.load_results)
@@ -107,6 +109,15 @@ class MainWindow(QtWidgets.QMainWindow):
             self.tick_timer = QtCore.QTimer(self)
             self.tick_timer.timeout.connect(self.tick)
             self.tick_timer.start(10)
+
+            self.update_netvars_timer = QtCore.QTimer()
+            self.update_netvars_timer.timeout.connect(self.update_netvars)
+            self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
+
+            self.next_error_timer = QtCore.QTimer()
+            self.next_error_timer.timeout.connect(self.show_next_error)
+            self.next_error_index = 0
+
         else:
             self.close()
 
@@ -120,11 +131,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # logging.getLogger().setLevel(logging.WARN)
 
     def set_up_source_mode_widget(self) -> SourceModeWidget:
-        source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self.netvars, self)
+        source_mode_widget = SourceModeWidget(self.settings, self.calibrator, self)
         self.clb_list_changed.connect(source_mode_widget.update_clb_list)
         self.usb_status_changed.connect(source_mode_widget.update_clb_status)
         self.signal_enable_changed.connect(source_mode_widget.signal_enable_changed)
-        self.ui.source_mode_layout.addWidget(source_mode_widget)
+        self.ui.control_box.layout().addWidget(source_mode_widget)
         return source_mode_widget
 
     def tick(self):
@@ -163,8 +174,22 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.previous_id = current_id
                 self.clear_results()
 
+    def update_netvars(self):
+        self.ui.fast_adc_label.setText(
+            f"{utils.float_to_string(self.netvars.fast_adc_slow.get())}")
+
+        firmware_type = "RELEASE" if self.netvars.release_firmware.get() else "DEBUG"
+        self.ui.firmware_info_label.setText(
+            f"{self.netvars.software_revision.get()} {firmware_type}")
+
+        self.ui.errors_count_label.setText(str(self.netvars.error_count.get()))
+        if self.netvars.error_count.get() > 0:
+            self.ui.errors_label.setStyleSheet("QLabel { color : red; }")
+        else:
+            self.ui.errors_label.setStyleSheet("QLabel { color : black; }")
+
     def lock_interface(self, a_lock):
-        self.source_mode_widget.ui.control_box.setDisabled(a_lock)
+        self.ui.control_box.setDisabled(a_lock)
         self.tests_widget.lock_interface(a_lock)
         self.ui.load_button.setDisabled(a_lock)
         self.ui.save_button.setDisabled(a_lock)
@@ -187,9 +212,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 logging.warning('Группа Предварительные стабилизаторы" не найдена')
 
             elif self.netvars.software_revision.get() < 295 and aux_group_enabled:
-                QtWidgets.QMessageBox.warning(self, "Ошибка", "Тест предварительных стабилизаторов доступен для "
-                                                              "прошивок старше 294 ревизии",
-                                              QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.Yes)
+                QtWidgets.QMessageBox.warning(
+                    self, "Ошибка", "Тест предварительных стабилизаторов доступен для прошивок "
+                    "старше 294 ревизии", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.Yes)
             elif self.netvars.source_manual_mode_password.get() != clb.MANUAL_MODE_ENABLE_PASSWORD:
                 self.lock_interface(True)
                 self.test_conductor.set_enabled_tests(self.tests_widget.get_tests_repeat_count())
@@ -199,7 +224,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.ui.loader_label.show()
                 self.loader.start()
             else:
-                logging.warning("Включен ручной режим. Перезагрузите калибратор, чтобы запустить проверку")
+                logging.warning(
+                    "Включен ручной режим. Перезагрузите калибратор, чтобы запустить проверку")
         else:
             logging.warning("Калибратор не подключен, невозможно провести проверку")
 
@@ -254,8 +280,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     errors_dialog.activateWindow()
                 except KeyError:
                     nl = "\n"
-                    errors_list = [f'<p style=" color:#ff0000;">Тест №{num + 1}</p>{error.replace(nl, "<br>")}'
-                                   for num, error in enumerate(errors_list)]
+                    errors_list = [
+                        f'<p style=" color:#ff0000;">Тест №{num + 1}</p>{error.replace(nl, "<br>")}'
+                        for num, error in enumerate(errors_list)
+                    ]
 
                     errors_dialog = DialogWithText(errors_list, self.settings, self)
                     errors_dialog.setWindowTitle(f'Ошибки теста "{a_group}: {a_name}"')
@@ -269,9 +297,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @utils.exception_decorator
     def save_button_clicked(self, _):
-        suggest_filename = f"{QtCore.QDate.currentDate().toString('yyyyMMdd')} N4-25 №{self.netvars.id.get()}"
+        suggest_filename = \
+            f"{QtCore.QDate.currentDate().toString('yyyyMMdd')} N4-25 №{self.netvars.id.get()}"
         chosen_file, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Сохранить результаты", f"{self.settings.last_save_results_folder}/{suggest_filename}",
+            self, "Сохранить результаты",
+            f"{self.settings.last_save_results_folder}/{suggest_filename}",
             "Результаты проверки (*.car)")
         if chosen_file != "":
             results = {}
@@ -285,9 +315,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @utils.exception_decorator
     def load_results(self, _):
-        chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Выберите файл",
-                                                               self.settings.last_save_results_folder,
-                                                               "Результаты проверки (*.car)")
+        chosen_file, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "Выберите файл", self.settings.last_save_results_folder,
+            "Результаты проверки (*.car)")
         if chosen_file != "":
             self.settings.last_save_results_folder = chosen_file[:chosen_file.rfind("/")]
 
@@ -310,8 +340,34 @@ class MainWindow(QtWidgets.QMainWindow):
         for test in self.tests:
             test_results = self.test_conductor.get_test_results(test.group(), test.name())
             test_results.delete_results()
-            self.tests_widget.set_test_status(test.group(), test.name(), test_results.get_final_status(),
-                                              test_results.get_success_results_count())
+            self.tests_widget.set_test_status(
+                test.group(), test.name(), test_results.get_final_status(),
+                test_results.get_success_results_count())
+
+    def start_errors_output(self):
+        if self.netvars.error_count.get() > 0:
+            self.next_error_index = 0
+            self.next_error_timer.start(1200)
+
+    def show_next_error(self):
+        error_index = self.netvars.error_index.get()
+        error_count = self.netvars.error_count.get()
+        if error_index >= error_count:
+            # На случай если во время вывода ошибок их состояние было изменено извне
+            self.next_error_timer.stop()
+        else:
+            if self.next_error_index == error_index:
+                error_code = self.netvars.error_code.get()
+                logging.warning(f"Ошибка №{error_index + 1}: "
+                                f"Код {error_code}. {clb.error_code_to_message[error_code]}.")
+
+                next_error_index = error_index + 1
+                if next_error_index >= error_count:
+                    self.netvars.clear_error_occurred_status.set(1)
+                    self.next_error_timer.stop()
+                else:
+                    self.next_error_index = next_error_index
+                    self.netvars.error_index.set(next_error_index)
 
     def open_settings(self):
         try:
