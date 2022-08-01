@@ -1,7 +1,7 @@
 from network_variables_database import NetvarsDatabase
 from irspy.clb.network_variables import NetworkVariables
 import irspy.clb.calibrator_constants as clb
-from settings_ini_parser import Settings
+from irspy.qt.qt_settings_ini_parser import QtSettings
 from irspy.clb.clb_dll import ClbDrv
 
 from clb_tests.test_eeprom_variables import EepromVariablesTest
@@ -16,7 +16,7 @@ from clb_tests.test_aux_stabilizers import AuxStabilizersTest
 
 
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db: NetvarsDatabase,
-                 a_settings: Settings):
+                 a_settings: QtSettings):
     tests = []
     # -----------------------------------------------------------------------------------------------------
     test = CablesTest(a_netvars=a_netvars)

@@ -5,20 +5,20 @@ from PyQt5 import QtGui, QtWidgets
 import pyqtgraph
 
 from ui.py.test_graphs_dialog import Ui_Dialog as GraphForm
-from settings_ini_parser import Settings
+from irspy.qt.qt_settings_ini_parser import QtSettings
 import utils
 
 
 class TestGraphDialog(QtWidgets.QDialog):
-    def __init__(self, a_graph_data: List[Dict[str, Tuple[List[float], List[float]]]], a_settings: Settings,
-                 a_parent=None):
+    def __init__(self, a_graph_data: List[Dict[str, Tuple[List[float], List[float]]]],
+                 a_settings: QtSettings, a_parent=None):
         super().__init__(a_parent)
 
         self.ui = GraphForm()
         self.ui.setupUi(self)
 
         self.settings = a_settings
-        self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
+        self.settings.restore_qwidget_state(self)
         self.show()
 
         self.graph_data = a_graph_data
@@ -80,5 +80,5 @@ class TestGraphDialog(QtWidgets.QDialog):
         print("graphs deleted")
 
     def closeEvent(self, a_event: QtGui.QCloseEvent) -> None:
-        self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
+        self.settings.save_qwidget_state(self)
         a_event.accept()

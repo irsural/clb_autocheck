@@ -4,20 +4,22 @@ import json
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from settings_ini_parser import Settings, BadIniException
+from irspy.qt.custom_widgets.tstlan_dialog import TstlanDialog
+import irspy.clb.clb_dll as clb_dll
+import irspy.clb.calibrator_constants as clb
+
+from irspy.settings_ini_parser import BadIniException
 from irspy.clb.network_variables import NetworkVariables
 from ui.py.mainwindow import Ui_MainWindow as MainForm
 from network_variables_database import NetvarsDatabase
 from source_mode_window import SourceModeWidget
+from settings import get_clb_autocheck_settings
 from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
 from dialog_with_text import DialogWithText
 from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
-from tstlan_dialog import TstlanDialog
 from qt_utils import QTextEditLogger
-import irspy.clb.clb_dll as clb_dll
-import irspy.clb.calibrator_constants as clb
 from clb_tests import tests_base
 import constants as cfg
 import tests_factory
@@ -45,31 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.loader_label.setMovie(self.loader)
 
         try:
-            self.settings = Settings("./settings.ini", [
-                Settings.VariableInfo(a_name="fixed_step_list", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_FLOAT, a_default=[0.0001,0.01,0.1,1,10,20,100]),
-                Settings.VariableInfo(a_name="checkbox_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="fixed_step_idx", a_section="PARAMETERS", a_type=Settings.ValueType.INT),
-                Settings.VariableInfo(a_name="rough_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.5),
-                Settings.VariableInfo(a_name="common_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.05),
-                Settings.VariableInfo(a_name="exact_step", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.002),
-                Settings.VariableInfo(a_name="tstlan_update_time", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=0.2),
-                Settings.VariableInfo(a_name="tstlan_show_marks", a_section="PARAMETERS", a_type=Settings.ValueType.INT, a_default=0),
-                Settings.VariableInfo(a_name="tstlan_marks", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="tstlan_graphs", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="tests_repeat_count", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="tests_collapsed_states", a_section="PARAMETERS", a_type=Settings.ValueType.LIST_INT),
-                Settings.VariableInfo(a_name="last_save_results_folder", a_section="PARAMETERS", a_type=Settings.ValueType.STRING),
-                Settings.VariableInfo(a_name="aux_correction_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=10),
-                Settings.VariableInfo(a_name="aux_deviation", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=2),
-                Settings.VariableInfo(a_name="aux_voltage_25_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=18),
-                Settings.VariableInfo(a_name="aux_voltage_230_discretes_60v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=61.2),
-                Settings.VariableInfo(a_name="aux_voltage_25_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=61),
-                Settings.VariableInfo(a_name="aux_voltage_230_discretes_200v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=215),
-                Settings.VariableInfo(a_name="aux_voltage_25_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=165),
-                Settings.VariableInfo(a_name="aux_voltage_230_discretes_600v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=605),
-                Settings.VariableInfo(a_name="aux_voltage_25_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=1.73),
-                Settings.VariableInfo(a_name="aux_voltage_230_discretes_4v", a_section="PARAMETERS", a_type=Settings.ValueType.FLOAT, a_default=4.6),
-            ])
+            self.settings = get_clb_autocheck_settings()
 
             ini_ok = True
         except BadIniException:
@@ -77,12 +55,10 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.critical(self, "Ошибка", 'Файл конфигурации поврежден. Пожалуйста, '
                                                            'удалите файл "settings.ini" и запустите программу заново')
         if ini_ok:
-            self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
-            self.ui.splitter.restoreState(self.settings.get_last_geometry(self.ui.splitter.__class__.__name__ + "1"))
-            self.ui.splitter_2.restoreState(self.settings.get_last_geometry(
-                self.ui.splitter_2.__class__.__name__ + "2"))
-            self.ui.tests_tree.header().restoreState(self.settings.get_last_geometry(
-                self.ui.tests_tree.__class__.__name__))
+            self.settings.restore_qwidget_state(self)
+            self.settings.restore_qwidget_state(self.ui.splitter)
+            self.settings.restore_qwidget_state(self.ui.splitter_2)
+            self.settings.restore_qwidget_state(self.ui.tests_tree)
 
             self.set_up_logger()
 
@@ -350,9 +326,9 @@ class MainWindow(QtWidgets.QMainWindow):
             self.clb_signal_off_timer.start(self.SIGNAL_OFF_TIME_MS)
             a_event.ignore()
         else:
-            self.settings.save_geometry(self.ui.splitter.__class__.__name__ + "1", self.ui.splitter.saveState())
-            self.settings.save_geometry(self.ui.splitter_2.__class__.__name__ + "2", self.ui.splitter_2.saveState())
-            self.settings.save_geometry(self.ui.tests_tree.__class__.__name__, self.ui.tests_tree.header().saveState())
-            self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
+            self.settings.save_qwidget_state(self.ui.splitter_2)
+            self.settings.save_qwidget_state(self.ui.splitter)
+            self.settings.save_qwidget_state(self.ui.tests_tree)
+            self.settings.save_qwidget_state(self)
             self.tests_widget.save()
             a_event.accept()

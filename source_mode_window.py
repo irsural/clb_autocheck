@@ -7,7 +7,7 @@ from PyQt5.QtCore import pyqtSignal, QTimer
 from ui.py.source_mode_form import Ui_Form as SourceModeForm
 from irspy.clb.network_variables import NetworkVariables
 import irspy.clb.calibrator_constants as clb
-from settings_ini_parser import Settings
+from irspy.qt.qt_settings_ini_parser import QtSettings
 import qt_utils
 import irspy.clb.clb_dll as clb_dll
 import utils
@@ -16,7 +16,7 @@ import utils
 class SourceModeWidget(QtWidgets.QWidget):
     close_confirmed = pyqtSignal()
 
-    def __init__(self, a_settings: Settings, a_calibrator: clb_dll.ClbDrv,
+    def __init__(self, a_settings: QtSettings, a_calibrator: clb_dll.ClbDrv,
                  a_network_variables: NetworkVariables, a_parent=None):
         super().__init__(a_parent)
 

@@ -5,7 +5,7 @@ import logging
 
 from irspy.clb.network_variables import NetworkVariables, BufferedVariable
 from clb_tests.tests_base import ClbTest
-from settings_ini_parser import Settings
+from irspy.qt.qt_settings_ini_parser import QtSettings
 import irspy.clb.calibrator_constants as clb
 import utils
 
@@ -312,8 +312,9 @@ class AuxStabilizersTest(ClbTest):
         WAIT_VOLTAGE = 1
         WAIT_STOP = 2
 
-    def __init__(self, a_settings: Settings, a_ref_v_map: Dict[AuxType, Tuple[int]], a_netvars: NetworkVariables,
-                 a_aux_fail_timeout_s: int = 40, a_hold_voltage_timeout_s: int = 10, a_timeout_s: int = 100):
+    def __init__(self, a_settings: QtSettings, a_ref_v_map: Dict[AuxType, Tuple[int]],
+                 a_netvars: NetworkVariables, a_aux_fail_timeout_s: int = 40,
+                 a_hold_voltage_timeout_s: int = 10, a_timeout_s: int = 100):
         super().__init__()
 
         assert AuxStabilizersTest.AuxType.V60 in a_ref_v_map, "Тест обязательно должен содержать стабилизатор 60 В"
