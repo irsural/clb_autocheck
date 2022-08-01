@@ -2,8 +2,8 @@ import abc
 from enum import IntEnum
 from typing import Dict
 
-from network_variables import NetworkVariables, BufferedVariable
-import calibrator_constants as clb
+from irspy.clb.network_variables import NetworkVariables, BufferedVariable
+import irspy.clb.calibrator_constants as clb
 
 
 class ClbTest(abc.ABC):

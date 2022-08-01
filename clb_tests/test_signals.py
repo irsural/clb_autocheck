@@ -1,9 +1,9 @@
 import logging
 
-from network_variables import NetworkVariables
+from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
-import calibrator_constants as clb
-from clb_dll import ClbDrv
+import irspy.clb.calibrator_constants as clb
+from irspy.clb.clb_dll import ClbDrv
 import utils
 
 

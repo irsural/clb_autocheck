@@ -9,8 +9,8 @@ from PyQt5 import QtGui, QtWidgets, QtCore
 from ui.py.tstlan_dialog import Ui_Dialog as TstlanForm
 from tstlan_graph_dialog import TstlanGraphDialog
 from settings_ini_parser import Settings
-from clb_dll import ClbDrv
-import network_variables as nv
+from irspy.clb.clb_dll import ClbDrv
+import irspy.clb.network_variables as nv
 import utils
 
 

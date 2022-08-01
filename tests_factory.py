@@ -1,8 +1,8 @@
 from network_variables_database import NetvarsDatabase
-from network_variables import NetworkVariables
-import calibrator_constants as clb
+from irspy.clb.network_variables import NetworkVariables
+import irspy.clb.calibrator_constants as clb
 from settings_ini_parser import Settings
-from clb_dll import ClbDrv
+from irspy.clb.clb_dll import ClbDrv
 
 from clb_tests.test_eeprom_variables import EepromVariablesTest
 from clb_tests.test_supply_voltage import SupplyVoltageTest

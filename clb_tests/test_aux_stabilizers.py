@@ -3,10 +3,10 @@ from enum import IntEnum
 from typing import Dict, Tuple
 import logging
 
-from network_variables import NetworkVariables, BufferedVariable
+from irspy.clb.network_variables import NetworkVariables, BufferedVariable
 from clb_tests.tests_base import ClbTest
 from settings_ini_parser import Settings
-import calibrator_constants as clb
+import irspy.clb.calibrator_constants as clb
 import utils
 
 

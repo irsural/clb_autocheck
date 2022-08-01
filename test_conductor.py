@@ -5,7 +5,7 @@ import json
 
 from PyQt5 import QtCore
 
-from network_variables import BufferedVariable
+from irspy.clb.network_variables import BufferedVariable
 from clb_tests import tests_base
 import utils
 

@@ -5,7 +5,7 @@ import logging
 
 from PyQt5 import QtGui, QtCore, QtWidgets, QtSql
 
-from network_variables import VariableInfo
+from irspy.clb.network_variables import VariableInfo
 
 
 class NetvarsDatabase(QtCore.QObject):

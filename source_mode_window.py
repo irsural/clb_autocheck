@@ -5,11 +5,11 @@ from PyQt5.QtCore import pyqtSignal, QTimer
 
 
 from ui.py.source_mode_form import Ui_Form as SourceModeForm
-from network_variables import NetworkVariables
-import calibrator_constants as clb
+from irspy.clb.network_variables import NetworkVariables
+import irspy.clb.calibrator_constants as clb
 from settings_ini_parser import Settings
 import qt_utils
-import clb_dll
+import irspy.clb.clb_dll as clb_dll
 import utils
 
 
@@ -101,7 +101,7 @@ class SourceModeWidget(QtWidgets.QWidget):
 
     def update_clb_status(self, a_status: clb.State):
         self.clb_state = a_status
-        self.ui.clb_state_label.setText(clb.enum_to_state[a_status])
+        # self.ui.clb_state_label.setText(clb.enum_to_state[a_status])
 
     def connect_to_clb(self, a_clb_name):
         self.calibrator.connect(a_clb_name)

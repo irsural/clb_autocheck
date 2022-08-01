@@ -2,9 +2,9 @@ from sys import float_info
 import logging
 
 from network_variables_database import NetvarsDatabase
-from network_variables import BufferedVariable
+from irspy.clb.network_variables import BufferedVariable
 from clb_tests.tests_base import ClbTest
-from clb_dll import ClbDrv
+from irspy.clb.clb_dll import ClbDrv
 
 import utils
 

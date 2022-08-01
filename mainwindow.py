@@ -5,10 +5,10 @@ import json
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from settings_ini_parser import Settings, BadIniException
+from irspy.clb.network_variables import NetworkVariables
 from ui.py.mainwindow import Ui_MainWindow as MainForm
 from network_variables_database import NetvarsDatabase
 from source_mode_window import SourceModeWidget
-from network_variables import NetworkVariables
 from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
 from dialog_with_text import DialogWithText
@@ -16,11 +16,11 @@ from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
 from tstlan_dialog import TstlanDialog
 from qt_utils import QTextEditLogger
-import calibrator_constants as clb
+import irspy.clb.clb_dll as clb_dll
+import irspy.clb.calibrator_constants as clb
 from clb_tests import tests_base
 import constants as cfg
 import tests_factory
-import clb_dll
 import utils
 
 
@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             self.set_up_logger()
 
-            self.clb_driver = clb_dll.set_up_driver(clb_dll.debug_dll_path)
+            self.clb_driver = clb_dll.clb_dll
 
             modbus_registers_count = 700
             self.usb_driver = clb_dll.UsbDrv(self.clb_driver, modbus_registers_count * 2)

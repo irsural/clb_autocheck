@@ -8,7 +8,7 @@ from ui.py.settings_form import Ui_Dialog as SettingsForm
 from custom_widgets.QTableDelegates import ComboboxCellDelegate, TableEditDoubleClick
 from network_variables_database import NetvarsDatabase
 from settings_ini_parser import Settings
-import calibrator_constants as clb
+import irspy.clb.calibrator_constants as clb
 
 import utils
 
