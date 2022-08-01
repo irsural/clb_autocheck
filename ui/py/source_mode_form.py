@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './ui/source_mode_form.ui'
+# Form implementation generated from reading ui file 'source_mode_form.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -335,4 +335,4 @@ class Ui_Form(object):
         self.fast_adc_label.setText(_translate("Form", "(0)"))
         self.enable_button.setText(_translate("Form", "Пуск"))
 from custom_widgets.CustomLineEdit import QEditCopyButton
-import icons_rc
+import icons

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './ui/mainwindow.ui'
+# Form implementation generated from reading ui file 'mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -147,4 +147,4 @@ class Ui_MainWindow(object):
         self.change_fixed_range_action.setText(_translate("MainWindow", "Изменить фиксированный шаг"))
         self.enter_settings_action.setText(_translate("MainWindow", "Настройки..."))
         self.action.setText(_translate("MainWindow", "О программе"))
-import icons_rc
+import icons
