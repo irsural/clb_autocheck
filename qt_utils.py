@@ -3,7 +3,7 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-import constants
+import irspy.constants
 
 
 QSTYLE_COLOR_WHITE = "background-color: rgb(255, 255, 255);"
@@ -13,7 +13,7 @@ QSTYLE_COLOR_RED = "background-color: rgb(245, 206, 203);"
 
 def update_edit_color(a_actual_value, a_current_value, a_edit: QtWidgets.QLineEdit):
     try:
-        if isclose(a_actual_value, float(a_current_value), rel_tol=constants.FLOAT_EPSILON):
+        if isclose(a_actual_value, float(a_current_value), rel_tol=irspy.constants.FLOAT_EPSILON):
             a_edit.setStyleSheet(QSTYLE_COLOR_WHITE)
         else:
             a_edit.setStyleSheet(QSTYLE_COLOR_YELLOW)

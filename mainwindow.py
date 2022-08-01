@@ -21,7 +21,7 @@ from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
 from qt_utils import QTextEditLogger
 from clb_tests import tests_base
-import constants as cfg
+import irspy.constants as cfg
 import tests_factory
 from irspy import utils
 
@@ -70,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.calibrator = clb_dll.ClbDrv(self.clb_driver)
             self.clb_state = clb.State.DISCONNECTED
 
-            self.netvars = NetworkVariables(cfg.CLB_CONFIG_PATH, self.calibrator)
+            self.netvars = NetworkVariables(f"./{clb.CLB_CONFIG_NAME}", self.calibrator)
             self.netvars_db = NetvarsDatabase("./netvars.db", self)
 
             self.clb_signal_off_timer = QtCore.QTimer()
