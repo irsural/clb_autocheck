@@ -1,3 +1,4 @@
+import os.path
 from typing import Dict, Tuple
 import logging
 import json
@@ -47,79 +48,83 @@ class MainWindow(QtWidgets.QMainWindow):
 
         try:
             self.settings = get_clb_autocheck_settings()
-
-            ini_ok = True
         except BadIniException:
-            ini_ok = False
-            QtWidgets.QMessageBox.critical(self, "Ошибка", 'Файл конфигурации поврежден. Пожалуйста, '
-                                                           'удалите файл "settings.ini" и запустите программу заново')
-        if ini_ok:
-            self.settings.restore_qwidget_state(self)
-            self.settings.restore_qwidget_state(self.ui.splitter)
-            self.settings.restore_qwidget_state(self.ui.splitter_2)
-            self.settings.restore_qwidget_state(self.ui.tests_tree)
-
-            self.set_up_logger()
-
-            self.clb_driver = clb_dll.clb_dll
-
-            modbus_registers_count = 700
-            self.usb_driver = clb_dll.UsbDrv(self.clb_driver, modbus_registers_count * 2)
-            self.usb_state = clb_dll.UsbDrv.UsbState.DISABLED
-            self.calibrator = clb_dll.ClbDrv(self.clb_driver)
-            self.clb_state = clb.State.DISCONNECTED
-
-            self.netvars = NetworkVariables(f"./{clb.CLB_CONFIG_NAME}", self.calibrator)
-            self.netvars_db = NetvarsDatabase("./netvars.db", self)
-
-            self.clb_signal_off_timer = QtCore.QTimer()
-            # noinspection PyTypeChecker
-            self.clb_signal_off_timer.timeout.connect(self.close)
-            self.SIGNAL_OFF_TIME_MS = 200
-
-            self.previous_id = 0
-
-            self.ui.enter_settings_action.triggered.connect(self.open_settings)
-
-            self.ui.errors_out_button.clicked.connect(self.start_errors_output)
-
-            self.source_mode_widget = self.set_up_source_mode_widget()
-            self.show()
-
-            self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db,
-                                                    self.settings)
-
-            self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
-            self.tests_widget.show_graph_requested.connect(self.show_test_graph)
-            self.tests_widget.show_errors_requested.connect(self.show_test_errors)
-            self.graphs_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
-            self.errors_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
-
-            self.test_conductor = TestsConductor(self.tests)
-            self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
-            self.test_conductor.tests_done.connect(self.stop_autocheck)
-            self.test_conductor.test_status_changed.connect(self.set_test_status)
-
-            self.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
-
-            self.ui.save_button.clicked.connect(self.save_button_clicked)
-            self.ui.load_button.clicked.connect(self.load_results)
-            self.ui.clear_results_button.clicked.connect(self.clear_results)
-
-            self.tick_timer = QtCore.QTimer(self)
-            self.tick_timer.timeout.connect(self.tick)
-            self.tick_timer.start(10)
-
-            self.update_netvars_timer = QtCore.QTimer()
-            self.update_netvars_timer.timeout.connect(self.update_netvars)
-            self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
-
-            self.next_error_timer = QtCore.QTimer()
-            self.next_error_timer.timeout.connect(self.show_next_error)
-            self.next_error_index = 0
-
-        else:
+            QtWidgets.QMessageBox.critical(
+                self, "Ошибка", 'Файл конфигурации поврежден. Пожалуйста, удалите файл '
+                                '"settings.ini" и запустите программу заново')
             self.close()
+            return
+
+        self.settings.restore_qwidget_state(self)
+        self.settings.restore_qwidget_state(self.ui.splitter)
+        self.settings.restore_qwidget_state(self.ui.splitter_2)
+        self.settings.restore_qwidget_state(self.ui.tests_tree)
+
+        self.set_up_logger()
+
+        self.clb_driver = clb_dll.clb_dll
+
+        modbus_registers_count = 700
+        self.usb_driver = clb_dll.UsbDrv(self.clb_driver, modbus_registers_count * 2)
+        self.usb_state = clb_dll.UsbDrv.UsbState.DISABLED
+        self.calibrator = clb_dll.ClbDrv(self.clb_driver)
+        self.clb_state = clb.State.DISCONNECTED
+
+        if not os.path.isfile(f"./{clb.CLB_CONFIG_NAME}"):
+            QtWidgets.QMessageBox.critical(
+                self, "Ошибка", f'Не найден файл конфигурации сетевых переменных калибратора '
+                                f'"./{clb.CLB_CONFIG_NAME}"')
+            self.close()
+            return
+
+        self.netvars = NetworkVariables(f"./{clb.CLB_CONFIG_NAME}", self.calibrator)
+        self.netvars_db = NetvarsDatabase("./netvars.db", self)
+
+        self.clb_signal_off_timer = QtCore.QTimer()
+        # noinspection PyTypeChecker
+        self.clb_signal_off_timer.timeout.connect(self.close)
+        self.SIGNAL_OFF_TIME_MS = 200
+
+        self.previous_id = 0
+
+        self.ui.enter_settings_action.triggered.connect(self.open_settings)
+
+        self.ui.errors_out_button.clicked.connect(self.start_errors_output)
+
+        self.source_mode_widget = self.set_up_source_mode_widget()
+        self.show()
+
+        self.tests = tests_factory.create_tests(self.calibrator, self.netvars, self.netvars_db,
+                                                self.settings)
+
+        self.tests_widget = TestsTreeWidget(self.tests, self.ui.tests_tree, self.settings)
+        self.tests_widget.show_graph_requested.connect(self.show_test_graph)
+        self.tests_widget.show_errors_requested.connect(self.show_test_errors)
+        self.graphs_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
+        self.errors_dialogs: Dict[Tuple[str, str], QtWidgets.QDialog] = {}
+
+        self.test_conductor = TestsConductor(self.tests)
+        self.ui.autocheck_start_button.clicked.connect(self.autocheck_button_clicked)
+        self.test_conductor.tests_done.connect(self.stop_autocheck)
+        self.test_conductor.test_status_changed.connect(self.set_test_status)
+
+        self.ui.open_tstlan_button.clicked.connect(self.open_tstlan)
+
+        self.ui.save_button.clicked.connect(self.save_button_clicked)
+        self.ui.load_button.clicked.connect(self.load_results)
+        self.ui.clear_results_button.clicked.connect(self.clear_results)
+
+        self.tick_timer = QtCore.QTimer(self)
+        self.tick_timer.timeout.connect(self.tick)
+        self.tick_timer.start(10)
+
+        self.update_netvars_timer = QtCore.QTimer()
+        self.update_netvars_timer.timeout.connect(self.update_netvars)
+        self.update_netvars_timer.start(self.settings.tstlan_update_time * 1000)
+
+        self.next_error_timer = QtCore.QTimer()
+        self.next_error_timer.timeout.connect(self.show_next_error)
+        self.next_error_index = 0
 
     def set_up_logger(self):
         log = QTextEditLogger(self.ui.log_text_edit)

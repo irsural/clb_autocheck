@@ -14,8 +14,10 @@ if __name__ == "__main__":
                                 a_product_name=app_info.FULL_NAME)
 
     libs = [
-        'C:\\Windows\\System32\\vcruntime140d.dll',
-        'C:\\Windows\\System32\\ucrtbased.dll',
+        ('C:\\Windows\\System32\\vcruntime140d.dll', '.'),
+        ('C:\\Windows\\System32\\ucrtbased.dll', '.'),
+        # ('irspy\\clb\\clb_driver_dll.dll', '.')
+        ('irspy\\clb\\clb_driver_dll.dll', '.\\irspy\\clb')
     ]
 
     py_build.build_qt_app(a_main_filename="main.py",
