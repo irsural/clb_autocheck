@@ -19,7 +19,7 @@ from tests_tree_widget import TestsTreeWidget
 from test_graph_dialog import TestGraphDialog
 from settings_dialog import SettingsDialog
 from test_conductor import TestsConductor
-from qt_utils import QTextEditLogger
+from irspy.qt.qt_utils import QTextEditLogger
 from clb_tests import tests_base
 import tests_factory
 from irspy import utils
@@ -122,7 +122,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.close()
 
     def set_up_logger(self):
-        log = QTextEditLogger(self, self.ui.log_text_edit)
+        log = QTextEditLogger(self.ui.log_text_edit)
         log.setFormatter(logging.Formatter('%(asctime)s - %(message)s', datefmt='%H:%M:%S'))
 
         logging.getLogger().addHandler(log)
