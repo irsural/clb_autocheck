@@ -66,7 +66,7 @@ class Ui_MainWindow(object):
         self.splitter.setSizePolicy(sizePolicy)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName("splitter")
-        self.log_text_edit = QtWidgets.QPlainTextEdit(self.splitter)
+        self.log_text_edit = QtWidgets.QTextEdit(self.splitter)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(0)

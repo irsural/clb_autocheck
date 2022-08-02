@@ -4,7 +4,7 @@ import logging
 from PyQt5 import QtGui, QtWidgets
 import pyqtgraph
 
-from ui.py.test_graphs_dialog import Ui_Dialog as GraphForm
+from ui.py.test_graphs_dialog import Ui_test_graph_dialog as GraphForm
 from irspy.qt.qt_settings_ini_parser import QtSettings
 from irspy import utils
 

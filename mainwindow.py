@@ -292,6 +292,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     errors_dialog = DialogWithText(errors_list, self.settings, self)
                     errors_dialog.setWindowTitle(f'Ошибки теста "{a_group}: {a_name}"')
+                    errors_dialog.ui.setObjectName("test_errors")
                     self.errors_dialogs[(a_group, a_name)] = errors_dialog
                     errors_dialog.exec()
                     del self.errors_dialogs[(a_group, a_name)]

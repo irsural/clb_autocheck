@@ -10,11 +10,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(838, 554)
-        self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
+class Ui_test_graph_dialog(object):
+    def setupUi(self, test_graph_dialog):
+        test_graph_dialog.setObjectName("test_graph_dialog")
+        test_graph_dialog.resize(838, 554)
+        self.verticalLayout = QtWidgets.QVBoxLayout(test_graph_dialog)
         self.verticalLayout.setContentsMargins(0, 5, 0, 0)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -28,9 +28,9 @@ class Ui_Dialog(object):
         self.chart_layout.setObjectName("chart_layout")
         self.verticalLayout.addLayout(self.chart_layout)
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(test_graph_dialog)
+        QtCore.QMetaObject.connectSlotsByName(test_graph_dialog)
 
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, test_graph_dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        test_graph_dialog.setWindowTitle(_translate("test_graph_dialog", "Dialog"))

@@ -122,7 +122,7 @@
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <widget class="QPlainTextEdit" name="log_text_edit">
+       <widget class="QTextEdit" name="log_text_edit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>1</horstretch>
