@@ -15,6 +15,37 @@ from clb_tests.test_aux_stabilizers import AuxStabilizersTest
 # from clb_tests.tests_base import EmptyTest
 
 
+def create_cooler_tests(a_cooler: CoolerTest.CoolerLocation, a_netvars: NetworkVariables):
+
+    test = CoolerTest(a_cooler_location=a_cooler, a_netvars=a_netvars)
+    test.set_group("Кулеры")
+    test.set_name(CoolerTest.COOLER_LOCATION_TO_TEXT[a_cooler])
+    test.set_variables_to_graph({"Выход pid-регулятора": a_netvars.main_board_fun_pid_out,
+                                 "Скорость (об/мин)": a_netvars.main_board_fun_speed})
+    return test
+
+
+def create_peltier_tests(a_peltier: PeltierTest.PeltierNumber, a_netvars: NetworkVariables,
+                         a_timeout=160):
+    test = PeltierTest(a_peltier_number=a_peltier, a_netvars=a_netvars, a_ready_hold_timer=30,
+                       a_wait_peltier_timeout_s=a_timeout, a_timeout_s=a_timeout * 3)
+    test.set_group("Пельтье")
+    test.set_name(f"№{int(a_peltier)}")
+
+    graph_variables_templates = {"Уставка": "peltier_{}_temperature_setpoint",
+                                 "Температура": "peltier_{}_temperature",
+                                 "Выход pid-регулятора": "peltier_{}_pid_out",
+                                 "Бит готовности": "peltier_{}_ready"}
+
+    graph_variables = {}
+    for name, template in graph_variables_templates.items():
+        graph_variables[name] = getattr(a_netvars, template.format(int(a_peltier)))
+
+    test.set_variables_to_graph(graph_variables)
+
+    return test
+
+
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db: NetvarsDatabase,
                  a_settings: QtSettings):
     tests = []
@@ -27,12 +58,13 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test = SupplyVoltageTest(a_netvars=a_netvars, a_success_timeout_s=30, a_timeout_s=60)
     test.set_group("Тесты")
     test.set_name("Напряжения питания")
-    test.set_variables_to_graph({"Внутр. стабилизатор 12 В": a_netvars.inner_stabilizer_12v_voltage,
-                                 "Внутр. стабилизатор 9 В": a_netvars.inner_stabilizer_9v_voltage,
-                                 "Внутр. стабилизатор 5 В": a_netvars.inner_stabilizer_5v_voltage,
-                                 "Внутр. стабилизатор +2.5 В": a_netvars.inner_stabilizer_2_5v_pos_voltage,
-                                 "Внутр. стабилизатор -2.5 В": a_netvars.inner_stabilizer_2_5v_neg_voltage,
-                                 "Питание кулеров": a_netvars.cooling_power_supply_voltage})
+    test.set_variables_to_graph({
+        "Внутр. стабилизатор 12 В": a_netvars.inner_stabilizer_12v_voltage,
+        "Внутр. стабилизатор 9 В": a_netvars.inner_stabilizer_9v_voltage,
+        "Внутр. стабилизатор 5 В": a_netvars.inner_stabilizer_5v_voltage,
+        "Внутр. стабилизатор +2.5 В": a_netvars.inner_stabilizer_2_5v_pos_voltage,
+        "Внутр. стабилизатор -2.5 В": a_netvars.inner_stabilizer_2_5v_neg_voltage,
+        "Питание кулеров": a_netvars.cooling_power_supply_voltage})
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
     test = EepromVariablesTest(a_netvars_db=a_netvars_db, a_calibrator=a_calibrator)
@@ -45,61 +77,13 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_name("Проверка перед отправкой")
     tests.append(test)
     # -----------------------------------------------------------------------------------------------------
-    test = CoolerTest(a_cooler_location=CoolerTest.CoolerLocation.MAIN_BOARD, a_netvars=a_netvars)
-    test.set_group("Кулеры")
-    test.set_name("Основная плата")
-    test.set_variables_to_graph({"Выход pid-регулятора": a_netvars.main_board_fun_pid_out,
-                                 "Скорость (об/мин)": a_netvars.main_board_fun_speed})
-    tests.append(test)
-
-    test = CoolerTest(a_cooler_location=CoolerTest.CoolerLocation.TRANSISTOR_DC,
-                      a_netvars=a_netvars)
-    test.set_group("Кулеры")
-    test.set_name("Транзистор DC")
-    test.set_variables_to_graph({"Выход pid-регулятора": a_netvars.transistor_dc_10a_fun_pid_out,
-                                 "Скорость (об/мин)": a_netvars.transistor_dc_10a_fun_speed})
-    tests.append(test)
+    tests.append(create_cooler_tests(CoolerTest.CoolerLocation.MAIN_BOARD, a_netvars))
+    tests.append(create_cooler_tests(CoolerTest.CoolerLocation.TRANSISTOR_DC, a_netvars))
     # -----------------------------------------------------------------------------------------------------
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FIRST, a_netvars=a_netvars, a_ready_hold_timer=30,
-                       a_wait_peltier_timeout_s=160, a_timeout_s=400)
-    test.set_group("Пельтье")
-    test.set_name("№1")
-    test.set_variables_to_graph({"Уставка": a_netvars.peltier_1_temperature_setpoint,
-                                 "Температура": a_netvars.peltier_1_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_1_pid_out,
-                                 "amplitude_code_float": a_netvars.peltier_1_amplitude_code_float,
-                                 "Бит готовности": a_netvars.peltier_1_ready})
-    tests.append(test)
-
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.SECOND, a_netvars=a_netvars, a_ready_hold_timer=30,
-                       a_wait_peltier_timeout_s=160, a_timeout_s=400)
-    test.set_group("Пельтье")
-    test.set_name("№2")
-    test.set_variables_to_graph({"Уставка": a_netvars.peltier_2_temperature_setpoint,
-                                 "Температура": a_netvars.peltier_2_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_2_pid_out,
-                                 "Бит готовности": a_netvars.peltier_2_ready})
-    tests.append(test)
-
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.THIRD, a_netvars=a_netvars, a_ready_hold_timer=30,
-                       a_wait_peltier_timeout_s=160, a_timeout_s=400)
-    test.set_group("Пельтье")
-    test.set_name("№3")
-    test.set_variables_to_graph({"Уставка": a_netvars.peltier_3_temperature_setpoint,
-                                 "Температура": a_netvars.peltier_3_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_3_pid_out,
-                                 "Бит готовности": a_netvars.peltier_3_ready})
-    tests.append(test)
-
-    test = PeltierTest(a_peltier_number=PeltierTest.PeltierNumber.FOURTH, a_netvars=a_netvars, a_ready_hold_timer=30,
-                       a_wait_peltier_timeout_s=160, a_timeout_s=400)
-    test.set_group("Пельтье")
-    test.set_name("№4")
-    test.set_variables_to_graph({"Уставка": a_netvars.peltier_4_temperature_setpoint,
-                                 "Температура": a_netvars.peltier_4_temperature,
-                                 "Выход pid-регулятора": a_netvars.peltier_4_pid_out,
-                                 "Бит готовности": a_netvars.peltier_4_ready})
-    tests.append(test)
+    tests.append(create_peltier_tests(PeltierTest.PeltierNumber.FIRST, a_netvars))
+    tests.append(create_peltier_tests(PeltierTest.PeltierNumber.SECOND, a_netvars))
+    tests.append(create_peltier_tests(PeltierTest.PeltierNumber.THIRD, a_netvars))
+    tests.append(create_peltier_tests(PeltierTest.PeltierNumber.FOURTH, a_netvars, 200))
     # -----------------------------------------------------------------------------------------------------
     test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
                       a_calibrator=a_calibrator)
@@ -257,7 +241,9 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
                                  "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
     tests.append(test)
+
     # ТЕСТЫ ПРЕДВАРИТЕЛЬНЫХ СТАБИЛИЗАТОРОВ ДОЛЖНЫ БЫТЬ ПОСЛЕДНИМИ ------------------------------------------------------
+
     ref_v_map = {AuxStabilizersTest.AuxType.V60: (12, 50, 88, 126, 164, 202, 240)}
     test = AuxStabilizersTest(a_settings=a_settings, a_ref_v_map=ref_v_map, a_netvars=a_netvars,
                               a_aux_fail_timeout_s=10, a_hold_voltage_timeout_s=2, a_timeout_s=100)

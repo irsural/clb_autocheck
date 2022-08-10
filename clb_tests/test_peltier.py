@@ -8,10 +8,10 @@ from irspy import utils
 
 class PeltierTest(ClbTest):
     class PeltierNumber(IntEnum):
-        FIRST = 0
-        SECOND = 1
-        THIRD = 2
-        FOURTH = 3
+        FIRST = 1
+        SECOND = 2
+        THIRD = 3
+        FOURTH = 4
 
     class Stage(IntEnum):
         TEMP_UP = 0

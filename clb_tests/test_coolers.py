@@ -11,6 +11,11 @@ class CoolerTest(ClbTest):
         MAIN_BOARD = 0
         TRANSISTOR_DC = 1
 
+    COOLER_LOCATION_TO_TEXT = {
+        CoolerLocation.MAIN_BOARD: "Основная плата",
+        CoolerLocation.TRANSISTOR_DC: "Транзистор DC"
+    }
+
     def __init__(self, a_cooler_location: CoolerLocation, a_netvars: NetworkVariables,
                  a_wait_cooler_timeout_s: int = 10, a_timeout_s: int = 30):
         super().__init__()
