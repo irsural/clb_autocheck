@@ -25,13 +25,17 @@ class SignalTest(ClbTest):
         if not clb.is_voltage_signal[self.signal_type]:
             self.netvars.short_circuit_password.set(clb.SHORT_CIRCUIT_PASSWORD)
 
-        if self.calibrator.amplitude == self.amplitude and self.calibrator.signal_type == self.signal_type and \
-                not self.calibrator.signal_enable:
+        if self.calibrator.amplitude == self.amplitude and \
+                self.calibrator.signal_type == self.signal_type and not self.calibrator.signal_enable:
             return True
         else:
-            self.calibrator.amplitude = self.amplitude
-            self.calibrator.signal_type = self.signal_type
-            self.calibrator.signal_enable = False
+            # Если тип сигнала одновременно поменять с полярностью, то будет баг в modbus, при
+            # котором полярность никогда не изменится и prepare всегда будет возвращать False
+            if self.calibrator.signal_type != self.signal_type:
+                self.calibrator.signal_type = self.signal_type
+            else:
+                self.calibrator.amplitude = self.amplitude
+                self.calibrator.signal_enable = False
             return False
 
     def start(self):
