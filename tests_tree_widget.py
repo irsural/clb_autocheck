@@ -47,7 +47,7 @@ class TestsTreeWidget(QtCore.QObject):
             group_items = self.tree_widget.findItems(test.group(), QtCore.Qt.MatchFixedString |
                                                      QtCore.Qt.MatchCaseSensitive | QtCore.Qt.MatchRecursive)
             if group_items:
-                assert len(group_items) == 1, "Группы не должны повторяться !"
+                assert len(group_items) == 1, "Группы не должны повторяться!"
                 group_item = group_items[0]
             else:
                 group_item = QtWidgets.QTreeWidgetItem(top_item, [test.group()])

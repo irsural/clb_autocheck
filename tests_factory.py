@@ -1,3 +1,5 @@
+import math
+
 from network_variables_database import NetvarsDatabase
 from irspy.clb.network_variables import NetworkVariables
 import irspy.clb.calibrator_constants as clb
@@ -13,6 +15,8 @@ from clb_tests.test_signals import SignalTest
 from clb_tests.test_cables import CablesTest
 from clb_tests.test_aux_stabilizers import AuxStabilizersTest
 # from clb_tests.tests_base import EmptyTest
+
+from irspy import utils
 
 
 def create_cooler_tests(a_cooler: CoolerTest.CoolerLocation, a_netvars: NetworkVariables):
@@ -44,6 +48,61 @@ def create_peltier_tests(a_peltier: PeltierTest.PeltierNumber, a_netvars: Networ
     test.set_variables_to_graph(graph_variables)
 
     return test
+
+
+def create_signal_test(a_signal_type: clb.SignalType, a_netvars: NetworkVariables,
+                       a_calibrator: ClbDrv, a_reverse_amplitude=False):
+    assert clb.is_dc_signal[a_signal_type] or not a_reverse_amplitude
+
+    tests = []
+    indent_percents = 5
+
+    st_ranges = clb.SIGNAL_TYPE_RANGES[a_signal_type]
+    for _range in st_ranges:
+        lower_limit, upper_limit = clb.RANGE_LIMITS[_range]
+
+        indent_amplitude = indent_percents * upper_limit / 100
+        if indent_amplitude > 1:
+            indent_amplitude = round(indent_amplitude)
+
+        amplitudes = [
+            lower_limit + indent_amplitude,
+            (upper_limit + lower_limit) / 2,
+            upper_limit - indent_amplitude
+        ]
+
+        value_to_user = utils.value_to_user_with_units(clb.signal_type_to_units[a_signal_type])
+
+        for amplitude in amplitudes:
+            amplitude = round(amplitude, 9)
+
+            sign = ""
+            if a_reverse_amplitude:
+                amplitude = -amplitude
+                sign = "+" if amplitude > 0 else "-"
+
+            test = SignalTest(a_amplitude=amplitude, a_signal_type=a_signal_type,
+                              a_netvars=a_netvars, a_calibrator=a_calibrator)
+            test.set_group(f"{sign}{clb.signal_type_to_text_short[a_signal_type]}")
+            test.set_name(f"{value_to_user(amplitude)} (Диапазон {_range.value})")
+
+            variables_to_graph = {
+                "Напряжение на выходе": a_netvars.fast_adc_slow,
+                "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
+                'Бит "Вышел на режим"': a_netvars.source_ready}
+
+            if a_signal_type == clb.SignalType.DCV and \
+                    (_range == clb.DcvRanges.DCV_200v or _range == clb.DcvRanges.DCV_635v):
+                variables_to_graph["Стабилизатор 600 В"] = a_netvars.aux_stabilizer_adc_dc_600v_voltage
+
+            elif a_signal_type == clb.SignalType.DCI:
+                variables_to_graph["Стабилизатор 4 В"] = a_netvars.aux_stabilizer_adc_dc_4v_voltage
+
+            test.set_variables_to_graph(variables_to_graph)
+
+            tests.append(test)
+
+    return tests
 
 
 def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db: NetvarsDatabase,
@@ -85,163 +144,12 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     tests.append(create_peltier_tests(PeltierTest.PeltierNumber.THIRD, a_netvars))
     tests.append(create_peltier_tests(PeltierTest.PeltierNumber.FOURTH, a_netvars, 200))
     # -----------------------------------------------------------------------------------------------------
-    test = SignalTest(a_amplitude=0.04, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("40 мВ")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=0.21, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("420 мВ")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=4, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("4 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=43, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("43 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=200, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("200 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=400, a_signal_type=clb.SignalType.DCV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U=")
-    test.set_name("635 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 600 В": a_netvars.aux_stabilizer_adc_dc_600v_voltage})
-    tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
-    test = SignalTest(a_amplitude=0.1, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U~")
-    test.set_name("110 мВ")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=1, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U~")
-    test.set_name("1.1 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=10, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U~")
-    test.set_name("11 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=100, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("U~")
-    test.set_name("110 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=400, a_signal_type=clb.SignalType.ACV, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("U~")
-    test.set_name("630 В")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
-    test = SignalTest(a_amplitude=0.0001, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("110 мкА")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=0.001, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("1.1 мА")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=0.01, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars,
-                      a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("11 мА")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=0.1, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("110 мА")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=1, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("1.1 А")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=10, a_signal_type=clb.SignalType.DCI, a_netvars=a_netvars, a_calibrator=a_calibrator)
-    test.set_group("I=")
-    test.set_name("11 А")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage,
-                                 "Стабилизатор 4 В": a_netvars.aux_stabilizer_adc_dc_4v_voltage})
-    tests.append(test)
-    # -----------------------------------------------------------------------------------------------------
-    test = SignalTest(a_amplitude=0.1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
-                      a_timeout_s=60)
-    test.set_group("I~")
-    test.set_name("110 мА")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=1, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
-                      a_timeout_s=60)
-    test.set_group("I~")
-    test.set_name("1.1 А")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
-    test = SignalTest(a_amplitude=10, a_signal_type=clb.SignalType.ACI, a_netvars=a_netvars, a_calibrator=a_calibrator,
-                      a_timeout_s=60)
-    test.set_group("I~")
-    test.set_name("11 А")
-    test.set_variables_to_graph({"Напряжение на выходе": a_netvars.fast_adc_slow,
-                                 "Стабилизатор 60 В": a_netvars.aux_stabilizer_adc_dc_40v_voltage})
-    tests.append(test)
-
+    tests.extend(create_signal_test(clb.SignalType.DCV, a_netvars, a_calibrator))
+    tests.extend(create_signal_test(clb.SignalType.DCV, a_netvars, a_calibrator, True))
+    tests.extend(create_signal_test(clb.SignalType.DCI, a_netvars, a_calibrator))
+    tests.extend(create_signal_test(clb.SignalType.DCI, a_netvars, a_calibrator, True))
+    tests.extend(create_signal_test(clb.SignalType.ACV, a_netvars, a_calibrator))
+    tests.extend(create_signal_test(clb.SignalType.ACI, a_netvars, a_calibrator))
     # ТЕСТЫ ПРЕДВАРИТЕЛЬНЫХ СТАБИЛИЗАТОРОВ ДОЛЖНЫ БЫТЬ ПОСЛЕДНИМИ ------------------------------------------------------
 
     ref_v_map = {AuxStabilizersTest.AuxType.V60: (12, 50, 88, 126, 164, 202, 240)}
