@@ -9,7 +9,7 @@ from irspy import utils
 
 class SignalTest(ClbTest):
     def __init__(self, a_amplitude: float, a_signal_type: clb.SignalType, a_calibrator: ClbDrv,
-                 a_netvars: NetworkVariables, a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 30):
+                 a_netvars: NetworkVariables, a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 50):
         super().__init__()
         self.amplitude = a_amplitude
         self.signal_type = a_signal_type
@@ -51,13 +51,12 @@ class SignalTest(ClbTest):
         self.hold_signal_timer.stop()
 
     def tick(self):
-        if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.READY):
-            if self.calibrator.state == clb.State.WAITING_SIGNAL:
-                self.hold_signal_timer.start()
-            else:
-                if self.hold_signal_timer.check():
-                    self.__status = ClbTest.Status.SUCCESS
-        else:
+        if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.DISCONNECTED):
+            self.hold_signal_timer.start()
+        elif self.calibrator.state == clb.State.READY:
+            if self.hold_signal_timer.check():
+                self.__status = ClbTest.Status.SUCCESS
+        elif self.calibrator.state == clb.State.STOPPED:
             self.error_message += "Обнаружено выключение сигнала\n"
             self.__status = ClbTest.Status.FAIL
 

@@ -51,7 +51,7 @@ def create_peltier_tests(a_peltier: PeltierTest.PeltierNumber, a_netvars: Networ
 
 
 def create_signal_test(a_signal_type: clb.SignalType, a_netvars: NetworkVariables,
-                       a_calibrator: ClbDrv, a_reverse_amplitude=False):
+                       a_calibrator: ClbDrv, a_timeout=50, a_reverse_amplitude=False):
     assert clb.is_dc_signal[a_signal_type] or not a_reverse_amplitude
 
     tests = []
@@ -82,7 +82,7 @@ def create_signal_test(a_signal_type: clb.SignalType, a_netvars: NetworkVariable
                 sign = "+" if amplitude > 0 else "-"
 
             test = SignalTest(a_amplitude=amplitude, a_signal_type=a_signal_type,
-                              a_netvars=a_netvars, a_calibrator=a_calibrator)
+                              a_netvars=a_netvars, a_calibrator=a_calibrator, a_timeout_s=a_timeout)
             test.set_group(f"{sign}{clb.signal_type_to_text_short[a_signal_type]}")
             test.set_name(f"{value_to_user(amplitude)} (Диапазон {_range.value})")
 
@@ -145,11 +145,11 @@ def create_tests(a_calibrator: ClbDrv, a_netvars: NetworkVariables, a_netvars_db
     tests.append(create_peltier_tests(PeltierTest.PeltierNumber.FOURTH, a_netvars, 200))
     # -----------------------------------------------------------------------------------------------------
     tests.extend(create_signal_test(clb.SignalType.DCV, a_netvars, a_calibrator))
-    tests.extend(create_signal_test(clb.SignalType.DCV, a_netvars, a_calibrator, True))
+    tests.extend(create_signal_test(clb.SignalType.DCV, a_netvars, a_calibrator, a_reverse_amplitude=True))
     tests.extend(create_signal_test(clb.SignalType.DCI, a_netvars, a_calibrator))
-    tests.extend(create_signal_test(clb.SignalType.DCI, a_netvars, a_calibrator, True))
+    tests.extend(create_signal_test(clb.SignalType.DCI, a_netvars, a_calibrator, a_reverse_amplitude=True))
     tests.extend(create_signal_test(clb.SignalType.ACV, a_netvars, a_calibrator))
-    tests.extend(create_signal_test(clb.SignalType.ACI, a_netvars, a_calibrator))
+    tests.extend(create_signal_test(clb.SignalType.ACI, a_netvars, a_calibrator, 200))
     # ТЕСТЫ ПРЕДВАРИТЕЛЬНЫХ СТАБИЛИЗАТОРОВ ДОЛЖНЫ БЫТЬ ПОСЛЕДНИМИ ------------------------------------------------------
 
     ref_v_map = {AuxStabilizersTest.AuxType.V60: (12, 50, 88, 126, 164, 202, 240)}
