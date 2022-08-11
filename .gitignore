@@ -6,7 +6,8 @@
 *.ini
 icons_rc.py
 /build
-/dist
+dist/*
+!/dist/clb_autocheck.exe
 /venv
 /venv3.5
 /Lib

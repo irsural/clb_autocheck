@@ -3,14 +3,14 @@ import logging
 from PyQt5 import QtGui, QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 
-from custom_widgets.EditListDialog import EditedListWithUnits
+from irspy.qt.custom_widgets.QTableDelegates import ComboboxCellDelegate, TableEditDoubleClick
+from irspy.qt.custom_widgets.EditListDialog import EditedListWithUnits
 from ui.py.settings_form import Ui_Dialog as SettingsForm
-from custom_widgets.QTableDelegates import ComboboxCellDelegate, TableEditDoubleClick
 from network_variables_database import NetvarsDatabase
-from settings_ini_parser import Settings
-import calibrator_constants as clb
+from irspy.qt.qt_settings_ini_parser import QtSettings
+import irspy.clb.calibrator_constants as clb
 
-import utils
+from irspy import utils
 
 
 class SettingsDialog(QtWidgets.QDialog):
@@ -20,7 +20,7 @@ class SettingsDialog(QtWidgets.QDialog):
 
     fixed_range_changed = pyqtSignal()
 
-    def __init__(self, a_settings: Settings, a_netvars_db: NetvarsDatabase, a_parent=None):
+    def __init__(self, a_settings: QtSettings, a_netvars_db: NetvarsDatabase, a_parent=None):
         super().__init__(a_parent)
 
         self.ui = SettingsForm()
@@ -28,16 +28,16 @@ class SettingsDialog(QtWidgets.QDialog):
 
         self.netvars_db = a_netvars_db
         self.settings = a_settings
-        self.restoreGeometry(self.settings.get_last_geometry(self.__class__.__name__))
-        self.ui.netvars_table.horizontalHeader().restoreState(
-            self.settings.get_last_header_state(self.ui.netvars_table.__class__.__name__))
+
+        self.settings.restore_qwidget_state(self)
+        self.settings.restore_qwidget_state(self.ui.netvars_table)
 
         self.ui.save_and_exit_button.clicked.connect(self.save_and_exit)
         self.ui.save_button.clicked.connect(self.save)
         self.ui.cancel_button.clicked.connect(self.close)
 
-        self.edit_fixed_range_widget = EditedListWithUnits(self, "В", self.settings.fixed_step_list, clb.MIN_VOLTAGE,
-                                                           clb.MAX_VOLTAGE,
+        self.edit_fixed_range_widget = EditedListWithUnits(self, "В", self.settings.fixed_step_list,
+                                                           clb.MIN_VOLTAGE, clb.MAX_VOLTAGE,
                                                            a_optional_widget=QtWidgets.QLabel("Шаг", self))
         self.ui.fixed_range_groupbox.layout().addWidget(self.edit_fixed_range_widget)
 
@@ -129,7 +129,6 @@ class SettingsDialog(QtWidgets.QDialog):
             self.close()
 
     def closeEvent(self, a_event: QtGui.QCloseEvent) -> None:
-        self.settings.save_geometry(self.__class__.__name__, self.saveGeometry())
-        self.settings.save_header_state(self.ui.netvars_table.__class__.__name__,
-                                        self.ui.netvars_table.horizontalHeader().saveState())
+        self.settings.save_qwidget_state(self)
+        self.settings.save_qwidget_state(self.ui.netvars_table)
         a_event.accept()

@@ -2,11 +2,11 @@ from sys import float_info
 import logging
 
 from network_variables_database import NetvarsDatabase
-from network_variables import BufferedVariable
+from irspy.clb.network_variables import BufferedVariable
 from clb_tests.tests_base import ClbTest
-from clb_dll import ClbDrv
+from irspy.clb.clb_dll import ClbDrv
 
-import utils
+from irspy import utils
 
 
 class EepromVariablesTest(ClbTest):
@@ -32,7 +32,7 @@ class EepromVariablesTest(ClbTest):
 
     def tick(self):
         for variable, _min, _max, _default in self.netvars_db.get_variables():
-            value_from_clb = BufferedVariable(variable, BufferedVariable.Mode.R, self.calibrator).get()
+            value_from_clb = BufferedVariable(variable, self.calibrator, BufferedVariable.Mode.R).get()
             if variable.type == "double":
                 match_default = abs(value_from_clb - _default) < float_info.epsilon
             elif variable.index == 1098:

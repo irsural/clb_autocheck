@@ -1,15 +1,20 @@
 from enum import IntEnum
 import logging
 
-from network_variables import NetworkVariables
+from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
-import utils
+from irspy import utils
 
 
 class CoolerTest(ClbTest):
     class CoolerLocation(IntEnum):
         MAIN_BOARD = 0
         TRANSISTOR_DC = 1
+
+    COOLER_LOCATION_TO_TEXT = {
+        CoolerLocation.MAIN_BOARD: "Основная плата",
+        CoolerLocation.TRANSISTOR_DC: "Транзистор DC"
+    }
 
     def __init__(self, a_cooler_location: CoolerLocation, a_netvars: NetworkVariables,
                  a_wait_cooler_timeout_s: int = 10, a_timeout_s: int = 30):

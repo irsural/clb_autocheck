@@ -5,9 +5,9 @@ import json
 
 from PyQt5 import QtCore
 
-from network_variables import BufferedVariable
+from irspy.clb.network_variables import BufferedVariable
 from clb_tests import tests_base
-import utils
+from irspy import utils
 
 
 class TestResults:
@@ -222,7 +222,7 @@ class TestsConductor(QtCore.QObject):
                     current_test.stop()
 
                     if current_test_status == tests_base.ClbTest.Status.FAIL and current_test.abort_on_fail():
-                        logging.warning("Провал данного теста критичен. Следующие тесты проводиться не будут")
+                        logging.error("Провал данного теста критичен. Следующие тесты проводиться не будут")
                         self.stop()
                         self.tests_done.emit()
                     else:
@@ -234,7 +234,7 @@ class TestsConductor(QtCore.QObject):
                 current_results.set_current_result(tests_base.ClbTest.Status.FAIL, f"{error} ТАЙМАУТ\n")
                 current_test.stop()
                 if current_test.abort_on_fail():
-                    logging.warning("Провал данного теста критичен. Следующие тесты проводиться не будут")
+                    logging.error("Провал данного теста критичен. Следующие тесты проводиться не будут")
                     self.stop()
                     self.tests_done.emit()
                 else:

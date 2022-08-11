@@ -4,7 +4,7 @@ from enum import IntEnum
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from clb_tests.tests_base import ClbTest
-from settings_ini_parser import Settings
+from irspy.qt.qt_settings_ini_parser import QtSettings
 
 
 class TestsTreeWidget(QtCore.QObject):
@@ -17,7 +17,8 @@ class TestsTreeWidget(QtCore.QObject):
     show_graph_requested = QtCore.pyqtSignal(str, str)
     show_errors_requested = QtCore.pyqtSignal(str, str)
 
-    def __init__(self, a_tests: List[ClbTest], a_tree_widget: QtWidgets.QTreeWidget, a_settings: Settings):
+    def __init__(self, a_tests: List[ClbTest], a_tree_widget: QtWidgets.QTreeWidget,
+                 a_settings: QtSettings):
         super().__init__()
         self.tree_widget = a_tree_widget
         self.settings = a_settings
@@ -46,7 +47,7 @@ class TestsTreeWidget(QtCore.QObject):
             group_items = self.tree_widget.findItems(test.group(), QtCore.Qt.MatchFixedString |
                                                      QtCore.Qt.MatchCaseSensitive | QtCore.Qt.MatchRecursive)
             if group_items:
-                assert len(group_items) == 1, "Группы не должны повторяться !"
+                assert len(group_items) == 1, "Группы не должны повторяться!"
                 group_item = group_items[0]
             else:
                 group_item = QtWidgets.QTreeWidgetItem(top_item, [test.group()])

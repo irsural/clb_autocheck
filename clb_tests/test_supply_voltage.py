@@ -1,8 +1,8 @@
 import logging
 
-from network_variables import NetworkVariables
+from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
-import utils
+from irspy import utils
 
 
 class SupplyVoltageTest(ClbTest):

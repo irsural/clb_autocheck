@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './ui/tstslan_graphs_dialog.ui'
+# Form implementation generated from reading ui file 'tstslan_graphs_dialog.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #

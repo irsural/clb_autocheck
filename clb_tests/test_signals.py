@@ -1,15 +1,15 @@
 import logging
 
-from network_variables import NetworkVariables
+from irspy.clb.network_variables import NetworkVariables
 from clb_tests.tests_base import ClbTest
-import calibrator_constants as clb
-from clb_dll import ClbDrv
-import utils
+import irspy.clb.calibrator_constants as clb
+from irspy.clb.clb_dll import ClbDrv
+from irspy import utils
 
 
 class SignalTest(ClbTest):
     def __init__(self, a_amplitude: float, a_signal_type: clb.SignalType, a_calibrator: ClbDrv,
-                 a_netvars: NetworkVariables, a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 30):
+                 a_netvars: NetworkVariables, a_hold_signal_timeout_s: int = 10, a_timeout_s: int = 50):
         super().__init__()
         self.amplitude = a_amplitude
         self.signal_type = a_signal_type
@@ -25,13 +25,17 @@ class SignalTest(ClbTest):
         if not clb.is_voltage_signal[self.signal_type]:
             self.netvars.short_circuit_password.set(clb.SHORT_CIRCUIT_PASSWORD)
 
-        if self.calibrator.amplitude == self.amplitude and self.calibrator.signal_type == self.signal_type and \
-                not self.calibrator.signal_enable:
+        if self.calibrator.amplitude == self.amplitude and \
+                self.calibrator.signal_type == self.signal_type and not self.calibrator.signal_enable:
             return True
         else:
-            self.calibrator.amplitude = self.amplitude
-            self.calibrator.signal_type = self.signal_type
-            self.calibrator.signal_enable = False
+            # Если тип сигнала одновременно поменять с полярностью, то будет баг в modbus, при
+            # котором полярность никогда не изменится и prepare всегда будет возвращать False
+            if self.calibrator.signal_type != self.signal_type:
+                self.calibrator.signal_type = self.signal_type
+            else:
+                self.calibrator.amplitude = self.amplitude
+                self.calibrator.signal_enable = False
             return False
 
     def start(self):
@@ -47,13 +51,12 @@ class SignalTest(ClbTest):
         self.hold_signal_timer.stop()
 
     def tick(self):
-        if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.READY):
-            if self.calibrator.state == clb.State.WAITING_SIGNAL:
-                self.hold_signal_timer.start()
-            else:
-                if self.hold_signal_timer.check():
-                    self.__status = ClbTest.Status.SUCCESS
-        else:
+        if self.calibrator.state in (clb.State.WAITING_SIGNAL, clb.State.DISCONNECTED):
+            self.hold_signal_timer.start()
+        elif self.calibrator.state == clb.State.READY:
+            if self.hold_signal_timer.check():
+                self.__status = ClbTest.Status.SUCCESS
+        elif self.calibrator.state == clb.State.STOPPED:
             self.error_message += "Обнаружено выключение сигнала\n"
             self.__status = ClbTest.Status.FAIL
 

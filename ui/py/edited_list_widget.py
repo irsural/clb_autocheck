@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './ui/edited_list_widget.ui'
+# Form implementation generated from reading ui file 'edited_list_widget.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.2
 #
@@ -94,4 +94,4 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.list_widget.setSortingEnabled(False)
-import icons_rc
+import icons
